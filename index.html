@@ -477,7 +477,7 @@ table.bt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:620px}
       <li><b>Chat</b> with gpt-oss-20b on Pollinations (no account).</li>
     </ol>
     <h3>Your own GPU</h3>
-    <p>The Your GPU mode shows how each model would run on your card. Connecting a GPU server comes next; until then those jobs are a preview.</p>
+    <p>Every studio runs on free GPUs right now. The GPU picker at the top only sizes the model library and benchmarks for your card. Running models on your own GPU is a later step.</p>
     <h3>Install</h3>
     <p>Windows: open this page in Edge or Chrome and choose Install in the address bar. Android: open it in Chrome and choose Install app in the menu. iPhone: Share, then Add to Home Screen.</p>
   </div>
@@ -496,7 +496,7 @@ const GPUS = [
   {gb:80, card:'H100 / A100 80GB'},
   {gb:96, card:'RTX PRO 6000'},
 ];
-const CB_LANGS = ['English','Hebrew','Arabic','Chinese','Danish','Dutch','Finnish','French','German','Greek','Hindi','Italian','Japanese','Korean','Malay','Norwegian','Polish','Portuguese','Russian','Spanish','Swahili','Swedish','Turkish'];
+const CB_LANGS = ['Hebrew','English','Arabic','Chinese','Danish','Dutch','Finnish','French','German','Greek','Hindi','Italian','Japanese','Korean','Malay','Norwegian','Polish','Portuguese','Russian','Spanish','Swahili','Swedish','Turkish'];
 const M = [
   {id:'minimax-h3',cat:'video',name:'MiniMax H3',maker:'MiniMax',params:'33B',date:'Aug 2026',variants:[{p:'BF16',gb:80},{p:'FP8',gb:44}],lic:'limited',license:'MiniMax H3 Community License',licNote:'Free commercial use under $20M yearly revenue. Self-hosting is not licensed in the US, EU, UK or South Korea.',tags:['top'],blurb:'Text and image to video with native stereo sound, up to 15 seconds. The open weights render up to 768p locally.',steps:30,q:'MiniMax-H3',opts:{dur:[5,10,15],res:['768p'],audio:true}},
   {id:'ltx-25',cat:'video',name:'LTX-2.5',maker:'Lightricks',params:'22B',date:'Aug 2026',variants:[{p:'BF16',gb:52},{p:'FP8',gb:30}],lic:'limited',license:'LTX open-weights license',licNote:'Source-available, not OSI open source. Read the terms before commercial use.',tags:[],blurb:'Picture and sound in one pass, with native multi-shot sequences. The fastest of the large video models.',steps:8,q:'LTX-2.5',opts:{dur:[5,10],res:['720p','1080p'],audio:true}},
@@ -536,22 +536,15 @@ const PROV = {
   hf:{name:'Hugging Face Spaces', run:true, by:'ZeroGPU', cats:['video','image','3d','speech','music'], models:'Demo Spaces for many open models in this library', limit:'A few GPU minutes a day (reports range from 3.5 to 5)', key:'Free account', blurb:'The only free way to try open video and 3D models without your own GPU. One video clip can use most of the daily quota.', url:'https://huggingface.co/docs/hub/spaces-zerogpu'},
 };
 const FREE_OPTS = [
-  {id:'f-hf-h3', cat:'video', prov:'hf', name:'MiniMax H3 on HF Spaces', base:'minimax-h3', run:'h3', limit:'Uses free ZeroGPU minutes: about one short clip a day without an account. Takes one to three minutes.'},
-  {id:'f-poll-flux', cat:'image', prov:'pollinations', name:'FLUX on Pollinations', base:'flux2-klein', run:'pollinations', limit:'No account needed. About one image every 45 seconds, with a small watermark.'},
-  {id:'f-hf-zimage', cat:'image', prov:'hf', name:'Z-Image Turbo on HF Spaces', base:'z-image-turbo', run:'zimage', limit:'Uses free ZeroGPU minutes. Sharper than Pollinations, no watermark.'},
-  {id:'f-cf-image', cat:'image', prov:'cloudflare', name:'Image models on Workers AI', base:'z-image-turbo'},
-  {id:'f-hf-3d', cat:'3d', prov:'hf', name:'Hunyuan3D 2.1 on HF Spaces', base:'hunyuan3d-21', run:'hunyuan3d', limit:'Uses free ZeroGPU minutes. Add a photo with +, or describe the object and FLUX draws it first.'},
-  {id:'f-hf-chatterbox', cat:'speech', prov:'hf', name:'Chatterbox on HF Spaces', base:'chatterbox-ml', run:'chatterbox', limit:'Uses free ZeroGPU minutes. Speaks Hebrew. Up to 300 characters per clip.'},
-  {id:'f-gemini-tts', cat:'speech', prov:'gemini', name:'Gemini 3.8 Flash TTS', thumb:'kokoro', langs:['Auto-detect']},
-  {id:'f-hf-ace', cat:'music', prov:'hf', name:'ACE-Step on HF Spaces', base:'ace-step-15'},
-  {id:'f-poll-oss', cat:'chat', prov:'pollinations', name:'gpt-oss-20b on Pollinations', base:'gpt-oss-20b', run:'pollchat', limit:'No account needed.'},
-  {id:'f-gemma4', cat:'chat', prov:'gemini', name:'Gemma 4 on Gemini API', thumb:'gpt-oss-20b', limit:'30 requests/min, 14,400 requests/day'},
-  {id:'f-gemini-lite', cat:'chat', prov:'gemini', name:'Gemini 3.5 Flash-Lite', thumb:'gpt-oss-20b', limit:'15 requests/min, 500 requests/day'},
-  {id:'f-groq-qwen', cat:'chat', prov:'groq', name:'Qwen3.8-27B on Groq', base:'qwen38-27b'},
-  {id:'f-groq-oss', cat:'chat', prov:'groq', name:'gpt-oss-120b on Groq', base:'gpt-oss-120b'},
-  {id:'f-gemini-flash', cat:'chat', prov:'gemini', name:'Gemini 3.8 Flash', thumb:'gpt-oss-20b', limit:'5 requests/min, 20 requests/day'},
-  {id:'f-or-minimax', cat:'chat', prov:'openrouter', name:'MiniMax M3 on OpenRouter', thumb:'gpt-oss-20b', limit:'Free variant: 20 requests/min, 50 requests/day'},
-  {id:'f-openrouter', cat:'chat', prov:'openrouter', name:'OpenRouter free models', thumb:'gpt-oss-20b'},
+  {id:'f-hf-h3', cat:'video', prov:'hf', name:'MiniMax H3', base:'minimax-h3', run:'h3', limit:'Video with sound. Takes one to three minutes and uses free GPU minutes: about one short clip a day without a Hugging Face token.'},
+  {id:'f-poll-flux', cat:'image', prov:'pollinations', name:'FLUX (Pollinations)', thumb:'flux2-dev', run:'pollinations', limit:'No account needed. About one image every 45 seconds, with a small watermark.'},
+  {id:'f-hf-klein', cat:'image', prov:'hf', name:'FLUX.2 [klein] 4B', base:'flux2-klein', run:'klein', limit:'Official Black Forest Labs Space. Fast, no watermark, uses free GPU minutes.'},
+  {id:'f-hf-zimage', cat:'image', prov:'hf', name:'Z-Image Turbo', base:'z-image-turbo', run:'zimage', limit:'Photoreal, no watermark, uses free GPU minutes.'},
+  {id:'f-hf-qwenimg', cat:'image', prov:'hf', name:'Qwen-Image-2.1', base:'qwen-image-21', run:'qwenimg', limit:'Best at text inside images. Official Qwen Space, uses free GPU minutes. Research license.'},
+  {id:'f-hf-3d', cat:'3d', prov:'hf', name:'Hunyuan3D 2.1', base:'hunyuan3d-21', run:'hunyuan3d', limit:'Takes one to three minutes and uses free GPU minutes. Add a photo with +, or describe the object and FLUX draws it first.'},
+  {id:'f-hf-chatterbox', cat:'speech', prov:'hf', name:'Chatterbox Multilingual V3', base:'chatterbox-ml', run:'chatterbox', limit:'Speaks Hebrew and 22 other languages. Up to 300 characters per clip. Uses free GPU minutes.'},
+  {id:'f-hf-ace', cat:'music', prov:'hf', name:'ACE-Step 1.5', base:'ace-step-15', run:'ace', limit:'First line: style. Lines after it: lyrics. Takes one to three minutes and uses free GPU minutes.'},
+  {id:'f-poll-oss', cat:'chat', prov:'pollinations', name:'gpt-oss-20b', base:'gpt-oss-20b', run:'pollchat', limit:'Free open model. No account needed.'},
 ];
 const freeById = Object.fromEntries(FREE_OPTS.map(f => [f.id, f]));
 const anyById = id => byId[id] || freeById[id];
@@ -599,6 +592,7 @@ S.runOn = {video:'free', image:'free', '3d':'free', speech:'free', music:'free'}
 const savedRun = store.get('runOn', {});
 for (const k in savedRun) if (savedRun[k] === 'free' || savedRun[k] === 'gpu') S.runOn[k] = savedRun[k];
 S.selFree = {video:'f-hf-h3', image:'f-poll-flux', '3d':'f-hf-3d', speech:'f-hf-chatterbox', music:'f-hf-ace'};
+if (!freeById[S.sel.chat]) S.sel.chat = 'f-poll-oss';
 const savedFree = store.get('selFree', {});
 for (const k in savedFree) if (freeById[savedFree[k]] && freeById[savedFree[k]].cat === k) S.selFree[k] = savedFree[k];
 
@@ -622,7 +616,7 @@ function sampleErrorCopy(e){
     default: return 'Claude could not be reached. Try again.';
   }
 }
-let userGens = (store.get('gens', []) || []).filter(g => g && anyById(g.model));
+let userGens = (store.get('gens', []) || []).filter(g => g && g.real && anyById(g.model));
 userGens.forEach(g => { if (g.real && g.status === 'working') { g.status = 'error'; g.error = 'Stopped when the app closed. Run it again.'; } });
 
 /* ---------- helpers ---------- */
@@ -874,8 +868,11 @@ function useModel(id){
     return;
   }
   const m = byId[id]; if (!m) return;
-  S.sel[m.cat] = id; store.set('sel', S.sel);
-  if (m.cat !== 'chat') { S.runOn[m.cat] = 'gpu'; store.set('runOn', S.runOn); }
+  const twin = FREE_OPTS.find(f => f.base === id) || FREE_OPTS.find(f => f.cat === m.cat);
+  if (twin) {
+    if (m.cat === 'chat') { S.sel.chat = twin.id; store.set('sel', S.sel); } else { S.selFree[m.cat] = twin.id; store.set('selFree', S.selFree); }
+    if (twin.base !== id) toast(`${m.name} isn't connected yet, so this uses ${twin.name}.`);
+  }
   if (m.cat === 'speech' || m.cat === 'music') { S.audioMode = m.cat; store.set('audioMode', S.audioMode); }
 }
 function freeSectionHTML(){
@@ -969,11 +966,11 @@ function viewExplore(){
     </section>
 
     <section class="sec" aria-labelledby="h-how">
-      <div class="sec-head"><h2 id="h-how" class="h-sec">How it runs</h2><span class="demo-pill">Free jobs run for real</span></div>
+      <div class="sec-head"><h2 id="h-how" class="h-sec">How it runs</h2></div>
       <ol class="steps">
-        <li><b>Pick a model and precision</b><p>The studio shows how much VRAM each version needs and picks the best one that fits your card.</p></li>
-        <li><b>Your GPU does the work</b><p>Image, video, 3D and audio jobs go to ComfyUI. Chat goes to an OpenAI-compatible server such as vLLM or llama.cpp.</p></li>
-        <li><b>Results land in your feed</b><p>Renders, meshes and audio show up with the exact model, precision and settings used.</p></li>
+        <li><b>Pick a model</b><p>Each studio lists the open models that run right now, for free.</p></li>
+        <li><b>It runs on free GPUs</b><p>Video, 3D, voice, music and most images run on Hugging Face. FLUX images and chat run on Pollinations.</p></li>
+        <li><b>Results land in your feed</b><p>Play, view or download each result. A Hugging Face token in Settings gives you more free GPU minutes.</p></li>
       </ol>
     </section>
     ${footHTML()}
@@ -1002,23 +999,23 @@ function footHTML(){
 
 /* ---------- STUDIOS ---------- */
 const STUDIO = {
-  video:{eyebrow:'Video studio', h:'Open video models.<br><span class="hl">Your GPU.</span>', lede:'MiniMax H3, LTX-2.5, Wan 2.2 and HunyuanVideo, with sound on the models that support it.'},
-  image:{eyebrow:'Image studio', h:'Open image models.<br><span class="hl">Full control.</span>', lede:'FLUX.2, Qwen-Image and Z-Image for photos, posters and edits from reference images.'},
-  '3d':{eyebrow:'3D studio', h:'One image in.<br><span class="hl">A mesh out.</span>', lede:'TRELLIS.2, Hunyuan3D and TripoSR turn a single picture into a textured GLB.'},
-  audio:{eyebrow:'Voice & music studio', h:'Voices and songs.<br><span class="hl">Hebrew too.</span>', lede:'Chatterbox speaks 23 languages including Hebrew. ACE-Step writes full songs with vocals.'},
+  video:{eyebrow:'Video studio', h:'Open video models.<br><span class="hl">Your GPU.</span>', lede:'MiniMax H3, the top open video model, with sound. Runs free on Hugging Face.'},
+  image:{eyebrow:'Image studio', h:'Open image models.<br><span class="hl">Full control.</span>', lede:'FLUX, FLUX.2 [klein], Z-Image Turbo and Qwen-Image-2.1. Free, no setup.'},
+  '3d':{eyebrow:'3D studio', h:'One image in.<br><span class="hl">A mesh out.</span>', lede:'Hunyuan3D 2.1 turns one photo into a textured 3D model you can spin and download.'},
+  audio:{eyebrow:'Voice & music studio', h:'Voices and songs.<br><span class="hl">Hebrew too.</span>', lede:'Chatterbox speaks 23 languages including Hebrew. ACE-Step 1.5 writes full songs.'},
 };
 const PLACEHOLDER = {
   video:'Describe a shot: subject, action, camera move, light. Add an image with + to animate it.',
   image:'Describe the image: subject, setting, light, style. Add an image with + to edit it.',
-  '3d':'Add a photo of the object with +, or describe it and Z-Image Turbo draws a reference first.',
+  '3d':'Add a photo of the object with +, or describe it and FLUX draws a reference first.',
   speech:'Type what the voice should say. Hebrew works with Chatterbox.',
-  music:'Describe the track: genre, instruments, tempo, mood. Put lyrics on new lines.',
+  music:'First line: the style (genre, instruments, tempo, mood). Next lines: lyrics, or choose Instrumental.',
 };
 const mcatOf = view => view === 'audio' ? S.audioMode : view;
 function viewStudio(view){
   const s = STUDIO[view];
   const cats = view === 'audio' ? ['speech','music'] : [view];
-  const n = M.filter(m => cats.includes(m.cat)).length;
+  const n = FREE_OPTS.filter(f => cats.includes(f.cat)).length;
   return `
   <div class="wrap">
     <section class="shero" aria-labelledby="h-studio">
@@ -1031,8 +1028,8 @@ function viewStudio(view){
       <div id="dock-slot" style="width:100%;display:flex;justify-content:center">${dockHTML(view)}</div>
     </section>
     <section class="feed" aria-labelledby="h-feed">
-      <div class="feed-head"><h2 id="h-feed" class="h-sec">Your generations</h2><p>Cards marked Example come with the studio. Free API jobs run for real. Your GPU jobs show a preview until a GPU server is connected.</p></div>
-      <div class="grid" id="feed">${feedFor(cats).map(genCard).join('')}</div>
+      <div class="feed-head"><h2 id="h-feed" class="h-sec">Your generations</h2><p>Every result here was generated for real. Hugging Face file links can expire, so download what you want to keep.</p></div>
+      <div class="grid" id="feed">${feedFor(cats).map(genCard).join('') || '<p class="empty" id="feed-empty">Your results will appear here. Write a prompt above and press Generate.</p>'}</div>
     </section>
     ${footHTML()}
   </div>`;
@@ -1042,33 +1039,18 @@ function chipSelect(id, label, icon, options, value){
   return `<label class="chip" title="${esc(label)}" for="opt-${id}">${icon}<span class="sr">${esc(label)}</span><select id="opt-${id}" data-opt="${id}">${opts}</select></label>`;
 }
 function optionSets(mcat, m){
-  const o = m.opts || {};
   if (mcat === 'video') return [
-    ['duration','Duration',I.clock,(o.dur || [5]).map(d => d + 's')],
+    ['duration','Duration',I.clock,['5s','8s','10s','14s']],
     ['aspect','Aspect ratio',I.ratio,['16:9','9:16','1:1']],
-    ['res','Resolution',I.res,o.res || ['720p']],
-    ...(o.audio ? [['audio','Sound',I.sound,['Audio on','Audio off']]] : []),
+    ['res','Quality',I.res,['Fast (544p)','Full (768p)']],
   ];
-  if (mcat === 'image') return [
-    ['aspect','Aspect ratio',I.ratio,['1:1','4:5','3:4','16:9','9:16']],
-    ['count','Images',I.stack,['1 image','2 images','4 images']],
-  ];
-  if (mcat === '3d') return [
-    ['texture','Texture',I.cube,o.tex ? ['PBR textures','Untextured'] : ['Untextured']],
-    ['format','File format',I.file,['GLB','OBJ']],
-  ];
-  if (mcat === 'speech') return [
-    ['lang','Language',I.globe,m.langs || ['English']],
-    ['voice','Voice',I.voice,['Noa','Ari','Maya','Daniel']],
-    ['emotion','Emotion',I.mood,['Neutral','Warm','Excited','Calm']],
-  ];
-  if (mcat === 'music') return [
-    ['duration','Length',I.clock,['30s','60s','2 min','4 min']],
-    ['vocals','Vocals',I.voice,['With vocals','Instrumental']],
-  ];
+  if (mcat === 'image') return [['aspect','Aspect ratio',I.ratio,['1:1','4:5','3:4','16:9','9:16']]];
+  if (mcat === '3d') return [['texture','Texture',I.cube,['PBR textures','Untextured']]];
+  if (mcat === 'speech') return [['lang','Language',I.globe,m.langs || CB_LANGS], ['emotion','Emotion',I.mood,['Neutral','Warm','Excited','Calm']]];
+  if (mcat === 'music') return [['duration','Length',I.clock,['30s','60s','2 min']], ['vocals','Vocals',I.voice,['With vocals','Instrumental']]];
   return [];
 }
-const isFree = mcat => S.runOn[mcat] === 'free';
+const isFree = () => true;
 const curItem = mcat => isFree(mcat) ? freeById[S.selFree[mcat]] : byId[S.sel[mcat]];
 function dockHTML(view){
   const mcat = mcatOf(view); const free = isFree(mcat); const m = curItem(mcat); const v = free ? null : curVariant(m);
@@ -1078,8 +1060,8 @@ function dockHTML(view){
   const canUpload = ['video','image','3d'].includes(mcat);
   const segAudio = view === 'audio' ? `<div class="seg" role="group" aria-label="Audio type"><button type="button" data-mode="speech" aria-pressed="${S.audioMode === 'speech'}">Speech</button><button type="button" data-mode="music" aria-pressed="${S.audioMode === 'music'}">Music</button></div>` : '';
   const segRun = `<div class="seg" role="group" aria-label="Run on"><button type="button" data-run="gpu" aria-pressed="${!free}">Your GPU</button><button type="button" data-run="free" aria-pressed="${free}">Free API</button></div>`;
-  return `<form class="dock has-seg" id="dock" data-mcat="${mcat}" autocomplete="off">
-    <div class="segs">${segAudio}${segRun}</div>
+  return `<form class="dock${segAudio ? ' has-seg' : ''}" id="dock" data-mcat="${mcat}" autocomplete="off">
+    ${segAudio ? `<div class="segs">${segAudio}</div>` : ''}
     <div class="dock-main">
       ${canUpload ? `<label class="add" for="ref-input" title="Add a reference image">${I.plus}<span class="sr">Add a reference image</span></label><input id="ref-input" type="file" accept="image/*" class="sr" tabindex="-1">` : ''}
       ${S.ref && canUpload ? `<div class="ref"><img src="${S.ref.thumb}" alt="Reference image ${esc(S.ref.name)}"><button type="button" id="ref-clear" aria-label="Remove reference image">×</button></div>` : ''}
@@ -1116,7 +1098,7 @@ function popHTML(mcat){
     <span class="fit ${fitClass(v.gb)}">${esc(v.p)}<br>≈${v.gb} GB</span></button>`; }).join('') + `<a class="pop-foot lnk" href="#models">Compare every model →</a>`;
 }
 function feedFor(cats){
-  return [...userGens.filter(g => cats.includes(g.cat)), ...EXAMPLES.filter(g => cats.includes(g.cat))];
+  return userGens.filter(g => g.real && cats.includes(g.cat));
 }
 const progressOf = g => g.status !== 'running' ? 1 : Math.min(1, (Date.now() - g.t0) / g.dur);
 function genCard(g){
@@ -1163,6 +1145,7 @@ function generate(){
   if (free && m.run) { g.real = true; g.status = 'working'; g.run = m.run; g._file = S.refFile || null; }
   userGens.unshift(g); userGens = userGens.slice(0, 30); persistGens();
   S.drafts[mcat] = ''; ta.value = '';
+  const fe = $('#feed-empty'); if (fe) fe.remove();
   const feed = $('#feed'); feed.insertAdjacentHTML('afterbegin', genCard(g)); hydrateGen(feed.firstElementChild);
   feed.firstElementChild.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block:'nearest'});
   if (g.real) runReal(g); else tick();
@@ -1236,7 +1219,9 @@ async function space(id){
 const fileUrl = d => !d ? null : typeof d === 'string' ? d : (d.url || (d.video && fileUrl(d.video)) || (d.image && fileUrl(d.image)) || d.path || null);
 const ZRES = {'1:1':'1024x1024 ( 1:1 )','4:5':'864x1152 ( 3:4 )','3:4':'864x1152 ( 3:4 )','16:9':'1280x720 ( 16:9 )','9:16':'720x1280 ( 9:16 )'};
 const PSIZE = {'1:1':[1024,1024],'4:5':[896,1120],'3:4':[864,1152],'16:9':[1280,720],'9:16':[720,1280]};
-const H3_CANVAS = {'16:9':'960x544 · 16:9 fast','9:16':'544x960 · 9:16 fast','1:1':'544x544 · 1:1 fast'};
+const H3_CANVAS = {'16:9':['960x544 · 16:9 fast','1344x768 · 16:9 full'],'9:16':['544x960 · 9:16 fast','768x1344 · 9:16 full'],'1:1':['544x544 · 1:1 fast','768x768 · 1:1 full']};
+const h3Canvas = o => (H3_CANVAS[o.aspect] || H3_CANVAS['16:9'])[/Full/.test(o.res || '') ? 1 : 0];
+const QSIZE = {'1:1':[1328,1328],'4:5':[1140,1472],'3:4':[1140,1472],'16:9':[1664,928],'9:16':[928,1664]};
 const LANG_CODE = {English:'en',Hebrew:'he',Arabic:'ar',Chinese:'zh',Danish:'da',Dutch:'nl',Finnish:'fi',French:'fr',German:'de',Greek:'el',Hindi:'hi',Italian:'it',Japanese:'ja',Korean:'ko',Malay:'ms',Norwegian:'no',Polish:'pl',Portuguese:'pt',Russian:'ru',Spanish:'es',Swahili:'sw',Swedish:'sv',Turkish:'tr'};
 function errText(e){
   const t = String((e && (e.message || e.title)) || e || '');
@@ -1250,6 +1235,28 @@ function pollImageUrl(prompt, aspect, seed){
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed % 100000}&model=flux&nologo=true`;
 }
 const RUNNERS = {
+  async klein(g){
+    const c = await space('black-forest-labs/FLUX.2-klein-4B'); const [w, h] = PSIZE[g.opts.aspect] || [1024, 1024];
+    const r = await c.predict('/infer', {prompt:g.prompt, input_images:[], mode_choice:'Distilled (4 steps)', seed:g.seed % 100000, randomize_seed:true, width:w, height:h, num_inference_steps:4, guidance_scale:1, prompt_upsampling:false});
+    const url = fileUrl(r.data && r.data[0]); if (!url) throw new Error('No image came back. Try again.');
+    return {type:'image', url};
+  },
+  async qwenimg(g){
+    const c = await space('Qwen/Qwen-Image-2.1'); const [w, h] = QSIZE[g.opts.aspect] || QSIZE['1:1'];
+    const r = await c.predict('/generate_request', {original_prompt:g.prompt, enable_extend:true, custom_size:true, log_dir:'./generation_logs_paper_case', seed:g.seed % 100000, height:h, width:w, negative_prompt:' '});
+    const url = fileUrl(r.data && r.data[0]); if (!url) throw new Error('No image came back. Try again.');
+    return {type:'image', url};
+  },
+  async ace(g){
+    const c = await space('ACE-Step/Ace-Step-v1.5');
+    const secs = {'30s':30, '60s':60, '2 min':120}[g.opts.duration] || 60;
+    const lines = g.prompt.split('\n'); const style = lines[0].trim();
+    const lyrics = g.opts.vocals === 'Instrumental' ? '[Instrumental]' : (lines.slice(1).join('\n').trim() || '[Instrumental]');
+    const lang = /[\u0590-\u05FF]/.test(lyrics) ? 'he' : 'unknown';
+    const r = await c.predict('/generation_wrapper', {selected_model:'acestep-v15-turbo', generation_mode:'custom', simple_query_input:'', simple_vocal_language:'unknown', param_4:style, param_5:lyrics, param_9:lang, param_14:null, param_15:secs, param_16:1, param_17:null, param_18:'', param_47:'vocals'});
+    const url = fileUrl(r.data && r.data[0]); if (!url) throw new Error('No song came back. Try again.');
+    return {type:'audio', url};
+  },
   async pollinations(g){
     const url = pollImageUrl(g.prompt, g.opts.aspect, g.seed);
     await new Promise((res, rej) => { const im = new Image(); im.onload = res; im.onerror = () => rej(new Error('Pollinations could not make that image. Try again.')); im.src = url; });
@@ -1264,7 +1271,7 @@ const RUNNERS = {
   },
   async h3(g){
     const c = await space('MiniMaxAI/MiniMax-H3-Turbo-Lora'); const { handle_file } = await gradio();
-    const r = await c.predict('/output_video', {in_0:g.prompt, in_1:g._file ? handle_file(g._file) : null, in_2:null, in_3:H3_CANVAS[g.opts.aspect] || H3_CANVAS['16:9'], in_4:parseFloat(g.opts.duration) || 5, in_5:6, in_6:g.seed % 100000, in_7:false, in_8:'larry'});
+    const r = await c.predict('/output_video', {in_0:g.prompt, in_1:g._file ? handle_file(g._file) : null, in_2:null, in_3:h3Canvas(g.opts), in_4:Math.min(14, parseFloat(g.opts.duration) || 5), in_5:6, in_6:g.seed % 100000, in_7:false, in_8:'larry'});
     const url = fileUrl(r.data && r.data[0]); if (!url) throw new Error('No video came back. Try again.');
     return {type:'video', url};
   },
@@ -1284,7 +1291,7 @@ const RUNNERS = {
     return {type:'audio', url};
   },
 };
-const WORK_LABEL = {pollinations:'Drawing on Pollinations', zimage:'Generating on Hugging Face', h3:'Making the video on Hugging Face · 1 to 3 min', hunyuan3d:'Building the 3D model on Hugging Face · 1 to 3 min', chatterbox:'Recording the voice on Hugging Face'};
+const WORK_LABEL = {klein:'Generating on Hugging Face', qwenimg:'Generating on Hugging Face', ace:'Writing the song on Hugging Face · 1 to 3 min', pollinations:'Drawing on Pollinations', zimage:'Generating on Hugging Face', h3:'Making the video on Hugging Face · 1 to 3 min', hunyuan3d:'Building the 3D model on Hugging Face · 1 to 3 min', chatterbox:'Recording the voice on Hugging Face'};
 function realCard(g){
   const m = anyById(g.model); const audio = g.cat === 'speech' || g.cat === 'music'; const r = g.result || {};
   const info = [m ? m.name : g.model, ...Object.values(g.opts || {})].map(esc).join(' · ');
@@ -1408,10 +1415,9 @@ function viewChat(){
   <div class="wrap">
     <div class="chat-layout">
       <section class="chat-main" aria-labelledby="h-chat">
-        <header class="chat-head"><div style="display:grid;gap:4px"><h1 id="h-chat" class="h-sec">Chat</h1><p class="muted">Open language models with your settings.</p></div><span class="demo-pill">Free chat runs for real</span></header>
+        <header class="chat-head"><div style="display:grid;gap:4px"><h1 id="h-chat" class="h-sec">Chat</h1><p class="muted">Open language models with your settings.</p></div></header>
         <div class="msgs" id="msgs" aria-live="polite">
-          <span class="ex-label">Example conversation</span>
-          ${CHAT_EXAMPLE.map(msgHTML).join('')}
+          ${S.chat.length ? '' : '<span class="ex-label">Ask anything. Answers come from gpt-oss-20b, an open model.</span>'}
           ${S.chat.map(msgHTML).join('')}
         </div>
         <form class="composer" id="composer" autocomplete="off">
@@ -1423,10 +1429,8 @@ function viewChat(){
       <aside class="chat-side" aria-label="Chat settings">
         <h2>Model</h2>
         <div style="display:grid;gap:8px" role="radiogroup" aria-label="Chat model">
-          <p class="mgroup">Free APIs</p>
+          <p class="mgroup">Runs free</p>
           ${FREE_OPTS.filter(f => f.cat === 'chat').map(f => { const p = PROV[f.prov]; return `<label class="mopt"><input type="radio" name="chatmodel" value="${f.id}"${f.id === m.id ? ' checked' : ''}><span><b>${esc(f.name)}${f.run ? ' <span class="tag tag-live">Works here</span>' : ''}</b><small>${esc(f.run ? p.name + ' · no key needed' : p.name + ' · ' + p.key)}</small></span><span class="mono fit-ok">Free</span></label>`; }).join('')}
-          <p class="mgroup">Your GPU</p>
-          ${M.filter(x => x.cat === 'chat').map(x => { const bv = bestVariant(x); return `<label class="mopt"><input type="radio" name="chatmodel" value="${x.id}"${x.id === m.id ? ' checked' : ''}><span><b>${esc(x.name)}</b><small>${esc(x.params)}</small></span><span class="mono ${fitClass(bv.gb)}">${esc(bv.p)} ≈${bv.gb} GB</span></label>`; }).join('')}
         </div>
         ${free ? `<div class="meter" id="chat-meter" style="border-top:0;padding-top:0">${freeMeterHTML(m, 'chat')}</div>` : `<div class="field"><label for="chat-prec">Precision</label><select id="chat-prec">${m.variants.map(x => `<option value="${esc(x.p)}"${x.p === v.p ? ' selected' : ''}>${esc(x.p)} · ≈${x.gb} GB${x.gb > S.gpu ? ' · over your card' : ''}</option>`).join('')}</select></div>
         <div class="meter" id="chat-meter" style="border-top:0;padding-top:0">${meterHTML(m, v)}</div>
@@ -1514,7 +1518,7 @@ function modelCards(){
         <div class="vars">${m.variants.map(v => `<div class="var"><span class="p" title="${esc(v.p)}">${esc(v.p)}</span><div class="bar" aria-hidden="true"><i class="${v.gb > S.gpu ? 'over' : ''}" style="width:${v.gb / CAP * 100}%"></i><b style="left:${S.gpu / CAP * 100}%"></b></div><span class="gb ${fitClass(v.gb)}">≈${v.gb} GB</span></div>`).join('')}</div>
         <div>${licHTML(m)}</div>
         ${m.licNote ? `<p class="lic-note">${esc(m.licNote)}</p>` : ''}
-        <div class="mfoot"><a class="lnk" href="https://huggingface.co/models?search=${encodeURIComponent(m.q)}" target="_blank" rel="noopener">Find on Hugging Face ↗</a><a class="btn btn-accent" href="#${studioFor(m.cat)}" data-use="${m.id}">Open in studio</a></div>
+        <div class="mfoot"><a class="lnk" href="https://huggingface.co/models?search=${encodeURIComponent(m.q)}" target="_blank" rel="noopener">Find on Hugging Face ↗</a><a class="btn btn-accent" href="#${studioFor(m.cat)}" data-use="${m.id}">${FREE_OPTS.some(f => f.base === m.id) ? 'Open in studio' : 'Try a similar model'}</a></div>
       </div>
     </article>`).join('');
 }
