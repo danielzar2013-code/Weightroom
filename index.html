@@ -1244,7 +1244,7 @@ async function space(id){
   if (!spaceClients[key]) spaceClients[key] = Client.connect(id, tok ? {token: tok} : {}).catch(e => { delete spaceClients[key]; throw e; });
   return spaceClients[key];
 }
-const fileUrl = d => !d ? null : typeof d === 'string' ? d : (d.url || (d.video && fileUrl(d.video)) || (d.image && fileUrl(d.image)) || d.path || null);
+const fileUrl = d => !d ? null : typeof d === 'string' ? d : (d.url || (d.value && fileUrl(d.value)) || (d.video && fileUrl(d.video)) || (d.image && fileUrl(d.image)) || d.path || null);
 const ZRES = {'1:1':'1024x1024 ( 1:1 )','4:5':'864x1152 ( 3:4 )','3:4':'864x1152 ( 3:4 )','16:9':'1280x720 ( 16:9 )','9:16':'720x1280 ( 9:16 )'};
 const PSIZE = {'1:1':[1024,1024],'4:5':[896,1120],'3:4':[864,1152],'16:9':[1280,720],'9:16':[720,1280]};
 const H3_CANVAS = {'16:9':['960x544 · 16:9 fast','1344x768 · 16:9 full'],'9:16':['544x960 · 9:16 fast','768x1344 · 9:16 full'],'1:1':['544x544 · 1:1 fast','768x768 · 1:1 full']};
