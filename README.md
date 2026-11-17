@@ -2,7 +2,7 @@
 
 An installable web app for open-weight AI models: video, image, 3D, voice, music and chat, each sized against your GPU's VRAM (up to 100 GB), with public benchmark rankings.
 
-**Open the app:** https://danielzar2013-code.github.io/weightroom/
+**Open the app:** https://danielzar2013-code.github.io/Weightroom/
 
 ## What runs for real
 

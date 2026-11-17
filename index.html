@@ -1321,7 +1321,7 @@ async function pollChatSend(){
   box.insertAdjacentHTML('beforeend', `<div class="msg assistant"><p class="msg-who">gpt-oss-20b</p><div class="msg-body thinking" dir="auto">Thinking…</div></div>`);
   const bubble = box.lastElementChild.querySelector('.msg-body'); box.scrollTop = box.scrollHeight;
   const sys = (($('#sys') && $('#sys').value) || '').trim();
-  const msgs = [{role:'system', content:`You are the assistant inside Weightroom, a studio for open-weight AI models.${sys ? ' ' + sys : ''} Reply in the language the user writes in. Keep answers short unless asked for detail.`}];
+  const msgs = [{role:'system', content:`You are the assistant inside Weightroom, the app the user is using right now. Weightroom generates images, video, 3D models and speech with open-weight models, runs them free through Pollinations and Hugging Face, and shows which models fit the user's GPU and how they rank on public benchmarks. If you are not sure about something, say so instead of guessing.${sys ? ' ' + sys : ''} Reply in the language the user writes in. Keep answers short unless asked for detail.`}];
   for (const x of S.chat.slice(-20)) { if (x.role === 'user') msgs.push({role:'user', content:x.text}); else if (x.role === 'assistant' && x.text) msgs.push({role:'assistant', content:x.text}); }
   chatCtl = new AbortController(); setSendBtn(true);
   try {
