@@ -1323,11 +1323,16 @@ const RUNNERS = {
       if (!resp.ok || !(resp.headers.get('content-type') || '').startsWith('image/')) throw new Error('Could not draw a reference picture right now. Add a photo with + or try again in a minute.');
       file = await resp.blob();
     }
-    const src = handle_file(file);
-    const textured = g.opts.texture !== 'Untextured';
-    const r = await c.predict(textured ? '/generation_all' : '/shape_generation', {image:src, steps:30, guidance_scale:5, seed:g.seed % 100000, octree_resolution:256, check_box_rembg:true, num_chunks:8000, randomize_seed:true});
+    const args = () => ({image:handle_file(file), steps:30, guidance_scale:5, seed:g.seed % 100000, octree_resolution:256, check_box_rembg:true, num_chunks:8000, randomize_seed:true});
+    let textured = g.opts.texture !== 'Untextured', note = '', r = null;
+    if (textured) {
+      /* Painting textures asks for more GPU time than Hugging Face gives free accounts, so fall back to the shape alone. */
+      try { r = await c.predict('/generation_all', args()); }
+      catch (e) { if (!/maximum allowed|Hugging Face PRO/i.test(String((e && (e.message || e.title)) || e))) throw e; textured = false; note = 'Textures need more GPU time than Hugging Face gives free accounts, so this model came out untextured.'; }
+    }
+    if (!r) r = await c.predict('/shape_generation', args());
     const url = fileUrl(textured ? (r.data[1] || r.data[0]) : r.data[0]); if (!url) throw new Error('No 3D file came back. Try again.');
-    return {type:'model', url};
+    return {type:'model', url, note};
   },
   async chatterbox(g){
     const c = await space('ResembleAI/Chatterbox-Multilingual-TTS-V3');
@@ -1351,7 +1356,7 @@ function realCard(g){
   else media = `<div class="gen-media failed"><p class="gerr">This result is no longer available.</p></div>`;
   const actions = g.status === 'done' && r.url ? `<div class="gen-actions"><a class="lnk" href="${esc(r.url)}" target="_blank" rel="noopener" download>Download ↓</a></div>`
     : g.status === 'error' ? `<div class="gen-actions"><button class="lnk" type="button" data-retry="${g.id}">Try again</button></div>` : '';
-  return `<article class="gen" id="${g.id}">${media}<div class="gen-meta"><p class="gen-prompt" dir="auto">${esc(g.prompt)}</p><p class="gen-info mono">${info}</p>${g.ranOn ? `<p class="gen-info">${g.sub ? 'Made with ' + esc(g.ranOn) + ' because this model isn\u2019t connected yet.' : 'Ran free on ' + esc(RUN_HOST(g.run)) + ' because no GPU is connected.'}</p>` : ''}${actions}</div></article>`;
+  return `<article class="gen" id="${g.id}">${media}<div class="gen-meta"><p class="gen-prompt" dir="auto">${esc(g.prompt)}</p><p class="gen-info mono">${info}</p>${g.ranOn ? `<p class="gen-info">${g.sub ? 'Made with ' + esc(g.ranOn) + ' because this model isn\u2019t connected yet.' : 'Ran free on ' + esc(RUN_HOST(g.run)) + ' because no GPU is connected.'}</p>` : ''}${r.note ? `<p class="gen-info">${esc(r.note)}</p>` : ''}${actions}</div></article>`;
 }
 let mvLoaded = false;
 function loadModelViewer(){ if (mvLoaded) return; mvLoaded = true; const sc = document.createElement('script'); sc.type = 'module'; sc.src = 'https://cdn.jsdelivr.net/npm/@google/model-viewer@4.3.1/dist/model-viewer.min.js'; document.head.appendChild(sc); }
