@@ -1265,7 +1265,7 @@ const runFor = m => (m && (m.run || TWIN[m.id])) || null;
 const LANG_CODE = {English:'en',Hebrew:'he',Arabic:'ar',Chinese:'zh',Danish:'da',Dutch:'nl',Finnish:'fi',French:'fr',German:'de',Greek:'el',Hindi:'hi',Italian:'it',Japanese:'ja',Korean:'ko',Malay:'ms',Norwegian:'no',Polish:'pl',Portuguese:'pt',Russian:'ru',Spanish:'es',Swahili:'sw',Swedish:'sv',Turkish:'tr'};
 function errText(e){
   const t = String((e && (e.message || e.title)) || e || '');
-  if (/quota/i.test(t)) return hfToken() ? 'Your free Hugging Face GPU minutes for today are used up. They come back 24 hours after first use.' : 'The free GPU minutes for this device are used up. Add a free Hugging Face token in Settings for more.';
+  if (/quota/i.test(t)) return hfToken() ? 'Your free Hugging Face GPU minutes for today are used up. They come back 24 hours after first use.' : 'Hugging Face\u2019s free GPU minutes for this internet connection are used up for now. They refill over the day. A free Hugging Face token in Settings adds more.';
   if (/capacity|queue|too many|busy/i.test(t)) return 'The shared GPU queue is busy right now. Wait a minute and try again.';
   if (/sleep|paused|building|starting/i.test(t)) return 'That model Space is waking up. Try again in a minute.';
   return (t || 'Something went wrong. Try again.').slice(0, 220);
