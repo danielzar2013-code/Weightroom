@@ -1110,14 +1110,17 @@ function meterHTML(m, v){
   return `<span class="mono">VRAM</span><div class="meter-track" role="img" aria-label="${v.gb} of ${S.gpu} GB"><i class="${over ? 'over' : ''}" style="width:${pct}%"></i></div><span class="mono">≈${v.gb} / ${S.gpu} GB</span><p class="note${over ? ' warn' : ''}">${note}${runNote}</p>`;
 }
 function popHTML(mcat){
-  if (isFree(mcat)) return `<p class="pop-head">Free APIs · ${CAT_LABEL[mcat]}</p>` + FREE_OPTS.filter(f => f.cat === mcat).map(f => { const p = PROV[f.prov]; return `<button type="button" class="pop-item" role="option" data-pick="${f.id}" aria-selected="${S.selFree[mcat] === f.id}">
+  const freeSel = isFree(mcat);
+  const freeItems = FREE_OPTS.filter(f => f.cat === mcat).map(f => { const p = PROV[f.prov]; const sub = f.run ? `${p.name} · runs now` : `${p.name} key not connected · ${RUN_NAME[runFor(f)] || 'a free model'} runs instead`; return `<button type="button" class="pop-item" role="option" data-pick="${f.id}" aria-selected="${freeSel && S.selFree[mcat] === f.id}">
     <canvas data-thumb="${thumbOf(f, mcat)}" aria-hidden="true"></canvas>
-    <span><b>${esc(f.name)}</b><small>${esc(p.name)} · ${esc(p.key)}</small></span>
-    <span class="fit fit-ok">Free</span></button>`; }).join('') + `<a class="pop-foot lnk" href="#models">See every free API →</a>`;
-  return `<p class="pop-head">${CAT_LABEL[mcat]} models · ${M.filter(m => m.cat === mcat).length} · sized for ${S.gpu} GB</p>` + M.filter(m => m.cat === mcat).map(m => { const v = bestVariant(m); return `<button type="button" class="pop-item" role="option" data-pick="${m.id}" aria-selected="${S.sel[mcat] === m.id}">
+    <span><b>${esc(f.name)}</b><small>${esc(sub)}</small></span>
+    <span class="fit fit-ok">Free</span></button>`; }).join('');
+  const lib = M.filter(m => m.cat === mcat);
+  const libItems = lib.map(m => { const v = bestVariant(m); return `<button type="button" class="pop-item" role="option" data-pick="${m.id}" aria-selected="${!freeSel && S.sel[mcat] === m.id}">
     <canvas data-thumb="${m.id}" aria-hidden="true"></canvas>
     <span><b>${esc(m.name)} ${tagsHTML(m)}</b><small>${esc(m.maker)} · ${esc(m.params)}</small></span>
-    <span class="fit ${fitClass(v.gb)}">${esc(v.p)}<br>≈${v.gb} GB</span></button>`; }).join('') + `<a class="pop-foot lnk" href="#models">Compare every model →</a>`;
+    <span class="fit ${fitClass(v.gb)}">${esc(v.p)}<br>≈${v.gb} GB</span></button>`; }).join('');
+  return `<p class="pop-head">Free APIs · ${CAT_LABEL[mcat]}</p>${freeItems}<p class="pop-head">${CAT_LABEL[mcat]} library · ${lib.length} models · sized for ${S.gpu} GB</p>${libItems}<a class="pop-foot lnk" href="#models">Compare every model →</a>`;
 }
 function feedFor(cats){
   return [...userGens.filter(g => cats.includes(g.cat)), ...EXAMPLES.filter(g => cats.includes(g.cat))];
