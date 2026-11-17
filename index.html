@@ -1,0 +1,1814 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0c0a">
+<meta name="description" content="Open-weight video, image, 3D, voice and chat models in one studio.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+<title>Weightroom Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky top bar, full-bleed hero bands with a floating prompt dock, card grids below. Single dark look by design. */
+:root{
+  color-scheme: dark;
+  --bg:#0b0c0a; --surface:#131411; --surface-2:#1a1c18; --surface-3:#23261f;
+  --line:#2a2d26; --line-2:#3b3f35;
+  --fg:#f1f2ec; --muted:#a2a597; --dim:#6c7065;
+  --accent:#cdfb3a; --accent-2:#e7ff92; --accent-ink:#121600;
+  /* chart groups: validated pair for the dark surface (lime, blue) plus a de-emphasis gray */
+  --c-lib:#7ba611; --c-open:#3987e5; --c-ref:#4b4f46;
+  --ok:#86e08f; --warn:#ffb547; --bad:#ff7a6b; --info:#8cc8ff; --info-bg:#16283a; --warn-bg:#33270f; --bad-bg:#3a1a16; --ok-bg:#15301a;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r-s:8px; --r-m:14px; --r-l:22px;
+}
+[hidden]{display:none!important}
+html,body{background:var(--bg);color:var(--fg)}
+body{font:15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mono{font-family:var(--f-mono);font-size:.86em;font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.wrap{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:color-mix(in oklab,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top-inner{display:flex;align-items:center;gap:18px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--f-display);font-weight:800;font-stretch:118%;text-transform:uppercase;letter-spacing:.03em;font-size:15px}
+.brand svg{flex:none}
+.nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.nav::-webkit-scrollbar{display:none}
+.nav a{padding:7px 12px;border-radius:999px;color:var(--muted);text-decoration:none;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.nav a:hover{color:var(--fg);background:var(--surface-2)}
+.nav a[aria-current="page"]{color:var(--accent)}
+.nav .sep{width:1px;background:var(--line);margin:8px 6px;flex:none}
+.top-actions{display:flex;gap:8px;align-items:center;margin-left:auto}
+.gpu-pill{display:flex;align-items:center;gap:6px;height:36px;padding:0 4px 0 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;font-size:13px}
+.gpu-pill select{appearance:none;-webkit-appearance:none;background:transparent;border:0;padding:0 22px 0 2px;height:34px;font-weight:600;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%23a2a597' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;background-size:14px}
+.gpu-pill .lbl{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 14px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);text-decoration:none;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--surface-3)}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn-accent:hover{background:var(--accent-2)}
+.btn-lg{height:46px;padding:0 20px;font-size:15px;border-radius:12px}
+.btn-ghost{background:color-mix(in oklab,var(--bg) 40%,transparent);border-color:color-mix(in oklab,var(--fg) 25%,transparent)}
+.demo-pill{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--warn);background:var(--warn-bg);padding:4px 8px;border-radius:6px}
+
+/* type */
+.eyebrow{font:500 12px var(--f-mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0}
+.display{font-family:var(--f-display);font-weight:800;font-stretch:115%;text-transform:uppercase;line-height:.9;letter-spacing:-.005em;text-wrap:balance;margin:0}
+.display .hl{color:var(--accent)}
+.d-xl{font-size:clamp(42px,7.4vw,104px)}
+.d-lg{font-size:clamp(36px,6vw,84px)}
+.d-md{font-size:clamp(32px,4.6vw,60px)}
+.h-sec{font-family:var(--f-display);font-weight:800;font-stretch:112%;text-transform:uppercase;font-size:clamp(22px,2.6vw,30px);letter-spacing:.005em;margin:0;line-height:1}
+.lede{font-size:clamp(15px,1.4vw,18px);color:color-mix(in oklab,var(--fg) 82%,var(--bg));max-width:60ch;margin:0;text-wrap:pretty}
+
+/* tags & licenses */
+.tag{display:inline-flex;align-items:center;font:600 10px var(--f-body);letter-spacing:.04em;text-transform:uppercase;padding:2px 6px;border-radius:5px;background:var(--surface-3);color:var(--muted);white-space:nowrap}
+.tag-new{background:var(--accent);color:var(--accent-ink)}
+.tag-top{background:var(--fg);color:var(--bg)}
+.tag-he{background:var(--info-bg);color:var(--info)}
+.lic{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.lic::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.lic-open{background:var(--ok-bg);color:var(--ok)}
+.lic-limited{background:var(--warn-bg);color:var(--warn)}
+.lic-nc{background:var(--bad-bg);color:var(--bad)}
+
+/* explore hero */
+.hero{position:relative;margin-top:16px;border-radius:var(--r-l);overflow:hidden;border:1px solid var(--line);background:var(--surface);display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:32px;align-items:end;padding:clamp(24px,5vw,56px)}
+.hero>canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,color-mix(in oklab,var(--bg) 92%,transparent) 0%,color-mix(in oklab,var(--bg) 55%,transparent) 55%,color-mix(in oklab,var(--bg) 20%,transparent) 100%);pointer-events:none}
+.hero-copy,.hero-card{position:relative;z-index:1}
+.hero-copy{display:grid;gap:22px;padding-top:clamp(40px,8vw,120px)}
+.cta-row{display:flex;gap:10px;flex-wrap:wrap}
+.hero-card{background:color-mix(in oklab,var(--surface) 88%,transparent);border:1px solid var(--line-2);border-radius:var(--r-m);padding:18px;display:grid;gap:14px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.hero-card select{appearance:none;-webkit-appearance:none;width:100%;height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);padding:0 36px 0 12px;font-weight:600;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%23a2a597' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px}
+.fitstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0}
+.fitstats div{background:var(--surface-2);border-radius:10px;padding:10px}
+.fitstats dt{font-size:12px;color:var(--muted)}
+.fitstats dd{margin:2px 0 0;font:700 26px/1 var(--f-display);font-stretch:110%;font-variant-numeric:tabular-nums}
+.fitstats .ok dd{color:var(--accent)}
+.fitstats .q dd{color:var(--fg)}
+.fitstats .x dd{color:var(--dim)}
+
+/* sections */
+.sec{padding-block:clamp(36px,5vw,64px) 0;display:grid;gap:20px}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}
+.sec-head p{margin:0}
+
+/* featured tiles */
+.feat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.feat{display:grid;grid-template-columns:76px minmax(0,1fr);gap:14px;align-items:center;padding:10px;border-radius:var(--r-m);background:var(--surface);border:1px solid var(--line);text-decoration:none;transition:border-color .15s,background .15s}
+.feat:hover{border-color:var(--line-2);background:var(--surface-2)}
+.feat canvas{width:76px;height:76px;border-radius:10px;display:block}
+.feat h3{margin:0;font-size:15px;font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.feat p{margin:3px 0 0;color:var(--muted);font-size:13px;line-height:1.4}
+
+/* studio cards */
+.scards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.scard{position:relative;display:block;border-radius:var(--r-m);overflow:hidden;background:var(--surface);border:1px solid var(--line);text-decoration:none;aspect-ratio:3/4;max-width:100%}
+.scard canvas{position:absolute;inset:0;width:100%;height:100%;display:block;transition:transform .5s}
+.scard:hover canvas{transform:scale(1.03)}
+.scard .lab{position:absolute;inset:auto 0 0 0;padding:14px;background:linear-gradient(transparent,color-mix(in oklab,var(--bg) 92%,transparent) 60%);display:grid;gap:4px}
+.scard .lab b{font-family:var(--f-display);font-weight:800;font-stretch:112%;text-transform:uppercase;font-size:20px;line-height:1}
+.scard .lab span{font-size:12px;color:var(--muted);min-height:2.9em}
+
+/* VRAM ladder */
+.ladder-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:clamp(16px,3vw,28px);display:grid;gap:14px}
+.ladder{display:grid;gap:7px}
+.lrow{display:grid;grid-template-columns:minmax(140px,210px) minmax(0,1fr) 92px;gap:14px;align-items:center}
+.lname{font-size:13px;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lname:hover{color:var(--accent)}
+.lname small{color:var(--dim);font-size:11px;margin-left:6px;text-transform:uppercase;letter-spacing:.06em}
+.ltrack{position:relative;height:20px;border-radius:5px;background:var(--surface-2)}
+.ltick{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--line-2)}
+.ltick.cur{background:var(--accent);width:2px;margin-left:-.5px}
+.lmin,.lrange{position:absolute;top:5px;bottom:5px}
+.lmin{left:0;border-radius:3px;background:var(--accent)}
+.lrange{border-radius:0 3px 3px 0;background:repeating-linear-gradient(135deg,var(--accent) 0 2px,transparent 2px 6px)}
+.lrow.part .lrange,.lrow.over .lrange{background:repeating-linear-gradient(135deg,var(--dim) 0 2px,transparent 2px 6px)}
+.lrow.over .lmin{background:var(--dim)}
+.lrow.over .lname{color:var(--dim)}
+.lval{font:500 12px var(--f-mono);color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.lscale{position:relative;height:16px}
+.lscale span{position:absolute;transform:translateX(-50%);font:500 11px var(--f-mono);color:var(--dim)}
+.lscale span.cur{color:var(--accent)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:22px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:6px}
+.legend .sw-a{background:var(--accent)}
+.legend .sw-b{background:repeating-linear-gradient(135deg,var(--accent) 0 2px,transparent 2px 6px);outline:1px solid var(--line-2)}
+.legend .sw-c{background:var(--accent);width:2px}
+
+/* how it runs */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:18px;display:grid;gap:6px;align-content:start}
+.steps li::before{counter-increment:s;content:counter(s);font:800 13px var(--f-display);color:var(--accent-ink);background:var(--accent);width:24px;height:24px;border-radius:7px;display:grid;place-items:center}
+.steps b{font-size:16px}
+.steps p{margin:0;color:var(--muted);font-size:14px}
+.foot{padding-block:48px 40px;color:var(--dim);font-size:13px;max-width:80ch}
+
+/* studio hero */
+.shero{position:relative;margin-top:16px;border-radius:var(--r-l);overflow:visible;min-height:min(600px,78vh);display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:36px;padding:clamp(36px,7vw,84px) clamp(12px,3vw,32px) clamp(16px,3vw,28px);text-align:center;isolation:isolate}
+.shero .bgclip{position:absolute;inset:0;border-radius:var(--r-l);overflow:hidden;z-index:-1;border:1px solid var(--line);background:var(--surface)}
+.shero .bgclip canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.shero .bgclip::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in oklab,var(--bg) 45%,transparent),color-mix(in oklab,var(--bg) 10%,transparent) 40%,color-mix(in oklab,var(--bg) 80%,transparent))}
+.shead{display:grid;gap:16px;justify-items:center}
+.shead .lede{text-align:center}
+
+/* prompt dock */
+.dock{position:relative;width:min(800px,100%);text-align:left;background:color-mix(in oklab,var(--surface) 90%,transparent);border:1px solid var(--line-2);border-radius:18px;padding:12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 30px 80px -30px rgba(0,0,0,.7)}
+.segs{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.seg{display:flex;gap:4px;background:var(--surface-2);border-radius:10px;padding:3px;width:max-content;max-width:100%}
+.chip.enhance{border-color:color-mix(in oklab,var(--accent) 45%,transparent);color:var(--accent)}
+.chip.enhance svg{color:var(--accent)}
+.chip.enhance[aria-busy="true"]{background:var(--surface-3)}
+.free-lim{flex:1 1 200px;color:var(--fg)}
+.tag-live{background:var(--accent);color:var(--accent-ink)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:16px;display:flex;flex-direction:column;gap:10px}
+.pcard.live{border-color:color-mix(in oklab,var(--accent) 55%,transparent)}
+.pcard h3{margin:0;font-size:17px;font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pcard .by{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+.pcard>p{margin:0;font-size:14px;color:color-mix(in oklab,var(--fg) 85%,var(--bg))}
+.pcard dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 12px;font-size:12.5px}
+.pcard dt{color:var(--dim)}
+.pcard dd{margin:0}
+.pcard .lnk{margin-top:auto}
+.cats{display:flex;gap:5px;flex-wrap:wrap}
+.mgroup{margin:4px 0 0;font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+.msg-body.thinking{color:var(--muted);font-style:italic}
+
+/* app build: real results */
+.gen-media img,.gen-media video,.gen-media model-viewer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--surface-3);display:block}
+.gen-media.audio-done{display:grid;place-items:center;padding:16px}
+.gen-media.audio-done audio{width:100%;max-width:100%}
+.gen-media.working{background:linear-gradient(110deg,var(--surface-3) 30%,var(--surface-2) 50%,var(--surface-3) 70%);background-size:300% 100%;animation:shimmer 1.6s linear infinite}
+@keyframes shimmer{to{background-position:-150% 0}}
+.prog-track.ind i{width:35%;animation:ind 1.3s ease-in-out infinite}
+@keyframes ind{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
+.gen-media.failed{display:grid;place-items:center;padding:18px;text-align:center}
+.gerr{margin:0;color:var(--warn);font-size:13.5px;max-width:40ch}
+.gen-actions{display:flex;gap:14px;padding-top:2px}
+.gen-actions .lnk{background:none;border:0;padding:0;cursor:pointer;color:var(--accent);font-size:13px;font-weight:600;text-decoration:none}
+.set-field{display:grid;gap:8px}
+.set-field input{height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);padding:0 12px;font-family:var(--f-mono);font-size:13px;width:100%;box-sizing:border-box}
+.set-row{display:flex;gap:8px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){.gen-media.working,.prog-track.ind i{animation:none}}
+
+/* benchmarks */
+.btabs{display:flex;gap:4px;background:var(--surface-2);border-radius:12px;padding:4px;width:max-content;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.btabs button{border:0;background:none;padding:8px 16px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.btabs button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.bsec{display:grid;gap:16px;padding-top:18px}
+.take{display:grid;gap:6px;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m)}
+.take p{margin:0}
+.take p:last-child{font-size:15.5px;max-width:90ch}
+.blegend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.blegend i,.grp i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px;vertical-align:-1px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,560px),1fr));gap:14px}
+.bcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:18px 18px 12px;display:grid;gap:10px;min-width:0;align-content:start}
+.bcard.wide{grid-column:1/-1}
+.bcard h3{margin:0;font-size:19px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.bcard h3 i{width:12px;height:12px;border-radius:2px;background:var(--accent);flex:none}
+.bcard .sub{margin:4px 0 0;font-size:12.5px;color:var(--muted)}
+.cwrap{overflow-x:auto;padding-bottom:4px}
+.chart{--h:230px;display:grid;grid-template-columns:44px minmax(0,1fr);min-width:calc(var(--n) * 34px + 92px);padding-left:44px}
+.yax{position:relative;height:var(--h)}
+.yax .in,.plot .in{position:absolute;inset:24px 0 0 0}
+.yax span{position:absolute;right:8px;transform:translateY(50%);font:500 11px var(--f-mono);color:var(--dim);font-variant-numeric:tabular-nums}
+.plot{position:relative;height:var(--h);border-bottom:1px solid var(--line-2)}
+.gl{position:absolute;left:0;right:0;height:1px;background:var(--line)}
+.cols{position:absolute;inset:0;display:flex;align-items:stretch}
+.col{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;cursor:default;border-radius:6px}
+.col:hover,.col:focus-visible{background:color-mix(in oklab,var(--fg) 5%,transparent)}
+.col .v{flex:none;display:block;font:500 11px var(--f-mono);color:var(--muted);margin-bottom:4px;font-variant-numeric:tabular-nums}
+.col:hover .v,.col:focus-visible .v{color:var(--fg)}
+.bar{flex:none;display:block;width:min(24px,64%);border-radius:4px 4px 0 0}
+.g-lib{background:var(--c-lib)} .g-open{background:var(--c-open)} .g-ref{background:var(--c-ref)}
+.xl{grid-column:2;display:flex;height:118px}
+.xl span{flex:1;position:relative;min-width:0}
+.xl b{position:absolute;top:8px;right:50%;transform-origin:100% 0;transform:rotate(-45deg);white-space:nowrap;font-size:11.5px;font-weight:400;color:var(--muted)}
+.xl .lib b{color:var(--fg);font-weight:600}
+.tview summary{cursor:pointer;font-size:13px;color:var(--muted);padding:6px 0}
+.tview summary:hover{color:var(--fg)}
+.btable-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+table.bt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:620px}
+.bt th{text-align:left;font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--dim);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.bt td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.bt tr:last-child td{border-bottom:0}
+.bt .num{text-align:right;font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bt small{font-size:12px}
+.bt .tag{margin-left:6px;text-decoration:none;vertical-align:1px}
+.grp{white-space:nowrap;font-size:12.5px;color:var(--muted)}
+.bsrc{margin:0;font-size:12.5px;color:var(--dim);max-width:100ch}
+.bsrc a{color:var(--muted)}
+.tip{position:fixed;z-index:96;pointer-events:none;background:var(--surface-3);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font-size:12.5px;max-width:270px;box-shadow:0 14px 34px rgba(0,0,0,.55)}
+.tip b{display:block;font-size:13.5px;margin-bottom:3px}
+.tip span{display:block;color:var(--muted)}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:8px;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface-3);color:var(--fg)}
+.dock-main{grid-column:1;display:flex;gap:10px;align-items:flex-start;min-width:0}
+.add{flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.add:hover{color:var(--fg)}
+.ref{position:relative;flex:none;width:52px;height:52px;border-radius:10px;overflow:hidden;border:1px solid var(--line-2)}
+.ref img{width:100%;height:100%;object-fit:cover;display:block}
+.ref button{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:5px;border:0;background:rgba(0,0,0,.7);color:var(--fg);font-size:12px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
+.dock textarea{flex:1;min-width:0;background:transparent;border:0;resize:none;font-size:16px;line-height:1.45;min-height:56px;padding:6px 2px;outline:none}
+.dock textarea::placeholder{color:var(--dim)}
+.dock-opts{grid-column:1;display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.chip{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 10px;border-radius:9px;background:var(--surface-2);border:1px solid var(--line);font-size:13px;font-weight:500;cursor:pointer;color:var(--fg);max-width:100%}
+.chip:hover{border-color:var(--line-2)}
+.chip svg{flex:none;color:var(--muted)}
+.chip select{appearance:none;-webkit-appearance:none;background:transparent;border:0;color:inherit;font:inherit;padding:0;cursor:pointer;max-width:100%;text-overflow:ellipsis}
+.chip-model{font-weight:600}
+.chip-model canvas{width:20px;height:20px;border-radius:5px;display:block;flex:none}
+.chip-model span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip.warn{border-color:color-mix(in oklab,var(--warn) 55%,transparent);color:var(--warn)}
+.go{grid-column:2;grid-row:1/span 2;align-self:stretch;min-width:136px;border:0;border-radius:13px;cursor:pointer;background:linear-gradient(180deg,var(--accent-2),var(--accent) 60%);color:var(--accent-ink);font-family:var(--f-display);font-weight:800;font-stretch:112%;text-transform:uppercase;letter-spacing:.05em;font-size:15px;box-shadow:0 10px 30px -10px color-mix(in oklab,var(--accent) 70%,transparent),inset 0 -2px 0 rgba(0,0,0,.12);transition:transform .1s}
+.go:active{transform:translateY(1px)}
+.has-seg .go{grid-row:2/span 2}
+.meter{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:10px;font-size:12px;color:var(--muted)}
+.meter-track{flex:1 1 140px;height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden;min-width:100px}
+.meter-track i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.meter-track i.over{background:var(--warn)}
+.meter .note{flex-basis:100%;margin:0}
+.meter .note.warn{color:var(--warn)}
+.pop{position:absolute;left:12px;bottom:calc(100% + 8px);width:min(440px,calc(100% - 24px));max-height:min(60vh,520px);overflow:auto;background:var(--surface);border:1px solid var(--line-2);border-radius:14px;padding:6px;box-shadow:0 30px 70px rgba(0,0,0,.6);z-index:30}
+.pop-item{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:9px;border-radius:10px;border:1px solid transparent;background:none;text-align:left;cursor:pointer}
+.pop-item:hover{background:var(--surface-2)}
+.pop-item[aria-selected="true"]{border-color:color-mix(in oklab,var(--accent) 60%,transparent);background:var(--surface-2)}
+.pop-item canvas{width:40px;height:40px;border-radius:8px;display:block}
+.pop-item b{font-weight:600;font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pop-item small{display:block;color:var(--muted);font-size:12px}
+.pop-item .fit{font:500 11px var(--f-mono);text-align:right;white-space:nowrap}
+.fit-ok{color:var(--ok)} .fit-over{color:var(--warn)}
+.pop-foot{display:block;padding:10px 9px 6px;font-size:13px;color:var(--muted)}
+.pop{scroll-margin-top:calc(80px + env(safe-area-inset-top,0px))}
+.pop-head{margin:0;padding:8px 9px 6px;font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+
+/* feed */
+.feed{padding-block:36px 0;display:grid;gap:16px}
+.feed-head{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.feed-head p{margin:0;font-size:13px;color:var(--muted);max-width:60ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:14px}
+.gen{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);overflow:hidden;display:flex;flex-direction:column}
+.gen-media{position:relative;aspect-ratio:4/3;background:var(--surface-3);max-width:100%}
+.gen-media.is-audio{aspect-ratio:2/1}
+.gen-media canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.badge{position:absolute;top:10px;left:10px;font:500 10px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;padding:3px 7px;border-radius:5px;background:rgba(0,0,0,.6);color:var(--fg)}
+.badge-demo{color:var(--warn)}
+.corner{position:absolute;top:10px;right:10px;padding:3px 7px;border-radius:5px;background:rgba(0,0,0,.6);font-size:11px}
+.ref-inset{position:absolute;right:10px;bottom:10px;width:46px;height:46px;object-fit:cover;border-radius:8px;border:2px solid var(--fg);box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.play{position:absolute;left:12px;bottom:12px;height:34px;padding:0 12px 0 10px;border-radius:999px;border:0;background:var(--fg);color:var(--bg);font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.prog{position:absolute;inset:auto 0 0 0;padding:12px;display:grid;gap:7px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+.prog-label{font-size:11px;color:var(--fg)}
+.prog-track{height:4px;border-radius:2px;background:rgba(255,255,255,.18);overflow:hidden}
+.prog-track i{display:block;height:100%;width:0;background:var(--accent)}
+.gen-meta{padding:12px 14px 14px;display:grid;gap:6px}
+.gen-prompt{margin:0;font-size:14px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gen-info{margin:0;color:var(--muted);font-size:11.5px;line-height:1.5}
+
+/* chat */
+.chat-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;margin-top:16px;align-items:start}
+.chat-main{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);display:flex;flex-direction:column;min-height:min(720px,80vh);min-width:0}
+.chat-head{padding:20px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.chat-head p{margin:0;font-size:13px}
+.msgs{flex:1;padding:22px;display:flex;flex-direction:column;gap:16px;overflow:auto}
+.ex-label{align-self:center;font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+.msg{max-width:min(640px,92%);display:grid;gap:4px}
+.msg-who{margin:0;font:500 11px var(--f-mono);color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.msg-body{padding:12px 14px;border-radius:14px;background:var(--surface-2);white-space:pre-wrap;overflow-wrap:anywhere;font-size:14.5px}
+.msg.user{align-self:flex-end}
+.msg.user .msg-who{text-align:right}
+.msg.user .msg-body{background:var(--accent);color:var(--accent-ink)}
+.msg.notice .msg-body{background:var(--warn-bg);color:var(--warn);font-size:13.5px}
+.composer{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line)}
+.composer textarea{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;resize:none;font-size:15px;outline:none}
+.composer textarea:focus{border-color:var(--line-2)}
+.composer .go{min-width:96px;grid-row:auto;font-size:14px}
+.chat-side{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:18px;display:grid;gap:14px;min-width:0}
+.chat-side h2{margin:0;font-size:12px;font-family:var(--f-mono);font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.mopt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.mopt:has(input:checked){border-color:color-mix(in oklab,var(--accent) 60%,transparent);background:var(--surface-2)}
+.mopt input{accent-color:var(--accent);margin:0}
+.mopt b{font-size:14px;font-weight:600;display:block}
+.mopt small{color:var(--muted);font-size:12px}
+.field{display:grid;gap:6px;font-size:13px}
+.field .row{display:flex;justify-content:space-between;gap:8px}
+.field output{font-family:var(--f-mono);font-size:12px;color:var(--accent)}
+.field input[type=range]{accent-color:var(--accent);width:100%}
+.field select,.field textarea{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;resize:vertical}
+.hint{margin:0;font-size:12px;color:var(--dim)}
+
+/* models */
+.page-head{display:grid;gap:14px;padding-block:36px 8px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-block:18px}
+.fchip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:transparent;font-weight:500;font-size:13px;cursor:pointer;color:var(--muted)}
+.fchip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.fchip .n{font-family:var(--f-mono);font-size:11px;opacity:.7;margin-left:4px}
+.tog{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;margin-left:8px}
+.tog input{accent-color:var(--accent);width:16px;height:16px;margin:0}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:14px}
+.mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);overflow:hidden;display:flex;flex-direction:column}
+.mcard .thumb{position:relative;aspect-ratio:16/7;max-width:100%}
+.mcard .thumb canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mcard .thumb .tags{position:absolute;top:10px;left:10px;display:flex;gap:5px}
+.mbody{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.mbody h3{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.mmeta{margin:0;color:var(--muted);font-size:12.5px}
+.mblurb{margin:0;font-size:14px;color:color-mix(in oklab,var(--fg) 85%,var(--bg))}
+.vars{display:grid;gap:6px;margin:2px 0}
+.var{display:grid;grid-template-columns:96px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:12px}
+.var .p{font-family:var(--f-mono);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.var .bar{position:relative;height:6px;border-radius:3px;background:var(--surface-3)}
+.var .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--accent)}
+.var .bar i.over{background:var(--warn)}
+.var .bar b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--fg);opacity:.6}
+.var .gb{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.lic-note{margin:0;font-size:12px;color:var(--dim)}
+.mfoot{margin-top:auto;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:6px}
+.mfoot .links{display:flex;gap:8px;align-items:center}
+.lnk{font-size:13px;color:var(--muted);text-decoration:none}
+.lnk:hover{color:var(--fg)}
+.empty{padding:40px;text-align:center;color:var(--muted);border:1px dashed var(--line-2);border-radius:var(--r-m);grid-column:1/-1}
+
+/* drawer & toast */
+.drawer{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.55);display:flex;justify-content:flex-end}
+.drawer-panel{width:min(460px,100%);height:100%;overflow:auto;background:var(--surface);border-left:1px solid var(--line-2);padding:calc(24px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) 24px;display:grid;gap:16px;align-content:start}
+.drawer-panel h2{margin:0}
+.drawer-panel h3{margin:6px 0 0;font-size:14px}
+.drawer-panel p{margin:0;color:var(--muted)}
+.drawer-panel ol{margin:0;padding-left:20px;display:grid;gap:10px;color:var(--muted)}
+.drawer-panel ol b{color:var(--fg)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:500;font-size:14px;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+
+@media (max-width:1100px){
+  .scards{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .chat-layout{grid-template-columns:minmax(0,1fr)}
+  .chat-side{order:-1}
+}
+@media (max-width:900px){
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .feat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps{grid-template-columns:minmax(0,1fr)}
+  .nav{order:3;flex-basis:100%;padding-bottom:8px}
+}
+@media (max-width:640px){
+  .feat-grid{grid-template-columns:minmax(0,1fr)}
+  .scards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dock{grid-template-columns:minmax(0,1fr)}
+  .go,.has-seg .go{grid-column:1;grid-row:auto;min-height:50px}
+  .dock{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface)}
+  .shero:has(#model-pop:not([hidden])){z-index:95}
+  .pop{box-sizing:border-box;position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;max-height:78vh;border-radius:18px 18px 0 0;padding:8px max(8px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:90;box-shadow:0 0 0 100vmax rgba(0,0,0,.6)}
+  .lrow{grid-template-columns:minmax(0,1fr) 84px;gap:4px 10px}
+  .lrow .ltrack{grid-column:1/-1;grid-row:2}
+  .lrow.head .lscale{grid-column:1/-1}
+  .lrow.head .spacer{display:none}
+  .gpu-pill .lbl{display:none}
+  .gpu-pill select{max-width:150px;text-overflow:ellipsis}
+  .top-inner{gap:10px}
+  .brand .bt{display:none}
+  .top-actions .btn .t{display:none}
+  .shero{min-height:auto}
+  .fitstats dd{font-size:22px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-inner">
+    <a class="brand" href="#explore" aria-label="Weightroom home">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="8" fill="var(--accent)"/><rect x="5" y="9" width="4" height="12" rx="1.5" fill="var(--accent-ink)"/><rect x="21" y="9" width="4" height="12" rx="1.5" fill="var(--accent-ink)"/><rect x="9" y="13.5" width="12" height="3" rx="1.2" fill="var(--accent-ink)"/></svg>
+      <span class="bt">Weightroom</span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#explore" data-view="explore">Explore</a>
+      <span class="sep" aria-hidden="true"></span>
+      <a href="#video" data-view="video">Video</a>
+      <a href="#image" data-view="image">Image</a>
+      <a href="#3d" data-view="3d">3D</a>
+      <a href="#audio" data-view="audio">Voice &amp; Music</a>
+      <a href="#chat" data-view="chat">Chat</a>
+      <span class="sep" aria-hidden="true"></span>
+      <a href="#models" data-view="models">Models</a>
+      <a href="#benchmarks" data-view="benchmarks">Benchmarks</a>
+    </nav>
+    <div class="top-actions">
+      <button class="btn btn-accent" id="install" type="button" hidden>Install app</button>
+      <label class="gpu-pill" for="gpu"><span class="lbl">Your GPU</span><select id="gpu"></select></label>
+      <button class="btn" id="connect" type="button"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="4" width="12" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5 4V2M8 4V2M11 4V2M5 14v-2M8 14v-2M11 14v-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span class="t">Settings</span></button>
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<aside class="drawer" id="drawer" hidden aria-labelledby="drawer-title">
+  <div class="drawer-panel" role="dialog" aria-modal="true">
+    <div style="display:flex;justify-content:flex-end"><button class="btn" type="button" data-close>Close</button></div>
+    <h2 id="drawer-title" class="h-sec">Settings</h2>
+    <div class="set-field">
+      <label for="hf-token"><b>Hugging Face token</b> (optional)</label>
+      <input id="hf-token" type="password" autocomplete="off" spellcheck="false" placeholder="hf_…">
+      <div class="set-row"><button class="btn btn-accent" type="button" id="hf-save">Save token</button><button class="btn" type="button" id="hf-clear">Remove</button></div>
+      <p>Video, 3D and speech run on free Hugging Face GPUs. Without a token each device gets a couple of GPU minutes a day. A free account token adds a few more, and a PRO account about 8 times more. The token stays on this device and is only sent to Hugging Face. A Read token is enough.</p>
+      <p id="hf-status" class="hint"></p>
+    </div>
+    <h3>What runs for real</h3>
+    <ol>
+      <li><b>Images</b> with FLUX on Pollinations (no account) or Z-Image Turbo on Hugging Face.</li>
+      <li><b>Video</b> with MiniMax H3, <b>3D</b> with Hunyuan3D 2.1, and <b>speech</b> in 23 languages, Hebrew included, with Chatterbox. All on Hugging Face.</li>
+      <li><b>Chat</b> with gpt-oss-20b on Pollinations (no account).</li>
+    </ol>
+    <h3>Your own GPU</h3>
+    <p>The Your GPU mode shows how each model would run on your card. Connecting a GPU server comes next; until then those jobs are a preview.</p>
+    <h3>Install</h3>
+    <p>Windows: open this page in Edge or Chrome and choose Install in the address bar. Android: open it in Chrome and choose Install app in the menu. iPhone: Share, then Add to Home Screen.</p>
+  </div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<script>
+(() => {
+'use strict';
+const CAP = 100;
+const GPUS = [
+  {gb:24, card:'RTX 4090'},
+  {gb:32, card:'RTX 5090'},
+  {gb:48, card:'RTX A6000 / L40S'},
+  {gb:80, card:'H100 / A100 80GB'},
+  {gb:96, card:'RTX PRO 6000'},
+];
+const CB_LANGS = ['English','Hebrew','Arabic','Chinese','Danish','Dutch','Finnish','French','German','Greek','Hindi','Italian','Japanese','Korean','Malay','Norwegian','Polish','Portuguese','Russian','Spanish','Swahili','Swedish','Turkish'];
+const M = [
+  {id:'minimax-h3',cat:'video',name:'MiniMax H3',maker:'MiniMax',params:'33B',date:'Aug 2026',variants:[{p:'BF16',gb:80},{p:'FP8',gb:44}],lic:'limited',license:'MiniMax H3 Community License',licNote:'Free commercial use under $20M yearly revenue. Self-hosting is not licensed in the US, EU, UK or South Korea.',tags:['top'],blurb:'Text and image to video with native stereo sound, up to 15 seconds. The open weights render up to 768p locally.',steps:30,q:'MiniMax-H3',opts:{dur:[5,10,15],res:['768p'],audio:true}},
+  {id:'ltx-25',cat:'video',name:'LTX-2.5',maker:'Lightricks',params:'22B',date:'Aug 2026',variants:[{p:'BF16',gb:52},{p:'FP8',gb:30}],lic:'limited',license:'LTX open-weights license',licNote:'Source-available, not OSI open source. Read the terms before commercial use.',tags:[],blurb:'Picture and sound in one pass, with native multi-shot sequences. The fastest of the large video models.',steps:8,q:'LTX-2.5',opts:{dur:[5,10],res:['720p','1080p'],audio:true}},
+  {id:'wan22',cat:'video',name:'Wan 2.2 A14B',maker:'Alibaba Wan',params:'27B MoE · 14B active',date:'Jul 2025',variants:[{p:'BF16',gb:64},{p:'FP8',gb:34}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Text and image to video with precise camera and lighting control. Two expert models split the denoising work.',steps:40,q:'Wan2.2',opts:{dur:[5],res:['480p','720p'],audio:false}},
+  {id:'wan22-animate',cat:'video',name:'Wan 2.2 Animate',maker:'Alibaba Wan',params:'14B',date:'Sep 2025',variants:[{p:'BF16',gb:40},{p:'FP8',gb:24}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Motion swap. Drive a character photo with the movement from a reference clip, or replace the person in a video.',steps:20,q:'Wan2.2-Animate',needsRef:true,opts:{dur:[5],res:['720p'],audio:false}},
+  {id:'hunyuanvideo-15',cat:'video',name:'HunyuanVideo 1.5',maker:'Tencent Hunyuan',params:'8.3B',date:'Nov 2025',variants:[{p:'BF16',gb:28},{p:'FP8',gb:16}],lic:'limited',license:'Tencent Hunyuan Community License',licNote:'Commercial use allowed with conditions. Not licensed in the EU, UK or South Korea.',tags:[],blurb:'Small enough for a 24 GB card, with strong faces and motion for its size.',steps:50,q:'HunyuanVideo-1.5',opts:{dur:[5,10],res:['480p','720p'],audio:false}},
+
+  {id:'flux2-dev',cat:'image',name:'FLUX.2 [dev]',maker:'Black Forest Labs',params:'32B',date:'Nov 2025',variants:[{p:'BF16',gb:90},{p:'FP8',gb:48}],lic:'nc',license:'FLUX [dev] Non-Commercial License',licNote:'Free for personal and research use. Commercial use needs a license from Black Forest Labs.',tags:[],blurb:'Detailed, photoreal images and editing from up to 10 reference images.',steps:28,q:'FLUX.2-dev'},
+  {id:'qwen-image-21',cat:'image',name:'Qwen-Image-2.1',maker:'Alibaba Qwen',params:'7B + 8B encoder',date:'Sep 2026',variants:[{p:'BF16',gb:34},{p:'FP8',gb:18}],lic:'nc',license:'Qwen Research License',licNote:'Research and evaluation only. Commercial use needs a paid license.',tags:['top'],blurb:'Generation and editing in one model, with transparent backgrounds and edits across up to 10 images. Excellent text rendering.',steps:8,q:'Qwen-Image-2.1'},
+  {id:'qwen-image',cat:'image',name:'Qwen-Image',maker:'Alibaba Qwen',params:'20B',date:'Aug 2025',variants:[{p:'BF16',gb:58},{p:'FP8',gb:30}],lic:'open',license:'Apache 2.0',tags:[],blurb:'The strongest Apache-licensed model for posters, packaging and anything with words in it. Pairs with Qwen-Image-Edit.',steps:30,q:'Qwen-Image'},
+  {id:'z-image-turbo',cat:'image',name:'Z-Image Turbo',maker:'Alibaba Tongyi',params:'6B',date:'Nov 2025',variants:[{p:'BF16',gb:16},{p:'FP8',gb:10}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Photoreal images in 8 steps. The fastest good model here, and it runs on almost any card.',steps:8,q:'Z-Image-Turbo'},
+  {id:'flux2-klein',cat:'image',name:'FLUX.2 [klein] 4B',maker:'Black Forest Labs',params:'4B',date:'Jan 2026',variants:[{p:'BF16',gb:13}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Small, quick FLUX for drafts, thumbnails and batch jobs.',steps:8,q:'FLUX.2-klein'},
+
+  {id:'trellis2',cat:'3d',name:'TRELLIS.2',maker:'Microsoft',params:'4B',date:'Dec 2025',variants:[{p:'BF16',gb:24}],lic:'open',license:'MIT',tags:[],blurb:'One image to a 3D asset with PBR materials, at up to 1536³ resolution, under the permissive MIT license.',steps:25,q:'TRELLIS.2',opts:{tex:true}},
+  {id:'hunyuan3d-21',cat:'3d',name:'Hunyuan3D 2.1',maker:'Tencent Hunyuan',params:'3.3B shape + 2B paint',date:'Jun 2025',variants:[{p:'Shape + paint',gb:29},{p:'Shape only',gb:10}],lic:'limited',license:'Tencent Hunyuan Community License',licNote:'Commercial use allowed with conditions. Not licensed in the EU, UK or South Korea.',tags:[],blurb:'Clean, production-ready meshes with physically based textures. Run shape only to save VRAM.',steps:30,q:'Hunyuan3D-2.1',opts:{tex:true}},
+  {id:'triposr',cat:'3d',name:'TripoSR',maker:'Tripo AI × Stability AI',params:'Under 1B',date:'Mar 2024',variants:[{p:'FP16',gb:6}],lic:'open',license:'MIT',tags:[],blurb:'A rough mesh from one image in under a second. Good for blocking out a scene.',steps:1,q:'TripoSR',opts:{tex:false}},
+
+  {id:'chatterbox-ml',cat:'speech',name:'Chatterbox Multilingual V3',maker:'Resemble AI',params:'0.5B',date:'Jun 2026',variants:[{p:'FP16',gb:5}],lic:'open',license:'MIT',tags:['he'],blurb:'23 languages including Hebrew, voice cloning from a short clip, and an emotion intensity control. Outputs carry an inaudible watermark.',licNote:'Hebrew sounds best when vowel marks are added first with the Dicta diacritizer.',steps:1,q:'chatterbox-multilingual',langs:CB_LANGS},
+  {id:'step-audio-editx',cat:'speech',name:'Step-Audio-EditX',maker:'StepFun',params:'3B',date:'Nov 2025',variants:[{p:'BF16',gb:12}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Speech you can edit after it is generated: change the emotion or speaking style, or add breaths and laughter.',steps:1,q:'Step-Audio-EditX',langs:['English','Chinese']},
+  {id:'kokoro',cat:'speech',name:'Kokoro 82M',maker:'hexgrad',params:'82M',date:'Jan 2025',variants:[{p:'FP32',gb:1}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Tiny and very fast. Clean narration voices that run even without a GPU.',steps:1,q:'Kokoro-82M',langs:['English','Chinese','French','Hindi','Italian','Japanese','Portuguese','Spanish']},
+  {id:'ace-step-15',cat:'music',name:'ACE-Step 1.5',maker:'ACE Studio × StepFun',params:'3.5B',date:'Jan 2026',variants:[{p:'BF16',gb:8}],lic:'open',license:'MIT',tags:[],blurb:'Full songs with vocals and lyrics in seconds, trained on licensed music. Supports LoRA styles.',steps:27,q:'ACE-Step'},
+
+  {id:'qwen38-27b',cat:'chat',name:'Qwen3.8-27B',maker:'Alibaba Qwen',params:'27B dense',date:'Aug 2026',variants:[{p:'BF16',gb:58},{p:'FP8',gb:32},{p:'Q4',gb:19}],lic:'open',license:'Apache 2.0',tags:['top'],blurb:'The strongest open model for its size. Reads text, images and video, with a 262K-token context window.',ctx:262144,q:'Qwen3.8-27B'},
+  {id:'gpt-oss-120b',cat:'chat',name:'gpt-oss-120b',maker:'OpenAI',params:'117B MoE · 5.1B active',date:'Aug 2025',variants:[{p:'MXFP4',gb:66}],lic:'open',license:'Apache 2.0',tags:[],blurb:'A large reasoning model that fits on one 80 GB card, with adjustable reasoning effort and built-in tool use.',ctx:131072,q:'gpt-oss-120b'},
+  {id:'qwen3-coder-next',cat:'chat',name:'Qwen3-Coder-Next',maker:'Alibaba Qwen',params:'80B MoE · 3B active',date:'2026',variants:[{p:'FP8',gb:85},{p:'Q4',gb:48}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Built for coding agents. Very fast, since only 3B parameters run per token.',ctx:262144,q:'Qwen3-Coder-Next'},
+  {id:'gpt-oss-20b',cat:'chat',name:'gpt-oss-20b',maker:'OpenAI',params:'21B MoE · 3.6B active',date:'Aug 2025',variants:[{p:'MXFP4',gb:16}],lic:'open',license:'Apache 2.0',tags:[],blurb:'A small, quick reasoning model for 16 GB cards and laptops.',ctx:131072,q:'gpt-oss-20b'},
+];
+const byId = Object.fromEntries(M.map(m => [m.id, m]));
+
+/* Free API providers. Limits come from provider pages and third-party trackers as of Nov 2026 and change often. */
+const PROV = {
+  groq:{name:'Groq', by:'GroqCloud', cats:['chat'], models:'Qwen3.8-27B, gpt-oss-120b, gpt-oss-20b', limit:'30 requests/min, 1,000 requests/day and 200K tokens/day per model', key:'Free API key, no card', blurb:'Runs the same open chat models from this library on very fast hardware.', url:'https://console.groq.com/docs/rate-limits'},
+  gemini:{name:'Gemini API', by:'Google AI Studio', cats:['chat','speech'], models:'Gemma 4, Gemini 3.5 Flash-Lite, Gemini 3.8 Flash, Gemini 3.8 Flash TTS', limit:'Gemma 4: 14,400 requests/day. Flash-Lite: 500/day. 3.8 Flash: 20/day. Set per project in AI Studio', key:'Free API key, no card', blurb:'The biggest free daily allowance here. Gemma 4, an open model, gets about 14,400 requests a day. Image and video generation are paid only.', note:'On the free tier, Google may use your prompts to improve its products.', url:'https://ai.google.dev/gemini-api/docs/rate-limits'},
+  openrouter:{name:'OpenRouter', by:'OpenRouter', cats:['chat'], models:'A changing set of free models, including MiniMax M3', limit:'20 requests/min and 50 requests/day (1,000/day after a one-time $10 top-up)', key:'Free API key', blurb:'One API for many free open chat models. The free list changes, so pin the model you rely on.', url:'https://openrouter.ai/blog/tutorials/free-llm-apis-compared/'},
+  pollinations:{name:'Pollinations', run:true, by:'Pollinations.AI', cats:['image','chat'], models:'FLUX images, and gpt-oss-20b for chat', limit:'About one image every 45 seconds without an account', key:'No key for the basic endpoint', blurb:'Free image generation with no signup. A free account removes the watermark and raises the limit.', url:'https://pollinations.ai'},
+  cloudflare:{name:'Workers AI', by:'Cloudflare', cats:['chat','image','speech'], models:'Open text, image and speech models', limit:'10,000 neurons/day shared across all models', key:'Free account and API token', blurb:'A daily free allowance across many open models. Some heavy models moved to the paid plan in July 2026.', url:'https://developers.cloudflare.com/workers-ai/platform/pricing/'},
+  hf:{name:'Hugging Face Spaces', run:true, by:'ZeroGPU', cats:['video','image','3d','speech','music'], models:'Demo Spaces for many open models in this library', limit:'A few GPU minutes a day (reports range from 3.5 to 5)', key:'Free account', blurb:'The only free way to try open video and 3D models without your own GPU. One video clip can use most of the daily quota.', url:'https://huggingface.co/docs/hub/spaces-zerogpu'},
+};
+const FREE_OPTS = [
+  {id:'f-hf-h3', cat:'video', prov:'hf', name:'MiniMax H3 on HF Spaces', base:'minimax-h3', run:'h3', limit:'Uses free ZeroGPU minutes: about one short clip a day without an account. Takes one to three minutes.'},
+  {id:'f-poll-flux', cat:'image', prov:'pollinations', name:'FLUX on Pollinations', base:'flux2-klein', run:'pollinations', limit:'No account needed. About one image every 45 seconds, with a small watermark.'},
+  {id:'f-hf-zimage', cat:'image', prov:'hf', name:'Z-Image Turbo on HF Spaces', base:'z-image-turbo', run:'zimage', limit:'Uses free ZeroGPU minutes. Sharper than Pollinations, no watermark.'},
+  {id:'f-cf-image', cat:'image', prov:'cloudflare', name:'Image models on Workers AI', base:'z-image-turbo'},
+  {id:'f-hf-3d', cat:'3d', prov:'hf', name:'Hunyuan3D 2.1 on HF Spaces', base:'hunyuan3d-21', run:'hunyuan3d', limit:'Uses free ZeroGPU minutes. Add a photo with +, or describe the object and FLUX draws it first.'},
+  {id:'f-hf-chatterbox', cat:'speech', prov:'hf', name:'Chatterbox on HF Spaces', base:'chatterbox-ml', run:'chatterbox', limit:'Uses free ZeroGPU minutes. Speaks Hebrew. Up to 300 characters per clip.'},
+  {id:'f-gemini-tts', cat:'speech', prov:'gemini', name:'Gemini 3.8 Flash TTS', thumb:'kokoro', langs:['Auto-detect']},
+  {id:'f-hf-ace', cat:'music', prov:'hf', name:'ACE-Step on HF Spaces', base:'ace-step-15'},
+  {id:'f-poll-oss', cat:'chat', prov:'pollinations', name:'gpt-oss-20b on Pollinations', base:'gpt-oss-20b', run:'pollchat', limit:'No account needed.'},
+  {id:'f-gemma4', cat:'chat', prov:'gemini', name:'Gemma 4 on Gemini API', thumb:'gpt-oss-20b', limit:'30 requests/min, 14,400 requests/day'},
+  {id:'f-gemini-lite', cat:'chat', prov:'gemini', name:'Gemini 3.5 Flash-Lite', thumb:'gpt-oss-20b', limit:'15 requests/min, 500 requests/day'},
+  {id:'f-groq-qwen', cat:'chat', prov:'groq', name:'Qwen3.8-27B on Groq', base:'qwen38-27b'},
+  {id:'f-groq-oss', cat:'chat', prov:'groq', name:'gpt-oss-120b on Groq', base:'gpt-oss-120b'},
+  {id:'f-gemini-flash', cat:'chat', prov:'gemini', name:'Gemini 3.8 Flash', thumb:'gpt-oss-20b', limit:'5 requests/min, 20 requests/day'},
+  {id:'f-or-minimax', cat:'chat', prov:'openrouter', name:'MiniMax M3 on OpenRouter', thumb:'gpt-oss-20b', limit:'Free variant: 20 requests/min, 50 requests/day'},
+  {id:'f-openrouter', cat:'chat', prov:'openrouter', name:'OpenRouter free models', thumb:'gpt-oss-20b'},
+];
+const freeById = Object.fromEntries(FREE_OPTS.map(f => [f.id, f]));
+const anyById = id => byId[id] || freeById[id];
+const THUMB_DEFAULT = {video:'wan22', image:'z-image-turbo', '3d':'trellis2', speech:'kokoro', music:'ace-step-15', chat:'gpt-oss-20b'};
+const thumbOf = (f, cat) => f.thumb || f.base || THUMB_DEFAULT[cat];
+const CAT_LABEL = {video:'Video', image:'Image', '3d':'3D', speech:'Speech', music:'Music', chat:'Chat'};
+const CAT_ORDER = ['video','image','3d','speech','music','chat'];
+const studioFor = c => c === 'speech' || c === 'music' ? 'audio' : c;
+
+const EXAMPLES = [
+  {id:'ex1',cat:'video',model:'minimax-h3',p:'FP8',prompt:'Handheld shot along a fishing pier at golden hour, gulls lifting off the railing, waves slapping the pilings',opts:{duration:'10s',aspect:'16:9',res:'768p',audio:'Audio on'},seed:11,pal:0},
+  {id:'ex2',cat:'video',model:'ltx-25',p:'FP8',prompt:'Rain on a neon ramen stall at night, slow push-in, steam drifting through the light',opts:{duration:'10s',aspect:'9:16',res:'1080p',audio:'Audio on'},seed:23,pal:2},
+  {id:'ex3',cat:'video',model:'wan22',p:'BF16',prompt:'Drone glide over terraced rice fields at sunrise, low mist in the valleys',opts:{duration:'5s',aspect:'16:9',res:'720p'},seed:37,pal:3},
+  {id:'ex4',cat:'image',model:'flux2-dev',p:'BF16',prompt:'Product photo of a ceramic pour-over coffee set on travertine, soft window light, 50mm',opts:{aspect:'4:5',count:'1 image'},seed:41,pal:4},
+  {id:'ex5',cat:'image',model:'qwen-image-21',p:'BF16',prompt:'Risograph poster that says NIGHT MARKET in bold condensed type, two-color print',opts:{aspect:'3:4',count:'1 image'},seed:53,pal:6},
+  {id:'ex6',cat:'image',model:'z-image-turbo',p:'BF16',prompt:'Desert highway at dusk, a lone motel sign flickering on',opts:{aspect:'16:9',count:'4 images'},seed:67,pal:0},
+  {id:'ex7',cat:'3d',model:'trellis2',p:'BF16',prompt:'Low-poly desert fox, game-ready',opts:{texture:'PBR textures',format:'GLB'},seed:71},
+  {id:'ex8',cat:'3d',model:'hunyuan3d-21',p:'Shape + paint',prompt:'Weathered bronze garden lantern',opts:{texture:'PBR textures',format:'GLB'},seed:89},
+  {id:'ex9',cat:'speech',model:'chatterbox-ml',p:'FP16',prompt:'ברוכים הבאים לסטודיו. כל מודל כאן רץ על הכרטיס הגרפי שלכם.',opts:{lang:'Hebrew',voice:'Noa',emotion:'Warm'},seed:97},
+  {id:'ex10',cat:'speech',model:'step-audio-editx',p:'BF16',prompt:'Okay, the render finished, and it actually looks good.',opts:{lang:'English',voice:'Ari',emotion:'Excited'},seed:101},
+  {id:'ex11',cat:'music',model:'ace-step-15',p:'BF16',prompt:'Lo-fi hip hop, warm Rhodes chords, vinyl crackle, 80 bpm',opts:{duration:'60s',vocals:'Instrumental'},seed:113},
+].map(g => ({...g, example:true, status:'done'}));
+
+/* ---------- storage ---------- */
+const store = {
+  get(k, d){ try { const v = localStorage.getItem('wr:' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v){ try { localStorage.setItem('wr:' + k, JSON.stringify(v)); } catch {} },
+};
+const DEFAULT_SEL = {video:'minimax-h3', image:'flux2-dev', '3d':'trellis2', speech:'chatterbox-ml', music:'ace-step-15', chat:'f-poll-oss'};
+const S = {
+  view:'explore',
+  gpu: GPUS.some(g => g.gb === store.get('gpu', 96)) ? store.get('gpu', 96) : 96,
+  sel: Object.assign({}, DEFAULT_SEL),
+  prec: {},
+  opts: {},
+  drafts: {},
+  audioMode: store.get('audioMode', 'speech') === 'music' ? 'music' : 'speech',
+  ref: null,
+  filters: {cat:'all', fit:false, commercial:false},
+  chat: [],
+};
+const savedSel = store.get('sel', {});
+for (const k in savedSel) { const x = anyById(savedSel[k]); if (x && x.cat === k && (byId[savedSel[k]] || k === 'chat')) S.sel[k] = savedSel[k]; }
+S.runOn = {video:'free', image:'free', '3d':'free', speech:'free', music:'free'};
+const savedRun = store.get('runOn', {});
+for (const k in savedRun) if (savedRun[k] === 'free' || savedRun[k] === 'gpu') S.runOn[k] = savedRun[k];
+S.selFree = {video:'f-hf-h3', image:'f-poll-flux', '3d':'f-hf-3d', speech:'f-hf-chatterbox', music:'f-hf-ace'};
+const savedFree = store.get('selFree', {});
+for (const k in savedFree) if (freeById[savedFree[k]] && freeById[savedFree[k]].cat === k) S.selFree[k] = savedFree[k];
+
+/* Claude, through the page's sample capability: the one free API this page can call directly. */
+let SAMPLE = null;
+const DENY = ['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'];
+function hideClaude(){ SAMPLE = null; document.querySelectorAll('.needs-claude').forEach(el => el.hidden = true); }
+try {
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('sample').then(fn => { if (fn) { SAMPLE = fn; document.querySelectorAll('.needs-claude').forEach(el => el.hidden = false); } }).catch(() => {});
+  }
+} catch {}
+function sampleErrorCopy(e){
+  switch (e && e.code) {
+    case 'not_granted': case 'sampling_disabled': case 'not_declared': case 'capability_disabled': case 'capability_removed': return 'Claude is turned off for this page, so it cannot answer here.';
+    case 'rate_limited': return 'Too many requests right now, or your Claude usage limit was reached. Try again in a little while.';
+    case 'session_expired': return 'Your Claude session expired. Sign in again, then try again.';
+    case 'refused': return 'Claude declined that request. Try rephrasing it.';
+    case 'prompt_too_large': return 'That is too long to send. Start a shorter conversation.';
+    case 'empty_completion': return 'Claude returned an empty answer. Try asking differently.';
+    default: return 'Claude could not be reached. Try again.';
+  }
+}
+let userGens = (store.get('gens', []) || []).filter(g => g && anyById(g.model));
+userGens.forEach(g => { if (g.real && g.status === 'working') { g.status = 'error'; g.error = 'Stopped when the app closed. Run it again.'; } });
+
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const gpuInfo = () => GPUS.find(g => g.gb === S.gpu);
+const minGB = m => Math.min(...m.variants.map(v => v.gb));
+const maxGB = m => Math.max(...m.variants.map(v => v.gb));
+const bestVariant = m => m.variants.find(v => v.gb <= S.gpu) || m.variants[m.variants.length - 1];
+const curVariant = m => m.variants.find(v => v.p === S.prec[m.id]) || bestVariant(m);
+const fitClass = gb => gb <= S.gpu ? 'fit-ok' : 'fit-over';
+function hash(s){ let h = 2166136261; for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(seed){ let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const tokCache = {};
+const tok = n => tokCache[n] || (tokCache[n] = getComputedStyle(document.documentElement).getPropertyValue(n).trim() || '#888');
+function rgbOf(c){ if (Array.isArray(c)) return c; const h = c.replace('#',''); const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function mixA(a, b, t){ const A = rgbOf(a), B = rgbOf(b); return A.map((v, i) => v + (B[i] - v) * t); }
+const css = (c, a = 1) => { const [r,g,b] = rgbOf(c).map(Math.round); return a >= 1 ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${a})`; };
+let toastTimer;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 3600); }
+const DPR = () => Math.min(2, window.devicePixelRatio || 1);
+function fit(c){ const r = c.getBoundingClientRect(); const d = DPR(); const w = Math.max(2, Math.round(r.width * d)), h = Math.max(2, Math.round(r.height * d)); if (c.width !== w || c.height !== h) { c.width = w; c.height = h; } return c.getContext('2d'); }
+function rr(ctx, x, y, w, h, r){ ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); ctx.fill(); }
+
+/* ---------- procedural art ---------- */
+const NOISE = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'); const id = x.createImageData(128, 128); for (let i = 0; i < id.data.length; i += 4) { id.data[i] = Math.random() * 255; id.data[i+1] = Math.random() * 255; id.data[i+2] = Math.random() * 255; id.data[i+3] = 255; } x.putImageData(id, 0, 0); return c; })();
+const PALS = [
+  ['#101a33','#e2724a','#ffd9a8'], ['#06201f','#1f9c8e','#c9fff4'], ['#1a0b24','#c8346f','#ffc6dc'],
+  ['#0c1408','#7aa33a','#efffc8'], ['#1c1206','#c98a3a','#fff0cf'], ['#0a1022','#4f7cf0','#dbe6ff'], ['#1d0c0a','#e0553a','#ffd2c2'],
+];
+function noiseFill(ctx, x, y, w, h, a, op){ ctx.save(); ctx.globalAlpha = a; if (op) ctx.globalCompositeOperation = op; const ox = Math.random() * 128 | 0, oy = Math.random() * 128 | 0; ctx.translate(-ox, -oy); ctx.fillStyle = ctx.createPattern(NOISE, 'repeat'); ctx.fillRect(x + ox, y + oy, w, h); ctx.restore(); }
+function scene(ctx, x, y, w, h, seed, t, palIdx){
+  const r = rng(seed); const pi = Math.floor(r() * PALS.length); const [deep, glow, light] = PALS[palIdx ?? pi];
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  const hz = y + h * (0.5 + r() * 0.16);
+  const g = ctx.createLinearGradient(0, y, 0, hz);
+  g.addColorStop(0, css(deep)); g.addColorStop(0.55, css(mixA(deep, glow, .5))); g.addColorStop(1, css(glow));
+  ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  const sx = x + w * (0.2 + r() * 0.6) + Math.sin(t * .25) * w * .02, sy = hz - h * (0.06 + r() * 0.16) - Math.sin(t * .18) * h * .015, sr = Math.min(w, h) * (0.05 + r() * 0.06);
+  const rg = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 6);
+  rg.addColorStop(0, css(light, .9)); rg.addColorStop(.25, css(light, .32)); rg.addColorStop(1, css(light, 0));
+  ctx.fillStyle = rg; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = css(light); ctx.beginPath(); ctx.arc(sx, sy, sr, 0, 7); ctx.fill();
+  const n = 3 + Math.floor(r() * 2);
+  for (let i = 0; i < n; i++) {
+    const k = i / (n - 1);
+    const base = hz - h * .06 + k * h * (.17 + r() * .06);
+    const amp = h * (.05 + r() * .07) * (1 - k * .35);
+    const f1 = 1 + r() * 2.5, f2 = 3 + r() * 5, f3 = 9 + r() * 10, p1 = r() * 6.3, p2 = r() * 6.3, p3 = r() * 6.3, sp = t * (.01 + k * .045);
+    ctx.fillStyle = css(mixA(mixA(deep, glow, .4), [5,6,5], .2 + k * .72));
+    ctx.beginPath(); ctx.moveTo(x, y + h);
+    for (let s = 0; s <= 72; s++) { const u = s / 72; const yy = base - amp * (.6 * Math.sin((u + sp) * f1 * 6.283 + p1) + .3 * Math.sin((u + sp) * f2 * 6.283 + p2) + .1 * Math.sin((u + sp) * f3 * 6.283 + p3)); ctx.lineTo(x + u * w, yy); }
+    ctx.lineTo(x + w, y + h); ctx.closePath(); ctx.fill();
+    if (i === 0) { const hg = ctx.createLinearGradient(0, base - amp, 0, base + h * .12); hg.addColorStop(0, css(glow, 0)); hg.addColorStop(1, css(glow, .22)); ctx.fillStyle = hg; ctx.fillRect(x, base - amp, w, h * .2); }
+  }
+  const vg = ctx.createRadialGradient(x + w/2, y + h/2, Math.min(w, h) * .3, x + w/2, y + h/2, Math.max(w, h) * .75);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.45)'); ctx.fillStyle = vg; ctx.fillRect(x, y, w, h);
+  noiseFill(ctx, x, y, w, h, .05, 'overlay');
+  ctx.restore();
+}
+const ICO = (() => {
+  const nrm = p => { const l = Math.hypot(p[0], p[1], p[2]); return [p[0]/l, p[1]/l, p[2]/l]; };
+  const t = (1 + Math.sqrt(5)) / 2;
+  const v = [[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]].map(nrm);
+  let f = [[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]];
+  for (let s = 0; s < 2; s++) {
+    const cache = new Map();
+    const mid = (a, b) => { const k = a < b ? a + '_' + b : b + '_' + a; if (cache.has(k)) return cache.get(k); v.push(nrm([(v[a][0]+v[b][0])/2, (v[a][1]+v[b][1])/2, (v[a][2]+v[b][2])/2])); cache.set(k, v.length - 1); return v.length - 1; };
+    const nf = []; for (const [a,b,c] of f) { const ab = mid(a,b), bc = mid(b,c), ca = mid(c,a); nf.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca]); } f = nf;
+  }
+  return {v, f};
+})();
+function mesh(ctx, w, h, seed, t, opts = {}){
+  const r = rng(seed);
+  const f1 = 1 + r() * 2.2, f2 = 1 + r() * 2.2, f3 = 1 + r() * 2.2, ph = r() * 6, amp = .1 + r() * .22, sq = .72 + r() * .45;
+  const ang = t * .55 + r() * 6, tilt = -.38;
+  const bg = rgbOf(tok('--surface-3')), bg2 = rgbOf(tok('--bg'));
+  const g = ctx.createRadialGradient(w/2, h*.42, 0, w/2, h*.42, Math.max(w, h) * .75);
+  g.addColorStop(0, css(bg)); g.addColorStop(1, css(bg2)); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  const s = Math.min(w, h) * (opts.scale || .29), cx = w / 2, cy = h * (opts.cy || .47);
+  // floor grid
+  ctx.save(); ctx.strokeStyle = css(tok('--line-2'), .5); ctx.lineWidth = Math.max(1, DPR() * .6);
+  const fy = cy + s * 1.15;
+  for (let i = 0; i < 7; i++) { const yy = fy + (i * i) * s * .028; ctx.globalAlpha = .55 - i * .07; ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(w, yy); ctx.stroke(); }
+  for (let i = -8; i <= 8; i++) { ctx.globalAlpha = .25; ctx.beginPath(); ctx.moveTo(cx + i * s * .18, fy); ctx.lineTo(cx + i * s * .62, h); ctx.stroke(); }
+  ctx.restore();
+  const sh = ctx.createRadialGradient(cx, fy, 0, cx, fy, s * 1.1); sh.addColorStop(0, 'rgba(0,0,0,.55)'); sh.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.save(); ctx.translate(cx, fy); ctx.scale(1, .22); ctx.translate(-cx, -fy); ctx.fillStyle = sh; ctx.beginPath(); ctx.arc(cx, fy, s * 1.1, 0, 7); ctx.fill(); ctx.restore();
+  const ca = Math.cos(ang), sa = Math.sin(ang), ct = Math.cos(tilt), st = Math.sin(tilt);
+  const P = ICO.v.map(([x, y, z]) => {
+    const d = 1 + amp * Math.sin(x * f1 * 2 + ph) * Math.sin(y * f2 * 2 + ph * 1.3) * Math.cos(z * f3 * 2);
+    const X = x * d, Y = y * d * sq, Z = z * d;
+    const X2 = X * ca + Z * sa, Z2 = -X * sa + Z * ca;
+    const Y3 = Y * ct - Z2 * st, Z3 = Y * st + Z2 * ct;
+    return [X2, Y3, Z3];
+  });
+  const L = (() => { const l = [-.45, .62, .64]; const n = Math.hypot(...l); return l.map(v => v / n); })();
+  const dark = rgbOf('#2b2e27'), lightc = rgbOf('#dfe3d4'), acc = rgbOf(tok('--accent'));
+  const faces = [];
+  for (const [a, b, c] of ICO.f) {
+    const A = P[a], B = P[b], C = P[c];
+    const u = [B[0]-A[0], B[1]-A[1], B[2]-A[2]], v = [C[0]-A[0], C[1]-A[1], C[2]-A[2]];
+    let n = [u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]];
+    const nl = Math.hypot(...n) || 1; n = n.map(q => q / nl);
+    const cen = [(A[0]+B[0]+C[0])/3, (A[1]+B[1]+C[1])/3, (A[2]+B[2]+C[2])/3];
+    if (n[0]*cen[0] + n[1]*cen[1] + n[2]*cen[2] < 0) n = n.map(q => -q);
+    if (n[2] < -.15) continue;
+    faces.push({A, B, C, n, z: cen[2]});
+  }
+  faces.sort((p, q) => p.z - q.z);
+  const pr = p => { const f = 3.2 / (3.2 - p[2]); return [cx + p[0] * s * f, cy - p[1] * s * f]; };
+  ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(.6, DPR() * .5);
+  for (const fc of faces) {
+    const diff = Math.max(0, fc.n[0]*L[0] + fc.n[1]*L[1] + fc.n[2]*L[2]);
+    const rim = Math.pow(1 - Math.max(0, fc.n[2]), 3);
+    let col = mixA(dark, lightc, .12 + .78 * diff); col = mixA(col, acc, rim * .55);
+    const [x1, y1] = pr(fc.A), [x2, y2] = pr(fc.B), [x3, y3] = pr(fc.C);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.lineTo(x3, y3); ctx.closePath();
+    ctx.fillStyle = css(col); ctx.strokeStyle = css(col); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = css(acc, .14); ctx.stroke();
+  }
+}
+function wave(ctx, w, h, seed, kind, prog = -1){
+  const r = rng(seed); ctx.fillStyle = tok('--surface-2'); ctx.fillRect(0, 0, w, h);
+  const d = DPR(), bw = Math.max(2, 3 * d), gap = Math.max(2, 2.5 * d);
+  const n = Math.max(8, Math.floor((w - 32 * d) / (bw + gap))); const x0 = (w - (n * (bw + gap) - gap)) / 2; const mid = h * .46;
+  const gates = []; if (kind === 'speech') { let i = 0; while (i < n) { const len = 4 + Math.floor(r() * 14); gates.push([i, i + len]); i += len + 1 + Math.floor(r() * 5); } }
+  const off = seed % 7;
+  for (let i = 0; i < n; i++) {
+    let a;
+    if (kind === 'speech') { const gt = gates.find(q => i >= q[0] && i < q[1]); a = gt ? Math.sin(Math.PI * (i - gt[0] + .5) / (gt[1] - gt[0])) * (.35 + .65 * r()) : .04 + .03 * r(); }
+    else { const beat = i % 8 === 0 ? 1 : i % 4 === 0 ? .78 : .5; a = (.35 + .45 * Math.abs(Math.sin(i * .07 + off))) * beat * (.7 + .3 * r()); }
+    const bh = Math.max(2 * d, a * h * .58);
+    ctx.fillStyle = prog < 0 ? tok('--muted') : (i / n <= prog ? tok('--accent') : tok('--line-2'));
+    rr(ctx, x0 + i * (bw + gap), mid - bh / 2, bw, bh, bw / 2);
+  }
+}
+function chatArt(ctx, w, h, seed){
+  const r = rng(seed); ctx.fillStyle = tok('--surface-2'); ctx.fillRect(0, 0, w, h);
+  const pad = w * .1; let y = h * .14; let right = false; const lh = Math.max(4, h * .05);
+  while (y < h * .84) {
+    const lines = 1 + Math.floor(r() * 3), bwid = w * (.38 + r() * .36);
+    for (let l = 0; l < lines && y < h * .9; l++) { const lw = l === lines - 1 ? bwid * (.35 + r() * .65) : bwid; ctx.fillStyle = right ? tok('--accent') : tok('--line-2'); rr(ctx, right ? w - pad - lw : pad, y, lw, lh, lh / 2); y += lh * 1.6; }
+    y += lh * 1.1; right = !right;
+  }
+}
+function field(ctx, w, h, t){
+  ctx.fillStyle = tok('--surface'); ctx.fillRect(0, 0, w, h);
+  const step = Math.max(14 * DPR(), w / 72); const acc = tok('--accent'), dim = tok('--dim');
+  for (let y = step / 2; y < h; y += step) for (let x = step / 2; x < w; x += step) {
+    const nx = x / w, ny = y / h;
+    const z = Math.sin(nx * 6.5 + t * .5) * Math.cos(ny * 4.6 - t * .35) + .55 * Math.sin((nx * 1.3 + ny) * 10 + t * .8);
+    const v = Math.max(0, Math.min(1, (z + 1.55) / 3.1)); const v2 = v * v;
+    const s = step * (.08 + .5 * v2);
+    ctx.globalAlpha = .12 + .88 * v2; ctx.fillStyle = v > .8 ? acc : dim;
+    ctx.fillRect(x - s / 2, y - s / 2, s, s);
+  }
+  ctx.globalAlpha = 1;
+}
+function heroWave(ctx, w, h, t){
+  ctx.fillStyle = tok('--surface'); ctx.fillRect(0, 0, w, h);
+  const d = DPR(), bw = 5 * d, gap = 4 * d, n = Math.floor(w / (bw + gap)), mid = h * .42, acc = rgbOf(tok('--accent')), dim = rgbOf(tok('--line-2'));
+  for (let i = 0; i < n; i++) {
+    const u = i / n; const env = Math.sin(Math.PI * u);
+    const a = env * (.25 + .75 * Math.abs(Math.sin(i * .11 + t * 1.6) * Math.cos(i * .037 - t * .7)));
+    const bh = Math.max(3 * d, a * h * .5);
+    ctx.fillStyle = css(mixA(dim, acc, Math.min(1, a * 1.4)), .35 + .65 * a);
+    rr(ctx, i * (bw + gap), mid - bh / 2, bw, bh, bw / 2);
+  }
+}
+function framed(ctx, w, h, g, t){
+  ctx.fillStyle = tok('--surface-3'); ctx.fillRect(0, 0, w, h);
+  const [aw, ah] = (g.opts && g.opts.aspect || (g.cat === 'video' ? '16:9' : '1:1')).split(':').map(Number);
+  const ar = aw / ah || 1; let iw = w, ih = w / ar; if (ih > h) { ih = h; iw = h * ar; }
+  const x = (w - iw) / 2, y = (h - ih) / 2;
+  const count = parseInt(g.opts && g.opts.count) || 1;
+  if (count === 1) scene(ctx, x, y, iw, ih, g.seed, t, g.pal);
+  else {
+    const cols = 2, rows = count === 2 ? 1 : 2, gap = 2 * DPR();
+    let cw = (w - gap) / cols, ch = cw / ar; if (ch * rows + gap * (rows - 1) > h) { ch = (h - gap * (rows - 1)) / rows; cw = ch * ar; }
+    const tw = cw * cols + gap, th = ch * rows + gap * (rows - 1), ox = (w - tw) / 2, oy = (h - th) / 2;
+    for (let i = 0; i < count; i++) scene(ctx, ox + (i % cols) * (cw + gap), oy + Math.floor(i / cols) * (ch + gap), cw, ch, g.seed + i * 977, t, g.pal);
+  }
+}
+function paintModelThumb(ctx, w, h, m, t = 0){
+  const s = hash(m.id);
+  if (m.cat === 'video' || m.cat === 'image') scene(ctx, 0, 0, w, h, s, t);
+  else if (m.cat === '3d') mesh(ctx, w, h, s, t, {scale:.3});
+  else if (m.cat === 'chat') chatArt(ctx, w, h, s);
+  else wave(ctx, w, h, s, m.cat, -1);
+}
+
+/* ---------- animation registry ---------- */
+const anims = [];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.target._a) e.target._a.vis = e.isIntersecting; })) : null;
+function addAnim(c, fn, mode = 'static', hoverEl){
+  const a = {c, fn, mode, vis:true, hover:false, t:0}; c._a = a; anims.push(a); if (io) io.observe(c);
+  if (hoverEl) { hoverEl.addEventListener('pointerenter', () => a.hover = true); hoverEl.addEventListener('pointerleave', () => a.hover = false); }
+  try { fn(0); } catch (e) { console.error(e); }
+  return a;
+}
+function loop(ts){
+  const t = ts / 1000;
+  for (let i = anims.length - 1; i >= 0; i--) {
+    const a = anims[i];
+    if (!a.c.isConnected) { anims.splice(i, 1); if (io) io.unobserve(a.c); continue; }
+    if (document.hidden || !a.vis || a.mode === 'static' || reduce) continue;
+    if (a.mode === 'hover' && !a.hover) continue;
+    a.t = t; a.fn(t);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => anims.forEach(a => a.c.isConnected && a.fn(a.t)), 120); });
+
+/* ---------- icons ---------- */
+const I = {
+  caret:'<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  plus:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  clock:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  ratio:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 5V3h3M14 5V3h-3M2 11v2h3M14 11v2h-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  res:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5 7h2M5 9h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  sound:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 6v4h2.5l3.5 3V3L5 6z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 5.5a3.5 3.5 0 010 5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  chip:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2v2M10 2v2M6 12v2M10 12v2M2 6h2M2 10h2M12 6h2M12 10h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+  stack:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3h6.5A1.5 1.5 0 0114 4.5V11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  cube:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2l5.5 3v6L8 14l-5.5-3V5z M2.5 5L8 8l5.5-3M8 8v6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+  file:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2h5l3 3v9H4z M9 2v3h3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+  globe:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>',
+  voice:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><rect x="6" y="2" width="4" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 8a4.5 4.5 0 009 0M8 12.5V14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  mood:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 9.5c1.3 1.4 3.7 1.4 5 0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="6" cy="6.5" r=".9" fill="currentColor"/><circle cx="10" cy="6.5" r=".9" fill="currentColor"/></svg>',
+  play:'<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>',
+  cloud:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 12.5h7a3 3 0 00.4-6 4 4 0 00-7.7 1A2.5 2.5 0 004.5 12.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+  spark:'<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l1.6 4.2 4.4 1.6-4.4 1.6L8 13.1 6.4 8.9 2 7.3l4.4-1.6zM13 11l.6 1.4 1.4.6-1.4.6L13 15l-.6-1.4L11 13l1.4-.6z" fill="currentColor"/></svg>',
+  stop:'<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1.5" fill="currentColor"/></svg>',
+};
+
+/* ---------- shared bits ---------- */
+function gpuOptions(){ return GPUS.map(g => `<option value="${g.gb}"${g.gb === S.gpu ? ' selected' : ''}>${g.gb} GB · ${esc(g.card)}</option>`).join(''); }
+function tagsHTML(m){ return (m.tags || []).map(t => t === 'new' ? '<span class="tag tag-new">New</span>' : t === 'top' ? '<span class="tag tag-top">Top</span>' : t === 'he' ? '<span class="tag tag-he">עברית</span>' : '').join(''); }
+function licHTML(m){ const cls = m.lic === 'open' ? 'lic-open' : m.lic === 'nc' ? 'lic-nc' : 'lic-limited'; return `<span class="lic ${cls}" title="${esc(m.licNote || m.license)}">${esc(m.license)}</span>`; }
+function useModel(id){
+  const f = freeById[id];
+  if (f) {
+    if (f.cat === 'chat') { S.sel.chat = id; store.set('sel', S.sel); }
+    else { S.selFree[f.cat] = id; S.runOn[f.cat] = 'free'; store.set('selFree', S.selFree); store.set('runOn', S.runOn); }
+    if (f.cat === 'speech' || f.cat === 'music') { S.audioMode = f.cat; store.set('audioMode', S.audioMode); }
+    return;
+  }
+  const m = byId[id]; if (!m) return;
+  S.sel[m.cat] = id; store.set('sel', S.sel);
+  if (m.cat !== 'chat') { S.runOn[m.cat] = 'gpu'; store.set('runOn', S.runOn); }
+  if (m.cat === 'speech' || m.cat === 'music') { S.audioMode = m.cat; store.set('audioMode', S.audioMode); }
+}
+function freeSectionHTML(){
+  return `<section class="sec" aria-labelledby="h-free">
+    <div class="sec-head"><div style="display:grid;gap:8px"><h2 id="h-free" class="h-sec">Free APIs</h2><p class="muted" style="max-width:68ch">No GPU? These services run models for free within daily limits. Pollinations and Hugging Face run for real in this app. The others need your own API key and are not connected yet.</p></div></div>
+    <div class="pgrid">${Object.values(PROV).map(p => `<article class="pcard${p.run ? ' live' : ''}">
+      <div><h3>${esc(p.name)}${p.run ? ' <span class="tag tag-live">Works in the app</span>' : ''}</h3><p class="by">${esc(p.by)}</p></div>
+      <div class="cats">${p.cats.map(c => `<span class="tag">${CAT_LABEL[c]}</span>`).join('')}</div>
+      <p>${esc(p.blurb)}</p>
+      <dl><dt>Models</dt><dd>${esc(p.models)}</dd><dt>Free limit</dt><dd>${esc(p.limit)}</dd><dt>You need</dt><dd>${esc(p.key)}</dd></dl>
+      ${p.note ? `<p class="lic-note">${esc(p.note)}</p>` : ''}
+      ${p.url ? `<a class="lnk" href="${p.url}" target="_blank" rel="noopener">Limits and docs ↗</a>` : `<a class="lnk" href="#chat" data-use="f-claude">Chat with Claude →</a>`}
+    </article>`).join('')}</div>
+  </section>`;
+}
+function freeMeterHTML(f, kind){
+  const p = PROV[f.prov];
+  if (f.run) return `<span class="mono">FREE</span><span class="free-lim">${esc(p.name)} · runs for real</span><p class="note">${esc(f.limit || p.limit)}${f.prov === 'hf' ? (store.get('hfToken', '') ? ' Using your Hugging Face token.' : ' Add a free Hugging Face token in Settings for more GPU minutes.') : ''}</p>`;
+  return `<span class="mono">FREE API</span><span class="free-lim">${esc(p.name)} · ${esc(f.limit || p.limit)}</span><p class="note">You need: ${esc(p.key)}. This one is not connected in the app yet, so ${kind === 'chat' ? 'messages are not sent' : 'Generate shows a preview'}.</p>`;
+}
+
+/* ---------- EXPLORE ---------- */
+function viewExplore(){
+  const fit48 = M.filter(m => minGB(m) <= 48).length;
+  const nFull = M.filter(m => m.variants[0].gb <= S.gpu).length;
+  const nQuant = M.filter(m => m.variants[0].gb > S.gpu && minGB(m) <= S.gpu).length;
+  const nOver = M.filter(m => minGB(m) > S.gpu).length;
+  const feat = ['minimax-h3','ltx-25','qwen-image-21','qwen38-27b','hunyuan3d-21','chatterbox-ml'].map(id => byId[id]);
+  const featLine = {
+    'minimax-h3':'Video with stereo sound, up to 15 s',
+    'ltx-25':'Multi-shot video and audio in one pass',
+    'qwen-image-21':'Second-ranked open image model, with editing',
+    'qwen38-27b':'Chat, vision and video understanding',
+    'hunyuan3d-21':'Textured 3D meshes from one image',
+    'chatterbox-ml':'Speech in 23 languages, Hebrew included',
+  };
+  const count = c => M.filter(m => m.cat === c).length;
+  const cards = [
+    {k:'video', href:'#video', name:'Video', sub:`${count('video')} models · MiniMax H3, LTX-2.5, Wan 2.2`},
+    {k:'image', href:'#image', name:'Image', sub:`${count('image')} models · FLUX.2, Qwen-Image, Z-Image`},
+    {k:'3d', href:'#3d', name:'3D', sub:`${count('3d')} models · TRELLIS.2, Hunyuan3D`},
+    {k:'speech', href:'#audio', mode:'speech', name:'Voice', sub:`${count('speech')} models · Hebrew with Chatterbox`},
+    {k:'music', href:'#audio', mode:'music', name:'Music', sub:'ACE-Step 1.5 · songs with vocals'},
+    {k:'chat', href:'#chat', name:'Chat', sub:`${count('chat')} models · Qwen3.8, gpt-oss`},
+  ];
+  return `
+  <div class="wrap">
+    <section class="hero" aria-labelledby="h-hero">
+      <canvas id="hero-field" aria-hidden="true"></canvas>
+      <div class="hero-copy">
+        <p class="eyebrow">Open weights · runs on hardware you control</p>
+        <h1 id="h-hero" class="display d-xl">Every open model.<br><span class="hl">One studio.</span></h1>
+        <p class="lede">Video, image, 3D, voice and chat models you can download and run yourself. All ${M.length} fit in ${CAP} GB of VRAM, and ${fit48} of them fit on a single 48 GB card.</p>
+        <div class="cta-row"><a class="btn btn-accent btn-lg" href="#video">Start creating</a><a class="btn btn-ghost btn-lg" href="#models">Browse models</a></div>
+      </div>
+      <aside class="hero-card" aria-label="What fits on your card">
+        <p class="eyebrow">Sized for your card</p>
+        <label class="sr" for="gpu-hero">Your GPU</label>
+        <select id="gpu-hero" data-gpu>${gpuOptions()}</select>
+        <dl class="fitstats">
+          <div class="ok"><dt>Best quality</dt><dd>${nFull}</dd></div>
+          <div class="q"><dt>Quantized</dt><dd>${nQuant}</dd></div>
+          <div class="x"><dt>Too big</dt><dd>${nOver}</dd></div>
+        </dl>
+        <p class="hint">Best quality means the full-precision version (usually BF16) fits. Quantized means only the FP8 or 4-bit version fits.</p>
+      </aside>
+    </section>
+
+    <section class="sec" aria-labelledby="h-feat">
+      <div class="sec-head"><h2 id="h-feat" class="h-sec">New and notable</h2><a class="lnk" href="#models">All ${M.length} models →</a></div>
+      <div class="feat-grid">
+        ${feat.map(m => `<a class="feat" href="#${studioFor(m.cat)}" data-use="${m.id}"><canvas data-thumb="${m.id}" aria-hidden="true"></canvas><div><h3>${esc(m.name)} ${tagsHTML(m)}</h3><p>${esc(featLine[m.id])}</p></div></a>`).join('')}
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="h-studios">
+      <div class="sec-head"><h2 id="h-studios" class="h-sec">Studios</h2></div>
+      <div class="scards">
+        ${cards.map(c => `<a class="scard" href="${c.href}"${c.mode ? ` data-mode="${c.mode}"` : ''}><canvas data-art="${c.k}" aria-hidden="true"></canvas><div class="lab"><b>${c.name}</b><span>${esc(c.sub)}</span></div></a>`).join('')}
+      </div>
+    </section>
+
+    ${freeSectionHTML()}
+
+    <section class="sec" aria-labelledby="h-ladder">
+      <div class="sec-head"><div style="display:grid;gap:8px"><h2 id="h-ladder" class="h-sec">What fits on your card</h2><p class="muted" style="max-width:62ch">Estimated VRAM for each model, from its smallest version to full precision. The lime line is your ${S.gpu} GB ${esc(gpuInfo().card)}.</p></div></div>
+      <div class="ladder-box">
+        <div class="legend"><span><i class="sw-a"></i>Smallest version</span><span><i class="sw-b"></i>Extra for higher precision</span><span><i class="sw-c"></i>Your GPU</span></div>
+        ${ladderHTML()}
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="h-how">
+      <div class="sec-head"><h2 id="h-how" class="h-sec">How it runs</h2><span class="demo-pill">Free jobs run for real</span></div>
+      <ol class="steps">
+        <li><b>Pick a model and precision</b><p>The studio shows how much VRAM each version needs and picks the best one that fits your card.</p></li>
+        <li><b>Your GPU does the work</b><p>Image, video, 3D and audio jobs go to ComfyUI. Chat goes to an OpenAI-compatible server such as vLLM or llama.cpp.</p></li>
+        <li><b>Results land in your feed</b><p>Renders, meshes and audio show up with the exact model, precision and settings used.</p></li>
+      </ol>
+    </section>
+    ${footHTML()}
+  </div>`;
+}
+function ladderHTML(){
+  const ticks = GPUS.map(g => g.gb);
+  const rows = [...M].sort((a, b) => CAT_ORDER.indexOf(a.cat) - CAT_ORDER.indexOf(b.cat) || maxGB(b) - maxGB(a));
+  const scale = `<div class="lrow head"><span class="spacer"></span><div class="lscale">${[0, ...ticks, CAP].map(v => `<span${v === S.gpu ? ' class="cur"' : ''} style="left:${v / CAP * 100}%">${v}</span>`).join('')}</div><span class="lval spacer">GB</span></div>`;
+  return `<div class="ladder" role="list">${scale}${rows.map(m => {
+    const lo = minGB(m), hi = maxGB(m);
+    const state = hi <= S.gpu ? 'all' : lo <= S.gpu ? 'part' : 'over';
+    return `<div class="lrow ${state}" role="listitem">
+      <a class="lname" href="#${studioFor(m.cat)}" data-use="${m.id}">${esc(m.name)}<small>${CAT_LABEL[m.cat]}</small></a>
+      <div class="ltrack" aria-label="${esc(m.name)}: ${lo === hi ? lo : lo + ' to ' + hi} GB">
+        ${ticks.map(v => `<span class="ltick${v === S.gpu ? ' cur' : ''}" style="left:${v / CAP * 100}%"></span>`).join('')}
+        <span class="lmin" style="width:${lo / CAP * 100}%"></span>
+        ${hi > lo ? `<span class="lrange" style="left:${lo / CAP * 100}%;width:${(hi - lo) / CAP * 100}%"></span>` : ''}
+      </div>
+      <span class="lval">${lo === hi ? '≈' + lo : '≈' + lo + '–' + hi} GB</span>
+    </div>`; }).join('')}</div>`;
+}
+function footHTML(){
+  return `<p class="foot">VRAM figures are estimates for weights plus working memory at each listed precision, at default resolution and context. Check each model card before buying hardware. Licenses vary: some models are research-only or not licensed in certain regions. Free API limits change often, so check each provider's page. Model and service names belong to their owners; this studio is an independent front end.</p>`;
+}
+
+/* ---------- STUDIOS ---------- */
+const STUDIO = {
+  video:{eyebrow:'Video studio', h:'Open video models.<br><span class="hl">Your GPU.</span>', lede:'MiniMax H3, LTX-2.5, Wan 2.2 and HunyuanVideo, with sound on the models that support it.'},
+  image:{eyebrow:'Image studio', h:'Open image models.<br><span class="hl">Full control.</span>', lede:'FLUX.2, Qwen-Image and Z-Image for photos, posters and edits from reference images.'},
+  '3d':{eyebrow:'3D studio', h:'One image in.<br><span class="hl">A mesh out.</span>', lede:'TRELLIS.2, Hunyuan3D and TripoSR turn a single picture into a textured GLB.'},
+  audio:{eyebrow:'Voice & music studio', h:'Voices and songs.<br><span class="hl">Hebrew too.</span>', lede:'Chatterbox speaks 23 languages including Hebrew. ACE-Step writes full songs with vocals.'},
+};
+const PLACEHOLDER = {
+  video:'Describe a shot: subject, action, camera move, light. Add an image with + to animate it.',
+  image:'Describe the image: subject, setting, light, style. Add an image with + to edit it.',
+  '3d':'Add a photo of the object with +, or describe it and Z-Image Turbo draws a reference first.',
+  speech:'Type what the voice should say. Hebrew works with Chatterbox.',
+  music:'Describe the track: genre, instruments, tempo, mood. Put lyrics on new lines.',
+};
+const mcatOf = view => view === 'audio' ? S.audioMode : view;
+function viewStudio(view){
+  const s = STUDIO[view];
+  const cats = view === 'audio' ? ['speech','music'] : [view];
+  const n = M.filter(m => cats.includes(m.cat)).length;
+  return `
+  <div class="wrap">
+    <section class="shero" aria-labelledby="h-studio">
+      <div class="bgclip"><canvas id="studio-bg" aria-hidden="true"></canvas></div>
+      <div class="shead">
+        <p class="eyebrow">${s.eyebrow} · ${n} models</p>
+        <h1 id="h-studio" class="display d-lg">${s.h}</h1>
+        <p class="lede">${s.lede}</p>
+      </div>
+      <div id="dock-slot" style="width:100%;display:flex;justify-content:center">${dockHTML(view)}</div>
+    </section>
+    <section class="feed" aria-labelledby="h-feed">
+      <div class="feed-head"><h2 id="h-feed" class="h-sec">Your generations</h2><p>Cards marked Example come with the studio. Free API jobs run for real. Your GPU jobs show a preview until a GPU server is connected.</p></div>
+      <div class="grid" id="feed">${feedFor(cats).map(genCard).join('')}</div>
+    </section>
+    ${footHTML()}
+  </div>`;
+}
+function chipSelect(id, label, icon, options, value){
+  const opts = options.map(o => { const v = typeof o === 'string' ? o : o.value, l = typeof o === 'string' ? o : o.label; return `<option value="${esc(v)}"${v === value ? ' selected' : ''}>${esc(l)}</option>`; }).join('');
+  return `<label class="chip" title="${esc(label)}" for="opt-${id}">${icon}<span class="sr">${esc(label)}</span><select id="opt-${id}" data-opt="${id}">${opts}</select></label>`;
+}
+function optionSets(mcat, m){
+  const o = m.opts || {};
+  if (mcat === 'video') return [
+    ['duration','Duration',I.clock,(o.dur || [5]).map(d => d + 's')],
+    ['aspect','Aspect ratio',I.ratio,['16:9','9:16','1:1']],
+    ['res','Resolution',I.res,o.res || ['720p']],
+    ...(o.audio ? [['audio','Sound',I.sound,['Audio on','Audio off']]] : []),
+  ];
+  if (mcat === 'image') return [
+    ['aspect','Aspect ratio',I.ratio,['1:1','4:5','3:4','16:9','9:16']],
+    ['count','Images',I.stack,['1 image','2 images','4 images']],
+  ];
+  if (mcat === '3d') return [
+    ['texture','Texture',I.cube,o.tex ? ['PBR textures','Untextured'] : ['Untextured']],
+    ['format','File format',I.file,['GLB','OBJ']],
+  ];
+  if (mcat === 'speech') return [
+    ['lang','Language',I.globe,m.langs || ['English']],
+    ['voice','Voice',I.voice,['Noa','Ari','Maya','Daniel']],
+    ['emotion','Emotion',I.mood,['Neutral','Warm','Excited','Calm']],
+  ];
+  if (mcat === 'music') return [
+    ['duration','Length',I.clock,['30s','60s','2 min','4 min']],
+    ['vocals','Vocals',I.voice,['With vocals','Instrumental']],
+  ];
+  return [];
+}
+const isFree = mcat => S.runOn[mcat] === 'free';
+const curItem = mcat => isFree(mcat) ? freeById[S.selFree[mcat]] : byId[S.sel[mcat]];
+function dockHTML(view){
+  const mcat = mcatOf(view); const free = isFree(mcat); const m = curItem(mcat); const v = free ? null : curVariant(m);
+  const prev = S.opts[mcat] || {};
+  const baseM = free ? (byId[m.base] || {}) : m;
+  const sets = optionSets(mcat, free ? {opts: baseM.opts || {}, langs: m.langs || baseM.langs} : m);
+  const canUpload = ['video','image','3d'].includes(mcat);
+  const segAudio = view === 'audio' ? `<div class="seg" role="group" aria-label="Audio type"><button type="button" data-mode="speech" aria-pressed="${S.audioMode === 'speech'}">Speech</button><button type="button" data-mode="music" aria-pressed="${S.audioMode === 'music'}">Music</button></div>` : '';
+  const segRun = `<div class="seg" role="group" aria-label="Run on"><button type="button" data-run="gpu" aria-pressed="${!free}">Your GPU</button><button type="button" data-run="free" aria-pressed="${free}">Free API</button></div>`;
+  return `<form class="dock has-seg" id="dock" data-mcat="${mcat}" autocomplete="off">
+    <div class="segs">${segAudio}${segRun}</div>
+    <div class="dock-main">
+      ${canUpload ? `<label class="add" for="ref-input" title="Add a reference image">${I.plus}<span class="sr">Add a reference image</span></label><input id="ref-input" type="file" accept="image/*" class="sr" tabindex="-1">` : ''}
+      ${S.ref && canUpload ? `<div class="ref"><img src="${S.ref.thumb}" alt="Reference image ${esc(S.ref.name)}"><button type="button" id="ref-clear" aria-label="Remove reference image">×</button></div>` : ''}
+      <label class="sr" for="prompt">Prompt</label>
+      <textarea id="prompt" rows="2" dir="auto" placeholder="${esc(PLACEHOLDER[mcat])}">${esc(S.drafts[mcat] || '')}</textarea>
+    </div>
+    <div class="dock-opts">
+      <button type="button" class="chip chip-model" id="model-btn" aria-haspopup="listbox" aria-expanded="false"><canvas data-thumb="${free ? thumbOf(m, mcat) : m.id}" aria-hidden="true"></canvas><span>${esc(m.name)}</span>${I.caret}</button>
+      ${free ? `<span class="chip" title="Runs on">${I.cloud}${esc(PROV[m.prov].name)}</span>`
+        : m.variants.length > 1 ? chipSelect('prec', 'Precision', I.chip, m.variants.map(x => ({value:x.p, label:`${x.p} · ${x.gb} GB`})), v.p).replace('class="chip"', `class="chip${v.gb > S.gpu ? ' warn' : ''}"`) : `<span class="chip" title="Precision">${I.chip}${esc(v.p)} · ${v.gb} GB</span>`}
+      ${sets.map(([id, label, icon, opts]) => chipSelect(id, label, icon, opts, opts.includes(prev[id]) ? prev[id] : opts[0])).join('')}
+      <button type="button" class="chip enhance" id="enhance" title="Rewrite your idea into a detailed prompt">${I.spark}<span>Enhance</span></button>
+    </div>
+    <button type="submit" class="go">Generate</button>
+    <div class="meter" id="meter">${free ? freeMeterHTML(m, 'gen') : meterHTML(m, v)}</div>
+    <div class="pop" id="model-pop" role="listbox" aria-label="Choose a model" hidden>${popHTML(mcat)}</div>
+  </form>`;
+}
+function meterHTML(m, v){
+  const over = v.gb > S.gpu; const pct = Math.min(100, v.gb / S.gpu * 100);
+  const note = over
+    ? `This version needs about ${v.gb - S.gpu} GB more than your card has. It can still run with CPU offload, but much slower.`
+    : `${esc(m.name)} ${esc(v.p)} fits your ${S.gpu} GB ${esc(gpuInfo().card)} with about ${S.gpu - v.gb} GB to spare.${m.licNote ? ' ' + esc(m.licNote) : ''}`;
+  return `<span class="mono">VRAM</span><div class="meter-track" role="img" aria-label="${v.gb} of ${S.gpu} GB"><i class="${over ? 'over' : ''}" style="width:${pct}%"></i></div><span class="mono">≈${v.gb} / ${S.gpu} GB</span><p class="note${over ? ' warn' : ''}">${note}</p>`;
+}
+function popHTML(mcat){
+  if (isFree(mcat)) return `<p class="pop-head">Free APIs · ${CAT_LABEL[mcat]}</p>` + FREE_OPTS.filter(f => f.cat === mcat).map(f => { const p = PROV[f.prov]; return `<button type="button" class="pop-item" role="option" data-pick="${f.id}" aria-selected="${S.selFree[mcat] === f.id}">
+    <canvas data-thumb="${thumbOf(f, mcat)}" aria-hidden="true"></canvas>
+    <span><b>${esc(f.name)}</b><small>${esc(p.name)} · ${esc(p.key)}</small></span>
+    <span class="fit fit-ok">Free</span></button>`; }).join('') + `<a class="pop-foot lnk" href="#models">See every free API →</a>`;
+  return `<p class="pop-head">${CAT_LABEL[mcat]} models · ${M.filter(m => m.cat === mcat).length} · sized for ${S.gpu} GB</p>` + M.filter(m => m.cat === mcat).map(m => { const v = bestVariant(m); return `<button type="button" class="pop-item" role="option" data-pick="${m.id}" aria-selected="${S.sel[mcat] === m.id}">
+    <canvas data-thumb="${m.id}" aria-hidden="true"></canvas>
+    <span><b>${esc(m.name)} ${tagsHTML(m)}</b><small>${esc(m.maker)} · ${esc(m.params)}</small></span>
+    <span class="fit ${fitClass(v.gb)}">${esc(v.p)}<br>≈${v.gb} GB</span></button>`; }).join('') + `<a class="pop-foot lnk" href="#models">Compare every model →</a>`;
+}
+function feedFor(cats){
+  return [...userGens.filter(g => cats.includes(g.cat)), ...EXAMPLES.filter(g => cats.includes(g.cat))];
+}
+const progressOf = g => g.status !== 'running' ? 1 : Math.min(1, (Date.now() - g.t0) / g.dur);
+function genCard(g){
+  if (g.real) return realCard(g);
+  const m = anyById(g.model); const running = progressOf(g) < 1; const audio = g.cat === 'speech' || g.cat === 'music';
+  const info = [m ? m.name : g.model, g.p, ...Object.values(g.opts || {})].map(esc).join(' · ');
+  return `<article class="gen" id="${g.id}">
+    <div class="gen-media${audio ? ' is-audio' : ''}">
+      <canvas aria-hidden="true"></canvas>
+      ${g.example ? '<span class="badge">Example</span>' : running ? '' : '<span class="badge badge-demo">Demo preview</span>'}
+      ${g.cat === 'video' && g.opts ? `<span class="corner mono">${esc(g.opts.duration || '')}</span>` : ''}
+      ${g.ref ? `<img class="ref-inset" src="${g.ref}" alt="Reference image">` : ''}
+      ${audio && !running ? `<button class="play" type="button" data-play="${g.id}">${I.play}<span>${g.cat === 'speech' ? 'Browser voice' : 'Play sketch'}</span></button>` : ''}
+      <div class="prog"${running ? '' : ' hidden'}><span class="prog-label mono"></span><div class="prog-track"><i></i></div></div>
+    </div>
+    <div class="gen-meta"><p class="gen-prompt" dir="auto">${esc(g.prompt)}</p><p class="gen-info mono">${info}</p></div>
+  </article>`;
+}
+function hydrateGen(el){
+  const g = [...userGens, ...EXAMPLES].find(x => x.id === el.id);
+  if (!g || g.real) { if (g && g.result && g.result.type === 'model') loadModelViewer(); return; }
+  const c = el.querySelector('canvas'); const media = el.querySelector('.gen-media');
+  const draw = t => {
+    const ctx = fit(c), w = c.width, h = c.height, p = progressOf(g);
+    if (g.cat === 'video' || g.cat === 'image') framed(ctx, w, h, g, t);
+    else if (g.cat === '3d') mesh(ctx, w, h, g.seed, p < 1 ? 0 : t);
+    else wave(ctx, w, h, g.seed, g.cat, el._play ?? -1);
+    if (p < 1) noiseFill(ctx, 0, 0, w, h, Math.pow(1 - p, .7));
+  };
+  const mode = g.cat === '3d' ? 'always' : g.cat === 'video' ? 'hover' : 'static';
+  addAnim(c, draw, mode, mode === 'hover' ? media : null);
+  if (mode === 'hover') media.addEventListener('click', e => { if (!e.target.closest('button')) c._a.hover = !c._a.hover; });
+}
+
+/* generation simulation */
+function readOpts(){ const o = {}; $$('#dock [data-opt]').forEach(s => { if (s.dataset.opt !== 'prec') o[s.dataset.opt] = s.value; }); return o; }
+function generate(){
+  const dock = $('#dock'); const mcat = dock.dataset.mcat; const free = isFree(mcat); const m = curItem(mcat); const v = free ? null : curVariant(m);
+  const ta = $('#prompt'); const prompt = ta.value.trim();
+  if (!free && m.needsRef && !S.ref) { toast(`${m.name} needs a reference image. Add one with the + button.`); return; }
+  if (!prompt && !S.ref) { toast('Write a prompt first.'); ta.focus(); return; }
+  const steps = free ? 1 : (m.steps || 30);
+  const g = {id:'g' + Date.now().toString(36), cat:mcat, model:m.id, p: free ? 'Free API' : v.p, prompt:prompt || 'From reference image', opts:readOpts(), seed:hash(prompt + Date.now()), status:'running', t0:Date.now(), dur: free ? 4500 : Math.min(7500, 3200 + steps * 90), steps, gb: free ? 0 : v.gb, prov: free ? m.prov : null, ref: ['video','image','3d'].includes(mcat) && S.ref ? S.ref.thumb : null};
+  if (free && m.run) { g.real = true; g.status = 'working'; g.run = m.run; g._file = S.refFile || null; }
+  userGens.unshift(g); userGens = userGens.slice(0, 30); persistGens();
+  S.drafts[mcat] = ''; ta.value = '';
+  const feed = $('#feed'); feed.insertAdjacentHTML('afterbegin', genCard(g)); hydrateGen(feed.firstElementChild);
+  feed.firstElementChild.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block:'nearest'});
+  if (g.real) runReal(g); else tick();
+}
+const ENH = {
+  video:'Rewrite this rough idea as one detailed prompt for an AI video model. One paragraph, under 80 words, in English: subject, action, setting, camera movement and lens, lighting, mood, and sound if it matters.',
+  image:'Rewrite this rough idea as one detailed prompt for an AI image model. One paragraph, under 70 words, in English: subject, composition, setting, lighting, lens or medium, style and colors. Put any words that must appear in the image in double quotes.',
+  '3d':'Rewrite this rough idea as a short description of one object for an image-to-3D model. Under 40 words, in English: shape, materials, colors and style, shown alone on a plain background in a three-quarter view.',
+  speech:'Clean up this text so a text-to-speech model reads it naturally. Keep the same language and meaning. Fix punctuation so pauses fall in the right places, spell out numbers and abbreviations, and add nothing new.',
+  music:'Rewrite this rough idea for an AI music model. First line: comma-separated style tags (genre, instruments, tempo in bpm, mood, vocal type). Then a blank line, then short lyrics marked [verse] and [chorus] if vocals fit the idea, written in the same language as the idea.',
+};
+let enhCtl = null;
+async function enhance(){
+  const btn = $('#enhance'); if (!btn) return;
+  if (enhCtl) { enhCtl.abort(); return; }
+  const ta = $('#prompt'); const idea = ta.value.trim();
+  if (!idea) { toast('Write a rough idea first. Enhance turns it into a detailed prompt.'); ta.focus(); return; }
+  const mcat = $('#dock').dataset.mcat; const it = curItem(mcat); const target = it.base ? byId[it.base].name : it.name;
+  const input = `${ENH[mcat]}\n\nTarget model: ${target}.\n\nRough idea:\n${idea}\n\nReply with only the finished prompt. No title, no quotes around it, no explanation.`;
+  enhCtl = new AbortController(); btn.setAttribute('aria-busy', 'true'); btn.querySelector('span').textContent = 'Stop';
+  try {
+    const { text } = SAMPLE ? await SAMPLE(input, {modelTier:'quick', cache:false, signal:enhCtl.signal, onText: ({text}) => { ta.value = text; }}) : await pollText(input, enhCtl.signal);
+    ta.value = text.trim(); S.drafts[mcat] = ta.value; toast('Prompt enhanced. Edit it or press Generate.');
+  } catch (e) {
+    ta.value = idea;
+    if (e && e.code !== 'cancelled' && e.name !== 'AbortError') toast(SAMPLE ? sampleErrorCopy(e) : 'Could not enhance right now. Try again in a moment.');
+    if (e && DENY.includes(e.code)) hideClaude();
+  } finally {
+    enhCtl = null; const b = $('#enhance'); if (b) { b.removeAttribute('aria-busy'); b.querySelector('span').textContent = 'Enhance'; }
+  }
+}
+function persistGens(){ store.set('gens', userGens.slice(0, 30).map(({_file, ...g}) => g)); }
+let ticker = null;
+function tick(){
+  if (ticker) return;
+  ticker = setInterval(() => {
+    let live = 0;
+    for (const g of userGens) {
+      if (g.status !== 'running') continue;
+      const p = progressOf(g); const el = document.getElementById(g.id);
+      if (p >= 1) {
+        g.status = 'done'; persistGens();
+        if (el) { el.outerHTML = genCard(g); hydrateGen(document.getElementById(g.id)); }
+        continue;
+      }
+      live++;
+      if (el) {
+        const pn = g.prov && PROV[g.prov] ? PROV[g.prov].name : '';
+        const label = pn ? (p < .15 ? `Sending to ${pn}` : p < .92 ? `Generating on ${pn}` : 'Receiving result')
+          : p < .15 ? `Loading weights · ${g.p} · ≈${g.gb} GB` : p < .92 ? (g.steps > 1 ? `Sampling · step ${Math.max(1, Math.round((p - .15) / .77 * g.steps))} / ${g.steps}` : 'Running inference') : 'Decoding';
+        el.querySelector('.prog-label').textContent = label;
+        el.querySelector('.prog-track i').style.width = (p * 100).toFixed(1) + '%';
+        const c = el.querySelector('canvas'); if (c._a) c._a.fn(performance.now() / 1000);
+      }
+    }
+    if (!live) { clearInterval(ticker); ticker = null; }
+  }, 110);
+}
+
+/* ---------- real generation (app) ---------- */
+const GRADIO_URL = 'https://cdn.jsdelivr.net/npm/@gradio/client@2.7.2/dist/browser.js';
+let gradioMod = null;
+const gradio = () => gradioMod || (gradioMod = import(GRADIO_URL));
+const hfToken = () => { const t = store.get('hfToken', ''); return t && /^hf_/.test(t) ? t : undefined; };
+let spaceClients = {};
+async function space(id){
+  const { Client } = await gradio(); const tok = hfToken(); const key = id + (tok ? '|t' : '|a');
+  if (!spaceClients[key]) spaceClients[key] = Client.connect(id, tok ? {token: tok} : {}).catch(e => { delete spaceClients[key]; throw e; });
+  return spaceClients[key];
+}
+const fileUrl = d => !d ? null : typeof d === 'string' ? d : (d.url || (d.video && fileUrl(d.video)) || (d.image && fileUrl(d.image)) || d.path || null);
+const ZRES = {'1:1':'1024x1024 ( 1:1 )','4:5':'864x1152 ( 3:4 )','3:4':'864x1152 ( 3:4 )','16:9':'1280x720 ( 16:9 )','9:16':'720x1280 ( 9:16 )'};
+const PSIZE = {'1:1':[1024,1024],'4:5':[896,1120],'3:4':[864,1152],'16:9':[1280,720],'9:16':[720,1280]};
+const H3_CANVAS = {'16:9':'960x544 · 16:9 fast','9:16':'544x960 · 9:16 fast','1:1':'544x544 · 1:1 fast'};
+const LANG_CODE = {English:'en',Hebrew:'he',Arabic:'ar',Chinese:'zh',Danish:'da',Dutch:'nl',Finnish:'fi',French:'fr',German:'de',Greek:'el',Hindi:'hi',Italian:'it',Japanese:'ja',Korean:'ko',Malay:'ms',Norwegian:'no',Polish:'pl',Portuguese:'pt',Russian:'ru',Spanish:'es',Swahili:'sw',Swedish:'sv',Turkish:'tr'};
+function errText(e){
+  const t = String((e && (e.message || e.title)) || e || '');
+  if (/quota/i.test(t)) return hfToken() ? 'Your free Hugging Face GPU minutes for today are used up. They come back 24 hours after first use.' : 'The free GPU minutes for this device are used up. Add a free Hugging Face token in Settings for more.';
+  if (/capacity|queue|too many|busy/i.test(t)) return 'The shared GPU queue is busy right now. Wait a minute and try again.';
+  if (/sleep|paused|building|starting/i.test(t)) return 'That model Space is waking up. Try again in a minute.';
+  return (t || 'Something went wrong. Try again.').slice(0, 220);
+}
+function pollImageUrl(prompt, aspect, seed){
+  const [w, h] = PSIZE[aspect] || [1024, 1024];
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed % 100000}&model=flux&nologo=true`;
+}
+const RUNNERS = {
+  async pollinations(g){
+    const url = pollImageUrl(g.prompt, g.opts.aspect, g.seed);
+    await new Promise((res, rej) => { const im = new Image(); im.onload = res; im.onerror = () => rej(new Error('Pollinations could not make that image. Try again.')); im.src = url; });
+    return {type:'image', url};
+  },
+  async zimage(g){
+    const c = await space('Tongyi-MAI/Z-Image-Turbo');
+    const r = await c.predict('/generate', {prompt:g.prompt, resolution:ZRES[g.opts.aspect] || ZRES['1:1'], seed:g.seed % 100000, steps:8, shift:3, random_seed:true, gallery_images:[]});
+    const item = r.data && r.data[0] && r.data[0][0];
+    const url = fileUrl(item); if (!url) throw new Error('No image came back. Try again.');
+    return {type:'image', url};
+  },
+  async h3(g){
+    const c = await space('MiniMaxAI/MiniMax-H3-Turbo-Lora'); const { handle_file } = await gradio();
+    const r = await c.predict('/output_video', {in_0:g.prompt, in_1:g._file ? handle_file(g._file) : null, in_2:null, in_3:H3_CANVAS[g.opts.aspect] || H3_CANVAS['16:9'], in_4:parseFloat(g.opts.duration) || 5, in_5:6, in_6:g.seed % 100000, in_7:false, in_8:'larry'});
+    const url = fileUrl(r.data && r.data[0]); if (!url) throw new Error('No video came back. Try again.');
+    return {type:'video', url};
+  },
+  async hunyuan3d(g){
+    const c = await space('tencent/Hunyuan3D-2.1'); const { handle_file } = await gradio();
+    const src = g._file ? handle_file(g._file) : handle_file(pollImageUrl(g.prompt + ', single object, centered, plain white background, three-quarter view, studio light', '1:1', g.seed));
+    const textured = g.opts.texture !== 'Untextured';
+    const r = await c.predict(textured ? '/generation_all' : '/shape_generation', {image:src, steps:30, guidance_scale:5, seed:g.seed % 100000, octree_resolution:256, check_box_rembg:true, num_chunks:8000, randomize_seed:true});
+    const url = fileUrl(textured ? (r.data[1] || r.data[0]) : r.data[0]); if (!url) throw new Error('No 3D file came back. Try again.');
+    return {type:'model', url};
+  },
+  async chatterbox(g){
+    const c = await space('ResembleAI/Chatterbox-Multilingual-TTS-V3');
+    const ex = {Neutral:.5, Warm:.6, Excited:.8, Calm:.35}[g.opts.emotion] ?? .5;
+    const r = await c.predict('/generate_tts_audio', {text_input:g.prompt.slice(0, 300), audio_prompt_path_input:null, language_id_input:LANG_CODE[g.opts.lang] || 'en', exaggeration_input:ex, temperature_input:.8, seed_num_input:0, cfgw_input:.5});
+    const url = fileUrl(r.data && r.data[0]); if (!url) throw new Error('No audio came back. Try again.');
+    return {type:'audio', url};
+  },
+};
+const WORK_LABEL = {pollinations:'Drawing on Pollinations', zimage:'Generating on Hugging Face', h3:'Making the video on Hugging Face · 1 to 3 min', hunyuan3d:'Building the 3D model on Hugging Face · 1 to 3 min', chatterbox:'Recording the voice on Hugging Face'};
+function realCard(g){
+  const m = anyById(g.model); const audio = g.cat === 'speech' || g.cat === 'music'; const r = g.result || {};
+  const info = [m ? m.name : g.model, ...Object.values(g.opts || {})].map(esc).join(' · ');
+  let media;
+  if (g.status === 'working') media = `<div class="gen-media${audio ? ' is-audio' : ''} working"><div class="prog"><span class="prog-label mono">${esc(WORK_LABEL[g.run] || 'Working')}</span><div class="prog-track ind"><i></i></div></div></div>`;
+  else if (g.status === 'error') media = `<div class="gen-media${audio ? ' is-audio' : ''} failed"><p class="gerr">${esc(g.error || 'Something went wrong.')}</p></div>`;
+  else if (r.type === 'image') media = `<div class="gen-media"><img src="${esc(r.url)}" alt="${esc(g.prompt)}" loading="lazy"></div>`;
+  else if (r.type === 'video') media = `<div class="gen-media"><video src="${esc(r.url)}" controls playsinline preload="metadata"></video></div>`;
+  else if (r.type === 'audio') media = `<div class="gen-media is-audio audio-done"><audio src="${esc(r.url)}" controls preload="metadata"></audio></div>`;
+  else if (r.type === 'model') media = `<div class="gen-media"><model-viewer src="${esc(r.url)}" camera-controls auto-rotate shadow-intensity="1" alt="${esc(g.prompt)}"></model-viewer></div>`;
+  else media = `<div class="gen-media failed"><p class="gerr">This result is no longer available.</p></div>`;
+  const actions = g.status === 'done' && r.url ? `<div class="gen-actions"><a class="lnk" href="${esc(r.url)}" target="_blank" rel="noopener" download>Download ↓</a></div>`
+    : g.status === 'error' ? `<div class="gen-actions"><button class="lnk" type="button" data-retry="${g.id}">Try again</button></div>` : '';
+  return `<article class="gen" id="${g.id}">${media}<div class="gen-meta"><p class="gen-prompt" dir="auto">${esc(g.prompt)}</p><p class="gen-info mono">${info}</p>${actions}</div></article>`;
+}
+let mvLoaded = false;
+function loadModelViewer(){ if (mvLoaded) return; mvLoaded = true; const sc = document.createElement('script'); sc.type = 'module'; sc.src = 'https://cdn.jsdelivr.net/npm/@google/model-viewer@4.3.1/dist/model-viewer.min.js'; document.head.appendChild(sc); }
+function swapCard(g){ const el = document.getElementById(g.id); if (el) { el.outerHTML = genCard(g); if (g.result && g.result.type === 'model') loadModelViewer(); } }
+async function runReal(g){
+  g.status = 'working'; swapCard(g);
+  try { g.result = await RUNNERS[g.run](g); g.status = 'done'; if (g.result.type === 'model') loadModelViewer(); }
+  catch (e) { g.status = 'error'; g.error = errText(e); }
+  persistGens(); swapCard(g);
+  if (g.status === 'done' && document.hidden === false) toast('Ready: ' + (g.prompt.length > 40 ? g.prompt.slice(0, 40) + '…' : g.prompt));
+}
+async function pollText(input, signal){
+  const r = await fetch('https://text.pollinations.ai/openai', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'openai', messages:[{role:'user', content:input}]}), signal});
+  if (!r.ok) throw new Error('Pollinations answered ' + r.status);
+  const d = await r.json(); const text = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content || '').trim();
+  if (!text) throw new Error('Empty answer'); return {text};
+}
+async function pollChatSend(){
+  const box = $('#msgs');
+  box.insertAdjacentHTML('beforeend', `<div class="msg assistant"><p class="msg-who">gpt-oss-20b</p><div class="msg-body thinking" dir="auto">Thinking…</div></div>`);
+  const bubble = box.lastElementChild.querySelector('.msg-body'); box.scrollTop = box.scrollHeight;
+  const sys = (($('#sys') && $('#sys').value) || '').trim();
+  const msgs = [{role:'system', content:`You are the assistant inside Weightroom, a studio for open-weight AI models.${sys ? ' ' + sys : ''} Reply in the language the user writes in. Keep answers short unless asked for detail.`}];
+  for (const x of S.chat.slice(-20)) { if (x.role === 'user') msgs.push({role:'user', content:x.text}); else if (x.role === 'assistant' && x.text) msgs.push({role:'assistant', content:x.text}); }
+  chatCtl = new AbortController(); setSendBtn(true);
+  try {
+    const r = await fetch('https://text.pollinations.ai/openai', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'openai', messages:msgs}), signal:chatCtl.signal});
+    if (!r.ok) throw new Error(r.status === 429 ? 'Too many messages in a short time. Wait a few seconds and send again.' : 'The chat service answered with an error (' + r.status + '). Try again.');
+    const d = await r.json(); const text = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content || '').trim();
+    if (!text) throw new Error('The model returned an empty answer. Try again.');
+    bubble.classList.remove('thinking'); bubble.textContent = text; S.chat.push({role:'assistant', model:'f-poll-oss', text});
+  } catch (e) {
+    const el = bubble.closest('.msg'); if (el) el.remove();
+    if (!(e && e.name === 'AbortError')) pushChat({role:'notice', text:String((e && e.message) || e)});
+  } finally { chatCtl = null; setSendBtn(false); const b = $('#msgs'); if (b) b.scrollTop = b.scrollHeight; }
+}
+
+/* settings, install, offline */
+function fillSettings(){ const i = $('#hf-token'); if (i) i.value = store.get('hfToken', ''); const st = $('#hf-status'); if (st) st.textContent = hfToken() ? 'A token is saved on this device.' : 'No token saved. Free jobs use this device’s small anonymous quota.'; }
+let deferredInstall = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; const b = $('#install'); if (b) b.hidden = false; });
+addEventListener('appinstalled', () => { const b = $('#install'); if (b) b.hidden = true; toast('Weightroom is installed.'); });
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(() => {});
+
+/* audio previews */
+let playing = null;
+const LANG = {English:'en-US',Hebrew:'he-IL',Arabic:'ar-SA',Chinese:'zh-CN',Danish:'da-DK',Dutch:'nl-NL',Finnish:'fi-FI',French:'fr-FR',German:'de-DE',Greek:'el-GR',Hindi:'hi-IN',Italian:'it-IT',Japanese:'ja-JP',Korean:'ko-KR',Malay:'ms-MY',Norwegian:'nb-NO',Polish:'pl-PL',Portuguese:'pt-BR',Russian:'ru-RU',Spanish:'es-ES',Swahili:'sw-KE',Swedish:'sv-SE',Turkish:'tr-TR'};
+function stopPlaying(){
+  if (!playing) return;
+  const p = playing; playing = null;
+  try { p.stop(); } catch {}
+  const el = document.getElementById(p.id); if (el) { el._play = -1; const c = el.querySelector('canvas'); c._a && c._a.fn(0); const b = el.querySelector('.play'); if (b) b.innerHTML = `${I.play}<span>${p.kind === 'speech' ? 'Browser voice' : 'Play sketch'}</span>`; }
+}
+function play(id){
+  const g = [...userGens, ...EXAMPLES].find(x => x.id === id); if (!g) return;
+  if (playing && playing.id === id) { stopPlaying(); return; }
+  stopPlaying();
+  const el = document.getElementById(id); const c = el.querySelector('canvas'); const btn = el.querySelector('.play');
+  let start = performance.now(), dur = 6000, raf;
+  const step = () => { if (!playing || playing.id !== id) return; el._play = Math.min(1, (performance.now() - start) / dur); c._a.fn(0); if (el._play >= 1) { stopPlaying(); return; } raf = requestAnimationFrame(step); };
+  if (g.cat === 'speech') {
+    if (!('speechSynthesis' in window)) { toast('This browser has no built-in voice to preview with.'); return; }
+    const u = new SpeechSynthesisUtterance(g.prompt); u.lang = LANG[g.opts && g.opts.lang] || 'en-US';
+    dur = Math.max(2000, g.prompt.length * 70);
+    u.onend = () => { if (playing && playing.id === id) stopPlaying(); };
+    try { speechSynthesis.cancel(); speechSynthesis.speak(u); } catch { toast('The browser voice could not start.'); return; }
+    playing = {id, kind:'speech', stop(){ speechSynthesis.cancel(); cancelAnimationFrame(raf); }};
+    toast('Playing your browser\'s built-in voice. The real model output arrives once a GPU is connected.');
+  } else {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) { toast('This browser cannot play audio here.'); return; }
+    const ac = new AC(); const r = rng(g.seed); const bpm = 80 + Math.floor(r() * 12); const beat = 60 / bpm; const t0 = ac.currentTime + .05;
+    const prog = [[57,60,64,67],[53,57,60,64],[50,53,57,60],[55,59,62,65]];
+    const master = ac.createGain(); master.gain.value = .5; master.connect(ac.destination);
+    const hz = n => 440 * Math.pow(2, (n - 69) / 12);
+    prog.forEach((ch, bar) => {
+      const bt = t0 + bar * beat * 4;
+      ch.forEach(n => { const o = ac.createOscillator(), gn = ac.createGain(); o.type = 'triangle'; o.frequency.value = hz(n); gn.gain.setValueAtTime(0, bt); gn.gain.linearRampToValueAtTime(.06, bt + .08); gn.gain.exponentialRampToValueAtTime(.001, bt + beat * 4); o.connect(gn).connect(master); o.start(bt); o.stop(bt + beat * 4 + .05); });
+      for (let b = 0; b < 4; b++) {
+        const kt = bt + b * beat; const k = ac.createOscillator(), kg = ac.createGain(); k.frequency.setValueAtTime(110, kt); k.frequency.exponentialRampToValueAtTime(40, kt + .18); kg.gain.setValueAtTime(b % 2 ? .0 : .5, kt); kg.gain.exponentialRampToValueAtTime(.001, kt + .25); k.connect(kg).connect(master); k.start(kt); k.stop(kt + .3);
+        const mel = ac.createOscillator(), mg = ac.createGain(); mel.type = 'sine'; mel.frequency.value = hz(ch[Math.floor(r() * 4)] + 12); const mt = kt + beat * .5; mg.gain.setValueAtTime(0, mt); mg.gain.linearRampToValueAtTime(.05, mt + .02); mg.gain.exponentialRampToValueAtTime(.001, mt + beat * .9); mel.connect(mg).connect(master); mel.start(mt); mel.stop(mt + beat);
+      }
+    });
+    dur = prog.length * 4 * beat * 1000;
+    playing = {id, kind:'music', stop(){ cancelAnimationFrame(raf); try { ac.close(); } catch {} }};
+    toast('Playing a short synth sketch. The real ACE-Step track arrives once a GPU is connected.');
+  }
+  btn.innerHTML = `${I.stop}<span>Stop</span>`;
+  start = performance.now(); raf = requestAnimationFrame(step);
+}
+
+/* ---------- CHAT ---------- */
+const CHAT_EXAMPLE = [
+  {role:'user', text:'Write a prompt for a 10-second video: rainy street at night, slow push-in. Keep it under 60 words.'},
+  {role:'assistant', model:'qwen38-27b', text:'Night street after heavy rain, neon signs reflected in deep puddles. Slow dolly push-in at eye level toward a ramen stall, steam drifting through the light. A cyclist crosses frame left to right. Shallow depth of field, 35mm lens. Soft rain and distant traffic hum. Cool blue shadows, warm orange highlights.'},
+  {role:'user', text:'Which video model should I use on a 48 GB card?'},
+  {role:'assistant', model:'qwen38-27b', text:'MiniMax H3 in FP8 needs about 44 GB and gives the best results, with sound generated alongside the picture. For faster drafts, LTX-2.5 in FP8 needs about 30 GB and also generates audio.'},
+];
+function msgHTML(x){
+  const who = x.role === 'user' ? 'You' : x.role === 'notice' ? 'Studio' : (anyById(x.model) ? anyById(x.model).name : 'Model');
+  return `<div class="msg ${x.role}"><p class="msg-who">${esc(who)}</p><div class="msg-body" dir="auto">${esc(x.text)}</div></div>`;
+}
+function viewChat(){
+  const free = !!freeById[S.sel.chat];
+  const m = anyById(S.sel.chat); const v = free ? null : curVariant(m);
+  const ctxMax = free ? 32768 : (m.ctx || 131072); const ctxVal = Math.min(S.chatCtx || 32768, ctxMax);
+  return `
+  <div class="wrap">
+    <div class="chat-layout">
+      <section class="chat-main" aria-labelledby="h-chat">
+        <header class="chat-head"><div style="display:grid;gap:4px"><h1 id="h-chat" class="h-sec">Chat</h1><p class="muted">Open language models with your settings.</p></div><span class="demo-pill">Free chat runs for real</span></header>
+        <div class="msgs" id="msgs" aria-live="polite">
+          <span class="ex-label">Example conversation</span>
+          ${CHAT_EXAMPLE.map(msgHTML).join('')}
+          ${S.chat.map(msgHTML).join('')}
+        </div>
+        <form class="composer" id="composer" autocomplete="off">
+          <label class="sr" for="chat-input">Message</label>
+          <textarea id="chat-input" rows="2" dir="auto" placeholder="Message ${esc(m.name)}"></textarea>
+          <button class="go" type="submit">Send</button>
+        </form>
+      </section>
+      <aside class="chat-side" aria-label="Chat settings">
+        <h2>Model</h2>
+        <div style="display:grid;gap:8px" role="radiogroup" aria-label="Chat model">
+          <p class="mgroup">Free APIs</p>
+          ${FREE_OPTS.filter(f => f.cat === 'chat').map(f => { const p = PROV[f.prov]; return `<label class="mopt"><input type="radio" name="chatmodel" value="${f.id}"${f.id === m.id ? ' checked' : ''}><span><b>${esc(f.name)}${f.run ? ' <span class="tag tag-live">Works here</span>' : ''}</b><small>${esc(f.run ? p.name + ' · no key needed' : p.name + ' · ' + p.key)}</small></span><span class="mono fit-ok">Free</span></label>`; }).join('')}
+          <p class="mgroup">Your GPU</p>
+          ${M.filter(x => x.cat === 'chat').map(x => { const bv = bestVariant(x); return `<label class="mopt"><input type="radio" name="chatmodel" value="${x.id}"${x.id === m.id ? ' checked' : ''}><span><b>${esc(x.name)}</b><small>${esc(x.params)}</small></span><span class="mono ${fitClass(bv.gb)}">${esc(bv.p)} ≈${bv.gb} GB</span></label>`; }).join('')}
+        </div>
+        ${free ? `<div class="meter" id="chat-meter" style="border-top:0;padding-top:0">${freeMeterHTML(m, 'chat')}</div>` : `<div class="field"><label for="chat-prec">Precision</label><select id="chat-prec">${m.variants.map(x => `<option value="${esc(x.p)}"${x.p === v.p ? ' selected' : ''}>${esc(x.p)} · ≈${x.gb} GB${x.gb > S.gpu ? ' · over your card' : ''}</option>`).join('')}</select></div>
+        <div class="meter" id="chat-meter" style="border-top:0;padding-top:0">${meterHTML(m, v)}</div>
+        <div class="field"><div class="row"><label for="ctx">Context window</label><output id="ctx-out" for="ctx">${fmtCtx(ctxVal)}</output></div><input type="range" id="ctx" min="4096" max="${ctxMax}" step="4096" value="${ctxVal}"><p class="hint">Longer context needs extra VRAM for the KV cache, on top of the weights. ${esc(m.name)} supports up to ${fmtCtx(ctxMax)}.</p></div>
+        <div class="field"><div class="row"><label for="temp">Temperature</label><output id="temp-out" for="temp">${(S.chatTemp ?? .7).toFixed(1)}</output></div><input type="range" id="temp" min="0" max="1.5" step="0.1" value="${S.chatTemp ?? .7}"></div>`}
+        <div class="field"><label for="sys">System prompt</label><textarea id="sys" rows="3">${esc(S.chatSys ?? 'You help plan shots and prompts for a video and image studio. Answer briefly.')}</textarea></div>
+      </aside>
+    </div>
+    ${footHTML()}
+  </div>`;
+}
+const fmtCtx = n => n >= 1024 ? Math.round(n / 1024) + 'K tokens' : n + ' tokens';
+let chatCtl = null;
+function pushChat(x){ S.chat.push(x); const box = $('#msgs'); if (box) { box.insertAdjacentHTML('beforeend', msgHTML(x)); box.scrollTop = box.scrollHeight; } }
+function setSendBtn(running){ const b = $('#composer .go'); if (b) b.textContent = running ? 'Stop' : 'Send'; }
+async function sendChat(){
+  if (chatCtl) { chatCtl.abort(); return; }
+  const ta = $('#chat-input'); const text = ta.value.trim(); if (!text) { ta.focus(); return; }
+  const sel = S.sel.chat; const f = freeById[sel];
+  pushChat({role:'user', text}); ta.value = '';
+  if (f && f.live) {
+    if (!SAMPLE) { pushChat({role:'notice', text:'Claude is not available in this view. Open the page on claude.ai while signed in to chat for real.'}); return; }
+    const box = $('#msgs');
+    box.insertAdjacentHTML('beforeend', `<div class="msg assistant"><p class="msg-who">Claude</p><div class="msg-body thinking" dir="auto">Thinking…</div></div>`);
+    const bubble = box.lastElementChild.querySelector('.msg-body'); box.scrollTop = box.scrollHeight;
+    const sys = (($('#sys') && $('#sys').value) || '').trim();
+    const rules = `You are the chat assistant inside Weightroom, a studio for open-weight AI models (video, image, 3D, voice, music and chat) that people run on their own GPUs or through free APIs.${sys ? ' Studio instructions: ' + sys : ''} Reply in the language the user writes in. Keep answers short unless asked for detail.`;
+    const hist = [];
+    for (const x of S.chat) { if (x.role === 'user') hist.push({role:'user', content:x.text}); else if (x.role === 'assistant' && x.model === 'f-claude' && x.text) hist.push({role:'assistant', content:x.text}); }
+    const turns = [{role:'user', content:rules}, ...hist.slice(-20)];
+    chatCtl = new AbortController(); setSendBtn(true);
+    try {
+      const { text: answer, truncated } = await SAMPLE(turns, {cache:false, signal:chatCtl.signal, onText: ({text}) => { bubble.classList.remove('thinking'); bubble.textContent = text; const b = $('#msgs'); if (b) b.scrollTop = b.scrollHeight; }});
+      bubble.classList.remove('thinking'); bubble.textContent = answer;
+      S.chat.push({role:'assistant', model:'f-claude', text:answer});
+      if (truncated) pushChat({role:'notice', text:'The answer was cut short. Ask for less at a time.'});
+    } catch (e) {
+      if (e && e.text) { bubble.classList.remove('thinking'); bubble.textContent = e.text; S.chat.push({role:'assistant', model:'f-claude', text:e.text}); }
+      else { const el = bubble.closest('.msg'); if (el) el.remove(); }
+      if (e && e.code !== 'cancelled') pushChat({role:'notice', text:sampleErrorCopy(e)});
+      if (e && DENY.includes(e.code)) hideClaude();
+    } finally { chatCtl = null; setSendBtn(false); }
+    return;
+  }
+  if (f && f.run === 'pollchat') { await pollChatSend(); return; }
+  if (f) {
+    const p = PROV[f.prov];
+    pushChat({role:'notice', text:`Not sent. This page cannot reach outside services, so ${f.name} only works in the hosted version (free limit: ${f.limit || p.limit}). Pick gpt-oss-20b under Free APIs to get a real answer now.`});
+    return;
+  }
+  const m = byId[sel], v = curVariant(m);
+  pushChat({role:'notice', text:`Not sent: no GPU is connected yet. With one, this message goes to ${m.name} (${v.p}, about ${v.gb} GB) through an OpenAI-compatible server such as vLLM, with a ${fmtCtx(S.chatCtx || 32768)} context window. Pick gpt-oss-20b under Free APIs to get a real answer now.`});
+}
+
+/* ---------- MODELS ---------- */
+function viewModels(){
+  const counts = c => c === 'all' ? M.length : M.filter(m => m.cat === c).length;
+  return `
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow">Library · ${M.length} models · all under ${CAP} GB VRAM</p>
+      <h1 class="display d-md">Model library</h1>
+      <p class="lede">Every model here has downloadable weights. Each version shows its estimated VRAM against your ${S.gpu} GB ${esc(gpuInfo().card)}. Free APIs that need no GPU are listed after the models. <a href="#benchmarks">See how they rank →</a></p>
+    </header>
+    <div class="filters" role="group" aria-label="Filter models">
+      ${['all', ...CAT_ORDER].map(c => `<button type="button" class="fchip" data-fcat="${c}" aria-pressed="${S.filters.cat === c}">${c === 'all' ? 'All' : CAT_LABEL[c]}<span class="n">${counts(c)}</span></button>`).join('')}
+      <label class="tog"><input type="checkbox" id="f-fit"${S.filters.fit ? ' checked' : ''}>Fits my GPU</label>
+      <label class="tog"><input type="checkbox" id="f-com"${S.filters.commercial ? ' checked' : ''}>Commercial use allowed</label>
+    </div>
+    <div class="mgrid" id="mgrid">${modelCards()}</div>
+    ${freeSectionHTML()}
+    ${footHTML()}
+  </div>`;
+}
+function modelCards(){
+  const f = S.filters;
+  const list = M.filter(m => (f.cat === 'all' || m.cat === f.cat) && (!f.fit || minGB(m) <= S.gpu) && (!f.commercial || m.lic !== 'nc'));
+  if (!list.length) return `<p class="empty">No models match these filters. Turn one off, or pick a bigger GPU at the top.</p>`;
+  return list.map(m => `
+    <article class="mcard">
+      <div class="thumb"><canvas data-thumb="${m.id}" data-hover aria-hidden="true"></canvas><div class="tags"><span class="tag">${CAT_LABEL[m.cat]}</span>${tagsHTML(m)}</div></div>
+      <div class="mbody">
+        <div><h3>${esc(m.name)}</h3><p class="mmeta">${esc(m.maker)} · ${esc(m.params)} · ${esc(m.date)}</p></div>
+        <p class="mblurb">${esc(m.blurb)}</p>
+        <div class="vars">${m.variants.map(v => `<div class="var"><span class="p" title="${esc(v.p)}">${esc(v.p)}</span><div class="bar" aria-hidden="true"><i class="${v.gb > S.gpu ? 'over' : ''}" style="width:${v.gb / CAP * 100}%"></i><b style="left:${S.gpu / CAP * 100}%"></b></div><span class="gb ${fitClass(v.gb)}">≈${v.gb} GB</span></div>`).join('')}</div>
+        <div>${licHTML(m)}</div>
+        ${m.licNote ? `<p class="lic-note">${esc(m.licNote)}</p>` : ''}
+        <div class="mfoot"><a class="lnk" href="https://huggingface.co/models?search=${encodeURIComponent(m.q)}" target="_blank" rel="noopener">Find on Hugging Face ↗</a><a class="btn btn-accent" href="#${studioFor(m.cat)}" data-use="${m.id}">Open in studio</a></div>
+      </div>
+    </article>`).join('');
+}
+
+/* ---------- BENCHMARKS ---------- */
+/* Numbers copied from public leaderboards on the read date below. Nothing here is estimated except the "fits in 100 GB" grouping for language models. */
+const BENCH_DATE = 'Nov 17, 2026';
+const GROUP_COLOR = {lib:'var(--c-lib)', open:'var(--c-open)', ref:'var(--c-ref)'};
+const ELO_COLS = [['n','Model'],['e','Elo','num'],['ci','95% CI','num'],['v','Votes','num'],['d','Released']];
+const ELO_RANK_COLS = [['r','#','num'], ...ELO_COLS];
+const T_ROWS = [
+  {n:'Nanbeige4.3-33B', by:'Nanbeige', p:'33B', ii:20, sp:null, tm:null, g:'open', run:'Dense 33B · fits at 8-bit'},
+  {n:'Qwen3.8 27B (Xhigh)', s:'Qwen3.8 27B', by:'Alibaba', p:'27B', ii:20, sp:48, tm:37.8, g:'lib', lib:'qwen38-27b'},
+  {n:'Nemotron 3.5 Super VL', by:'NVIDIA', p:'120B · 12B active', ii:14, sp:295, tm:4.6, g:'open', run:'Fits at 4-bit (about 66 GB)'},
+  {n:'Muse Glimmer (High)', s:'Muse Glimmer', by:'Meta', p:'30B', ii:6, sp:90, tm:4.8, g:'open'},
+  {n:'Nemotron 3.5 Lightning', by:'NVIDIA', p:'31.6B · 3.6B active', ii:6, sp:280, tm:3.9, g:'open'},
+];
+const IMG = [
+  {r:1, n:'H3-Image', by:'MiniMax', e:1066, ci:'±14', v:3258, d:'Nov 2026', g:'open', run:'33.1B · BF16 weights 68.7 GB plus a separate text encoder; FP8 fits a 48 GB card', lic:'MiniMax H3-Image Community License'},
+  {r:2, n:'Qwen-Image-2.1', by:'Alibaba Qwen', e:1047, ci:'±12', v:6312, d:'Sep 2026', g:'lib', lib:'qwen-image-21'},
+  {r:3, n:'FLUX 3 Image Klein', by:'Black Forest Labs', e:1041, ci:'±11', v:5791, d:'Oct 2026', g:'open', run:'5.6B · about 11 GB in BF16', lic:'FLUX community license (check terms)'},
+  {r:4, n:'Fibo 2.0', by:'Bria', e:1037, ci:'±11', v:5741, d:'Oct 2026', g:'open', run:'8B · about 16 GB in BF16', lic:'CC BY-NC 4.0, non-commercial'},
+  {r:5, n:'Ideogram 4.0 (Quality)', s:'Ideogram 4.0', by:'Ideogram', e:1026, ci:'±10', v:11275, d:'Jun 2026', g:'open', run:'9.3B · the nf4 build fits a 24 GB card', lic:'Non-commercial weights'},
+];
+const T2V = [
+  {r:1, n:'MiniMax H3 (768p)', by:'MiniMax', e:1159, ci:'±13', v:8225, d:'Jul 2026', g:'lib', lib:'minimax-h3'},
+  {r:2, n:'Pika H3 Flex', by:'Pika', e:1124, ci:'±14', v:5136, d:'Oct 2026', g:'open', run:'LoRA adapters on top of MiniMax H3, so it needs the H3 base weights and the same VRAM', lic:'MiniMax H3 Community License'},
+  {r:3, n:'LTX-2.5 Fast', s:'LTX-2.5', by:'Lightricks', e:939, ci:'±14', v:5170, d:'Aug 2026', g:'lib', lib:'ltx-25', note:'Fast and Pro modes score 939 and 938'},
+  {r:5, n:'LTX-2.3 Pro', s:'LTX-2.3', by:'Lightricks', e:885, ci:'±15', v:5640, d:'Mar 2026', g:'open', run:'The previous LTX release'},
+];
+const I2V = [
+  {r:1, n:'MiniMax H3 (768p)', by:'MiniMax', e:1134, ci:'±14', v:6594, d:'Jul 2026', g:'lib', lib:'minimax-h3'},
+  {r:2, n:'Hyperflow H3', by:'Community', e:1119, ci:'±14', v:6853, d:'Sep 2026', g:'open', run:'A compressed few-step version of MiniMax H3. Not an official MiniMax release'},
+  {r:3, n:'Pika H3 Flex', by:'Pika', e:1114, ci:'±15', v:4584, d:'Oct 2026', g:'open', run:'LoRA adapters on top of MiniMax H3'},
+  {r:4, n:'LTX-2.5 Pro', s:'LTX-2.5', by:'Lightricks', e:912, ci:'±15', v:4911, d:'Aug 2026', g:'lib', lib:'ltx-25', note:'Pro and Fast modes both score 912'},
+  {r:6, n:'LTX-2.3 Pro', s:'LTX-2.3', by:'Lightricks', e:837, ci:'±16', v:4968, d:'Mar 2026', g:'open', run:'The previous LTX release'},
+];
+const TTS = [
+  {r:1, n:'Fish Audio Drama 3', s:'Fish Drama 3', by:'Fish Audio', e:1279, ci:'±17', v:1861, d:'Oct 2026', g:'open', run:'35B MoE, 3B active · a 48 GB card is advised', lic:'Fish Audio Community License; free commercial use under $500K revenue'},
+  {r:3, n:'Breeze TTS 2', by:'BreezeBlue', e:1229, ci:'±12', v:3006, d:'Aug 2026', g:'open', run:'3B', lic:'Non-commercial weights'},
+  {r:4, n:'Ming-3.0-tts', by:'inclusionAI', e:1182, ci:'±13', v:2712, d:'Oct 2026', g:'open', run:'The open tiny version is 7.9B MoE with 1.3B active', lic:'MIT'},
+  {r:5, n:'Phonon 31M (English)', s:'Phonon 31M', by:'Phonon', e:1109, ci:'±13', v:2000, d:'Oct 2026', g:'open', run:'31M parameters · English only'},
+  {r:6, n:'Step Audio EditX (Mar 2026)', s:'Step-Audio-EditX', by:'StepFun', e:1102, ci:'±11', v:2649, d:'Feb 2026', g:'lib', lib:'step-audio-editx', note:'Tied with Fish Audio S2 Pro at 1,102'},
+];
+const R3D = [
+  {r:2, n:'TRELLIS-3DGS', s:'TRELLIS', by:'Microsoft', e:1398, v:4844, g:'open', run:'Gaussian-splat output. The same model with mesh output scores 1,301', lic:'MIT'},
+  {r:8, n:'Hunyuan3D-2', by:'Tencent', e:1283, v:5249, g:'open', lic:'Tencent Hunyuan Community License'},
+  {r:9, n:'Hunyuan3D-2.1', by:'Tencent', e:1271, v:2226, g:'lib', lib:'hunyuan3d-21'},
+  {r:10, n:'InstantMesh', by:'TencentARC', e:1269, v:11616, g:'open'},
+  {r:11, n:'SAM-3D-Objects-3DGS', s:'SAM 3D Objects', by:'Meta', e:1268, v:1426, g:'open', lic:'SAM License'},
+];
+const TOP_NOTE = 'Only models you can download and run in up to 100 GB of VRAM are shown. Commercial and closed models are left out. Modes or previews of the same model count once, at their best score.';
+const BENCH = {
+  text:{label:'Language', groups:{lib:'In your library', open:'Not in your library yet'},
+    src:[['Artificial Analysis, open source models','https://artificialanalysis.ai/models/open-source']],
+    method:TOP_NOTE + ' The Intelligence Index v5.0.1 combines 9 evaluations. Speed and time per task are measured on API providers, not on your GPU. Fit is estimated from parameter count.',
+    take:'Nanbeige4.3-33B and Qwen3.8 27B tie for first at 20. Nemotron 3.5 Super VL scores 14 and is by far the fastest at 295 tokens per second. gpt-oss-120b, at 4, is no longer in the top five.',
+    cards:[
+      {title:'Intelligence', sub:'Artificial Analysis Intelligence Index · Higher is better', key:'ii', vlabel:'Intelligence Index', max:25, step:5, wide:true},
+      {title:'Output speed', sub:'Output tokens per second on API providers · Higher is better', key:'sp', vlabel:'Tokens per second', max:300, step:100},
+      {title:'Time per task', sub:'Minutes per Intelligence Index task · Lower is better', key:'tm', vlabel:'Minutes per task', max:40, step:10, asc:true, fmt:v => v.toFixed(1)},
+    ],
+    rows:T_ROWS, cols:[['n','Model'],['by','Creator'],['ii','Intelligence','num'],['p','Parameters'],['sp','Tokens/s','num'],['tm','Min per task','num']]},
+  image:{label:'Image', groups:{lib:'In your library', open:'Not in your library yet'},
+    src:[['Artificial Analysis Image Arena, text to image','https://artificialanalysis.ai/image/leaderboard/text-to-image']],
+    method:TOP_NOTE + ' Elo ratings come from blind pairwise votes by people. # is the rank among open-weights models.',
+    take:'H3-Image leads the open image models at 1,066 Elo. Qwen-Image-2.1 (1,047) is the only one of the five already in your library. FLUX.2 [dev] and Z-Image Turbo are no longer in the top five.',
+    cards:[{title:'Text to image', sub:'AA-Image-T2I v2.1 · Elo · Higher is better · Axis starts at 900', key:'e', vlabel:'Elo', base:900, max:1100, step:50, wide:true, rows:IMG, cols:ELO_RANK_COLS}]},
+  video:{label:'Video', groups:{lib:'In your library', open:'Not in your library yet'},
+    src:[['Artificial Analysis Video Arena, text to video','https://artificialanalysis.ai/video/leaderboard/text-to-video'],['image to video','https://artificialanalysis.ai/video/leaderboard/image-to-video']],
+    method:TOP_NOTE + ' Elo ratings come from blind pairwise votes on videos with audio. # is the rank among open-weights models. Only four open models are ranked for text to video.',
+    take:'MiniMax H3 leads at 1,159 Elo, level with the closed Seedance 2.5 (1,156). For image to video, Hyperflow H3 and Pika H3 Flex, both built on MiniMax H3, come next.',
+    cards:[
+      {title:'Text to video', sub:'AA-Video-T2V v2.1, with audio · Elo · Higher is better · Axis starts at 800', key:'e', vlabel:'Elo', base:800, max:1200, step:100, rows:T2V, cols:ELO_RANK_COLS},
+      {title:'Image to video', sub:'AA-Video-I2V v2.1, with audio · Elo · Higher is better · Axis starts at 800', key:'e', vlabel:'Elo', base:800, max:1200, step:100, rows:I2V, cols:ELO_RANK_COLS},
+    ]},
+  speech:{label:'Speech', groups:{lib:'In your library', open:'Not in your library yet'},
+    src:[['Artificial Analysis Speech Arena, provider voices','https://artificialanalysis.ai/text-to-speech/leaderboard']],
+    method:TOP_NOTE + ' Elo ratings come from blind pairwise votes on each provider’s own voices. # is the rank among open-weights models.',
+    take:'Fish Audio Drama 3 leads at 1,279 Elo. Step-Audio-EditX (1,102) is the only library model in the top five. Kokoro and Chatterbox, the Hebrew voice, rank lower.',
+    cards:[{title:'Text to speech', sub:'AA Speech Arena · Elo · Higher is better · Axis starts at 1,000', key:'e', vlabel:'Elo', base:1000, max:1300, step:100, wide:true, rows:TTS, cols:ELO_RANK_COLS}]},
+  '3d':{label:'3D', groups:{lib:'In your library', open:'Not in your library yet'},
+    src:[['3D Arena on Hugging Face','https://huggingface.co/spaces/3d-arena/3d-arena']],
+    method:TOP_NOTE + ' 3D Arena ranks image-to-3D models by human votes between two results. New models start at 1,200, where the axis starts. # is the overall rank, including commercial models.',
+    take:'TRELLIS with Gaussian-splat output leads at 1,398. Hunyuan3D 2.1 (1,271) is the only library model in the top five. TRELLIS.2 (1,128) and TripoSR (1,080) are not.',
+    cards:[{title:'Image to 3D', sub:'3D Arena · Elo-style score · Higher is better · Axis starts at 1,200', key:'e', vlabel:'Score', base:1200, max:1400, step:50, wide:true, rows:R3D, cols:[['r','#','num'],['n','Model'],['by','Creator'],['e','Score','num'],['v','Votes','num']]}]},
+};
+const fmtNum = v => Number(v).toLocaleString('en-US');
+function tipText(r, c, groups){
+  const f = c.fmt || fmtNum; const v = r[c.key];
+  const lines = [r.n, `${c.vlabel}: ${f(v)}${r.ci && r.ci !== 'Anchor' ? ' ' + r.ci : ''}`];
+  if (r.v) lines.push(fmtNum(r.v) + ' votes');
+  if (r.p) lines.push(r.p + ' parameters');
+  if (r.d) lines.push('Released ' + r.d);
+  const m = r.lib && anyById(r.lib);
+  if (m && m.variants) lines.push(`In your library · about ${minGB(m)}${maxGB(m) !== minGB(m) ? '–' + maxGB(m) : ''} GB VRAM`);
+  else lines.push(groups[r.g]);
+  if (r.run) lines.push(r.run);
+  if (r.lic) lines.push('License: ' + r.lic);
+  if (r.note) lines.push(r.note);
+  return lines.join('\n');
+}
+function chartHTML(c, rows, groups){
+  const f = c.fmt || fmtNum; const base = c.base || 0, span = c.max - base;
+  const data = rows.filter(r => r[c.key] != null).sort((a, b) => c.asc ? a[c.key] - b[c.key] : b[c.key] - a[c.key]);
+  const ticks = []; for (let t = base; t <= c.max + 1e-9; t += c.step) ticks.push(t);
+  const y = v => (Math.min(v, c.max) - base) / span * 100;
+  return `<div class="cwrap"><div class="chart" style="--n:${data.length}">
+    <div class="yax" aria-hidden="true"><div class="in">${ticks.map(t => `<span style="bottom:${y(t)}%">${fmtNum(t)}</span>`).join('')}</div></div>
+    <div class="plot"><div class="in">${ticks.map(t => `<i class="gl" style="bottom:${y(t)}%"></i>`).join('')}
+      <div class="cols">${data.map(r => `<button type="button" class="col" data-tip="${esc(tipText(r, c, groups))}" aria-label="${esc(r.n)}, ${esc(c.vlabel)} ${esc(f(r[c.key]))}"><span class="v">${esc(f(r[c.key]))}</span><span class="bar g-${r.g}" style="height:${Math.max(.6, y(r[c.key]))}%"></span></button>`).join('')}</div>
+    </div></div>
+    <div class="xl" aria-hidden="true">${data.map(r => `<span class="${r.g === 'lib' ? 'lib' : ''}"><b>${esc(r.s || r.n)}</b></span>`).join('')}</div>
+  </div></div>`;
+}
+function tableHTML(rows, cols, groups){
+  const cell = (r, k) => {
+    if (k === 'n') { const m = r.lib && anyById(r.lib); return esc(r.n) + (m ? ` <a class="tag tag-new" href="#${studioFor(m.cat)}" data-use="${m.id}">In studio</a>` : '') + [r.run, r.lic && 'License: ' + r.lic, r.note].filter(Boolean).map(x => `<br><small class="muted">${esc(x)}</small>`).join(''); }
+    const v = r[k]; return v == null ? '–' : esc(typeof v === 'number' ? fmtNum(v) : v);
+  };
+  return `<details class="tview"><summary>Show all ${rows.length} as a table</summary><div class="btable-wrap"><table class="bt">
+    <thead><tr>${cols.map(([k, l, cl]) => `<th scope="col"${cl ? ' class="num"' : ''}>${l}</th>`).join('')}<th scope="col">Group</th></tr></thead>
+    <tbody>${rows.map(r => `<tr>${cols.map(([k, l, cl]) => `<td${cl ? ' class="num"' : ''}>${cell(r, k)}</td>`).join('')}<td><span class="grp"><i style="background:${GROUP_COLOR[r.g]}"></i>${esc(groups[r.g])}</span></td></tr>`).join('')}</tbody>
+  </table></div></details>`;
+}
+function viewBench(){
+  const tab = BENCH[S.btab] ? S.btab : 'text'; const b = BENCH[tab];
+  const used = new Set((b.rows || b.cards.flatMap(c => c.rows)).map(r => r.g));
+  return `
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow">Benchmarks · top 5 you can run · read ${BENCH_DATE}</p>
+      <h1 class="display d-md">How the models rank</h1>
+      <p class="lede">The five strongest models in each category that you can download and run yourself in up to 100 GB of VRAM, with scores copied from public leaderboards. Lime bars are already in your library; blue bars are not yet. Hover or tap a bar for details.</p>
+    </header>
+    <div class="btabs" role="group" aria-label="Benchmark category">${Object.entries(BENCH).map(([k, v]) => `<button type="button" data-btab="${k}" aria-pressed="${k === tab}">${v.label}</button>`).join('')}</div>
+    <section class="bsec" aria-label="${esc(b.label)} benchmarks">
+      <div class="take"><p class="eyebrow">Takeaway</p><p>${esc(b.take)}</p></div>
+      <div class="blegend">${Object.entries(b.groups).filter(([g]) => used.has(g)).map(([g, l]) => `<span><i style="background:${GROUP_COLOR[g]}"></i>${esc(l)}</span>`).join('')}</div>
+      <div class="bgrid">${b.cards.map(c => `<article class="bcard${c.wide ? ' wide' : ''}"><header><h3><i aria-hidden="true"></i>${esc(c.title)}</h3><p class="sub">${esc(c.sub)}</p></header>${chartHTML(c, c.rows || b.rows, b.groups)}${c.rows ? tableHTML(c.rows, c.cols, b.groups) : ''}</article>`).join('')}</div>
+      ${b.rows ? tableHTML(b.rows, b.cols, b.groups) : ''}
+      <p class="bsrc">Source: ${b.src.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join(' · ')}, read ${BENCH_DATE}. ${esc(b.method)}</p>
+    </section>
+    ${footHTML()}
+  </div>`;
+}
+
+/* ---------- render & hydrate ---------- */
+const app = $('#app');
+const VIEWS = ['explore','video','image','3d','audio','chat','models','benchmarks'];
+S.btab = store.get('btab', 'text');
+function render(){
+  stopPlaying();
+  $$('.nav a').forEach(a => a.dataset.view === S.view ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  const v = S.view;
+  const tipEl = $('#tip'); if (tipEl) tipEl.hidden = true;
+  app.innerHTML = v === 'explore' ? viewExplore() : v === 'models' ? viewModels() : v === 'chat' ? viewChat() : v === 'benchmarks' ? viewBench() : viewStudio(v);
+  $('#gpu').innerHTML = gpuOptions();
+  hydrate();
+}
+function hydrateThumbs(root = app){
+  $$('canvas[data-thumb]', root).forEach(c => {
+    if (c._a) return; const m = byId[c.dataset.thumb];
+    const hov = c.hasAttribute('data-hover') && (m.cat === 'video' || m.cat === '3d');
+    const host = c.closest('.feat, .mcard');
+    const animated = host && (m.cat === 'video' || m.cat === '3d');
+    addAnim(c, t => paintModelThumb(fit(c), c.width, c.height, m, t), animated ? 'hover' : 'static', animated ? host : null);
+  });
+}
+function hydrate(){
+  hydrateThumbs();
+  const hf = $('#hero-field'); if (hf) addAnim(hf, t => field(fit(hf), hf.width, hf.height, t), 'always');
+  $$('canvas[data-art]').forEach(c => {
+    const k = c.dataset.art; const host = c.closest('.scard');
+    const fn = {
+      video: t => scene(fit(c), 0, 0, c.width, c.height, 7, t, 0),
+      image: t => scene(fit(c), 0, 0, c.width, c.height, 19, 0, 5),
+      '3d': t => mesh(fit(c), c.width, c.height, 5, t, {scale:.27, cy:.4}),
+      speech: () => wave(fit(c), c.width, c.height, 97, 'speech', .55),
+      music: () => wave(fit(c), c.width, c.height, 113, 'music', .35),
+      chat: () => chatArt(fit(c), c.width, c.height, 31),
+    }[k];
+    addAnim(c, fn, k === 'video' || k === '3d' ? 'hover' : 'static', host);
+  });
+  const sb = $('#studio-bg');
+  if (sb) {
+    const v = S.view;
+    const fn = v === 'video' ? t => scene(fit(sb), 0, 0, sb.width, sb.height, 7, t * 1.6, 0)
+      : v === 'image' ? () => scene(fit(sb), 0, 0, sb.width, sb.height, 19, 0, 5)
+      : v === '3d' ? t => mesh(fit(sb), sb.width, sb.height, 5, t, {scale:.22, cy:.36})
+      : t => heroWave(fit(sb), sb.width, sb.height, t);
+    addAnim(sb, fn, v === 'image' ? 'static' : 'always');
+  }
+  $$('#feed .gen').forEach(hydrateGen);
+  if (userGens.some(g => g.status === 'running')) tick();
+  const msgs = $('#msgs'); if (msgs) msgs.scrollTop = msgs.scrollHeight;
+}
+function rerenderDock(){
+  const slot = $('#dock-slot'); if (!slot) return;
+  const ta = $('#prompt'); if (ta) S.drafts[$('#dock').dataset.mcat] = ta.value;
+  slot.innerHTML = dockHTML(S.view); hydrateThumbs(slot);
+}
+function route(){
+  const h = decodeURIComponent(location.hash.slice(1));
+  S.view = VIEWS.includes(h) ? h : 'explore';
+  render(); window.scrollTo(0, 0);
+}
+function setGPU(gb){
+  S.gpu = gb; store.set('gpu', gb); S.prec = {};
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+  toast(`Sized for ${gb} GB · ${gpuInfo().card}`);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'gpu' || t.hasAttribute('data-gpu')) { setGPU(+t.value); return; }
+  if (t.id === 'opt-prec') { const m = byId[S.sel[$('#dock').dataset.mcat]]; S.prec[m.id] = t.value; const v = curVariant(m); $('#meter').innerHTML = meterHTML(m, v); t.closest('.chip').classList.toggle('warn', v.gb > S.gpu); return; }
+  if (t.matches('#dock [data-opt]')) { const mc = $('#dock').dataset.mcat; (S.opts[mc] = S.opts[mc] || {})[t.dataset.opt] = t.value; return; }
+  if (t.id === 'ref-input' && t.files && t.files[0]) {
+    const file = t.files[0];
+    const img = new Image(); const url = URL.createObjectURL(file);
+    img.onload = () => { const s = 320 / Math.max(img.width, img.height); const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.width * Math.min(1, s))); c.height = Math.max(1, Math.round(img.height * Math.min(1, s))); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); S.ref = {thumb:c.toDataURL('image/jpeg', .8), name:file.name}; S.refFile = file; URL.revokeObjectURL(url); rerenderDock(); toast('Reference image added.'); };
+    img.onerror = () => { URL.revokeObjectURL(url); toast('That file could not be read as an image. Try a JPG or PNG.'); };
+    img.src = url; return;
+  }
+  if (t.name === 'chatmodel') { S.sel.chat = t.value; store.set('sel', S.sel); const y = window.scrollY; render(); window.scrollTo(0, y); return; }
+  if (t.id === 'chat-prec') { const m = byId[S.sel.chat]; S.prec[m.id] = t.value; $('#chat-meter').innerHTML = meterHTML(m, curVariant(m)); return; }
+  if (t.id === 'f-fit') { S.filters.fit = t.checked; $('#mgrid').innerHTML = modelCards(); hydrateThumbs($('#mgrid')); return; }
+  if (t.id === 'f-com') { S.filters.commercial = t.checked; $('#mgrid').innerHTML = modelCards(); hydrateThumbs($('#mgrid')); return; }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'ctx') { S.chatCtx = +t.value; $('#ctx-out').textContent = fmtCtx(+t.value); }
+  if (t.id === 'temp') { S.chatTemp = +t.value; $('#temp-out').textContent = (+t.value).toFixed(1); }
+  if (t.id === 'sys') S.chatSys = t.value;
+  if (t.id === 'prompt') S.drafts[$('#dock').dataset.mcat] = t.value;
+});
+document.addEventListener('click', e => {
+  const t = e.target;
+  const use = t.closest('[data-use]'); if (use) useModel(use.dataset.use);
+  const modeLink = t.closest('a[data-mode]'); if (modeLink) { S.audioMode = modeLink.dataset.mode; store.set('audioMode', S.audioMode); }
+  const bt = t.closest('[data-btab]'); if (bt) { S.btab = bt.dataset.btab; store.set('btab', S.btab); const y = window.scrollY; render(); window.scrollTo(0, y); return; }
+  const run = t.closest('[data-run]'); if (run) { const mc = $('#dock').dataset.mcat; const ta = $('#prompt'); if (ta) S.drafts[mc] = ta.value; S.runOn[mc] = run.dataset.run; store.set('runOn', S.runOn); rerenderDock(); return; }
+  if (t.closest('#enhance')) { enhance(); return; }
+  if (t.closest('#model-btn')) { const pop = $('#model-pop'); pop.hidden = !pop.hidden; $('#model-btn').setAttribute('aria-expanded', String(!pop.hidden)); if (!pop.hidden) { hydrateThumbs(pop); pop.scrollTop = 0; try { pop.scrollIntoView({block:'nearest'}); } catch {} const sel = pop.querySelector('[aria-selected="true"]'); if (sel) sel.focus({preventScroll:true}); } return; }
+  const pick = t.closest('[data-pick]'); if (pick) { useModel(pick.dataset.pick); rerenderDock(); $('#model-btn').focus(); return; }
+  if (!t.closest('#model-pop') && $('#model-pop') && !$('#model-pop').hidden) { $('#model-pop').hidden = true; $('#model-btn').setAttribute('aria-expanded', 'false'); }
+  const seg = t.closest('.seg [data-mode]'); if (seg) { const ta = $('#prompt'); if (ta) S.drafts[$('#dock').dataset.mcat] = ta.value; S.audioMode = seg.dataset.mode; store.set('audioMode', S.audioMode); const y = window.scrollY; render(); window.scrollTo(0, y); return; }
+  if (t.closest('#ref-clear')) { S.ref = null; S.refFile = null; rerenderDock(); return; }
+  const pl = t.closest('[data-play]'); if (pl) { play(pl.dataset.play); return; }
+  const fc = t.closest('[data-fcat]'); if (fc) { S.filters.cat = fc.dataset.fcat; $$('[data-fcat]').forEach(b => b.setAttribute('aria-pressed', String(b === fc))); $('#mgrid').innerHTML = modelCards(); hydrateThumbs($('#mgrid')); return; }
+  if (t.closest('#connect')) { fillSettings(); $('#drawer').hidden = false; $('#drawer [data-close]').focus(); return; }
+  if (t.closest('#hf-save')) { const v = ($('#hf-token').value || '').trim(); if (v && !/^hf_/.test(v)) { $('#hf-status').textContent = 'That does not look like a Hugging Face token. It should start with hf_.'; return; } store.set('hfToken', v); spaceClients = {}; fillSettings(); toast(v ? 'Token saved on this device.' : 'Token removed.'); return; }
+  if (t.closest('#hf-clear')) { store.set('hfToken', ''); spaceClients = {}; fillSettings(); toast('Token removed.'); return; }
+  if (t.closest('#install')) { if (deferredInstall) { deferredInstall.prompt(); deferredInstall.userChoice.finally(() => { deferredInstall = null; $('#install').hidden = true; }); } return; }
+  const rt = t.closest('[data-retry]'); if (rt) { const g = userGens.find(x => x.id === rt.dataset.retry); if (g) runReal(g); return; }
+  if (t.closest('[data-close]') || t.id === 'drawer') { $('#drawer').hidden = true; $('#connect').focus(); return; }
+});
+document.addEventListener('submit', e => {
+  if (e.target.id === 'dock') { e.preventDefault(); generate(); }
+  if (e.target.id === 'composer') { e.preventDefault(); sendChat(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const pop = $('#model-pop'); if (pop && !pop.hidden) { pop.hidden = true; $('#model-btn').setAttribute('aria-expanded', 'false'); $('#model-btn').focus(); }
+    if (!$('#drawer').hidden) { $('#drawer').hidden = true; $('#connect').focus(); }
+  }
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && e.target.id === 'prompt') { e.preventDefault(); generate(); }
+  if (e.key === 'Enter' && !e.shiftKey && e.target.id === 'chat-input') { e.preventDefault(); if (!chatCtl) sendChat(); }
+});
+/* chart tooltip: hover, tap or keyboard focus on a column */
+function showTip(el){
+  const tip = $('#tip'); const text = el.getAttribute('data-tip'); if (!tip || !text) return;
+  tip.textContent = '';
+  text.split('\n').forEach((line, i) => { const e = document.createElement(i === 0 ? 'b' : 'span'); e.textContent = line; tip.appendChild(e); });
+  tip.hidden = false;
+  const r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+  const x = Math.max(8, Math.min(innerWidth - tw - 8, r.left + r.width / 2 - tw / 2));
+  let yy = r.top + r.height * .35 - th - 8; if (yy < 72) yy = r.bottom + 8;
+  tip.style.left = x + 'px'; tip.style.top = Math.min(innerHeight - th - 8, yy) + 'px';
+}
+const hideTip = () => { const tip = $('#tip'); if (tip) tip.hidden = true; };
+document.addEventListener('pointerover', e => { const c = e.target.closest && e.target.closest('.col[data-tip]'); if (c) showTip(c); });
+document.addEventListener('pointerout', e => { if (e.target.closest && e.target.closest('.col[data-tip]')) hideTip(); });
+document.addEventListener('focusin', e => { const c = e.target.closest && e.target.closest('.col[data-tip]'); if (c) showTip(c); });
+document.addEventListener('focusout', e => { if (e.target.closest && e.target.closest('.col[data-tip]')) hideTip(); });
+addEventListener('scroll', hideTip, {passive:true});
+
+addEventListener('hashchange', route);
+route();
+})();
+</script>
+
+
+</body>
+</html>
