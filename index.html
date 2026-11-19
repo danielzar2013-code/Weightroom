@@ -33,6 +33,13 @@
   --r-s:8px; --r-m:14px; --r-l:22px;
 }
 [hidden]{display:none!important}
+.tag-rank{background:var(--surface-3);color:var(--fg);font-family:var(--f-mono);letter-spacing:0;margin-right:6px}
+.tag-rank.r3{background:var(--fg);color:var(--bg)}
+.tag-rank.r1{background:var(--accent);color:var(--accent-ink)}
+.mcard .tags .tag-rank{margin-right:0}
+.rank-line{margin:0;font-size:12.5px;color:var(--muted)}
+.rank-line b{color:var(--accent);font-family:var(--f-mono)}
+.rank-line .lnk{font-size:12.5px}
 .mcp-tabs{display:flex;gap:4px;justify-content:center;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);padding:0 16px}
 .mcp-tabs::-webkit-scrollbar{display:none}
 .mcp-tabs button{border:0;background:none;color:var(--muted);font-weight:600;font-size:14px;padding:12px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
@@ -49,7 +56,7 @@
 .btn.btn-white:hover{background:#fff}
 .btn.btn-claude{background:#d97757;border-color:#d97757;color:#fff;box-shadow:inset 0 -3px 0 rgba(0,0,0,.16)}
 .btn.btn-claude:hover{background:#e3876a}
-@media (max-width:1500px) and (min-width:901px){.gpu-pill .lbl{display:none}.nav a{padding:7px 10px}}
+@media (max-width:1500px) and (min-width:901px){.gpu-pill .lbl{display:none}.nav a{padding:7px 9px}.top-actions .btn .t{display:none}.top-inner{gap:12px}}
 .mcp-status{margin:0;font-size:13px;display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
 .mcp-status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--dim)}
 .mcp-status.on::before{background:var(--ok);box-shadow:0 0 0 4px color-mix(in oklab,var(--ok) 25%,transparent)}
@@ -1215,10 +1222,10 @@ function popHTML(mcat){
     <canvas data-thumb="${thumbOf(f, mcat)}" aria-hidden="true"></canvas>
     <span><b>${esc(f.name)}</b><small>${esc(sub)}</small></span>
     <span class="fit fit-ok">Free</span></button>`; }).join('');
-  const lib = M.filter(m => m.cat === mcat);
+  const lib = byRank(M.filter(m => m.cat === mcat));
   const libItems = lib.map(m => { const v = bestVariant(m); return `<button type="button" class="pop-item" role="option" data-pick="${m.id}" aria-selected="${!freeSel && S.sel[mcat] === m.id}">
     <canvas data-thumb="${m.id}" aria-hidden="true"></canvas>
-    <span><b>${esc(m.name)} ${tagsHTML(m)}</b><small>${esc(m.maker)} · ${esc(m.params)}</small></span>
+    <span><b>${rankPill(m)}${esc(m.name)} ${tagsHTML(m)}</b><small>${esc(m.maker)} · ${esc(m.params)}${rankOf(m) ? '' : ' · not ranked yet'}</small></span>
     <span class="fit ${fitClass(v.gb)}">${esc(v.p)}<br>≈${v.gb} GB</span></button>`; }).join('');
   return `<p class="pop-head">Free APIs · ${CAT_LABEL[mcat]}</p>${freeItems}<p class="pop-head">${CAT_LABEL[mcat]} library · ${lib.length} models · sized for ${S.gpu} GB</p>${libItems}<a class="pop-foot lnk" href="#models">Compare every model →</a>`;
 }
@@ -2000,7 +2007,7 @@ function viewChat(){
           <p class="mgroup">Free APIs</p>
           ${FREE_OPTS.filter(f => f.cat === 'chat').map(f => { const p = PROV[f.prov]; return `<label class="mopt"><input type="radio" name="chatmodel" value="${f.id}"${f.id === m.id ? ' checked' : ''}><span><b>${esc(f.name)}${f.run || (f.prov === 'gemini' && GEMINI_PICK[f.id] && geminiKey()) ? ' <span class="tag tag-live">Works here</span>' : ''}</b><small>${esc(f.run ? p.name + ' · no key needed' : f.prov === 'gemini' && GEMINI_PICK[f.id] ? (geminiKey() ? p.name + ' · your key' : p.name + ' · add your free key in Settings') : p.name + ' · ' + p.key)}</small></span><span class="mono fit-ok">Free</span></label>`; }).join('')}
           <p class="mgroup">Your GPU</p>
-          ${M.filter(x => x.cat === 'chat').map(x => { const bv = bestVariant(x); return `<label class="mopt"><input type="radio" name="chatmodel" value="${x.id}"${x.id === m.id ? ' checked' : ''}><span><b>${esc(x.name)}</b><small>${esc(x.params)}</small></span><span class="mono ${fitClass(bv.gb)}">${esc(bv.p)} ≈${bv.gb} GB</span></label>`; }).join('')}
+          ${byRank(M.filter(x => x.cat === 'chat')).map(x => { const bv = bestVariant(x); return `<label class="mopt"><input type="radio" name="chatmodel" value="${x.id}"${x.id === m.id ? ' checked' : ''}><span><b>${rankPill(x)}${esc(x.name)}</b><small>${esc(x.params)}${rankOf(x) ? ' · ' + RANK[x.id] + ' on the Intelligence Index' : ' · not ranked yet'}</small></span><span class="mono ${fitClass(bv.gb)}">${esc(bv.p)} ≈${bv.gb} GB</span></label>`; }).join('')}
         </div>
         ${free ? `<div class="meter" id="chat-meter" style="border-top:0;padding-top:0">${freeMeterHTML(m, 'chat')}</div>` : `<div class="field"><label for="chat-prec">Precision</label><select id="chat-prec">${m.variants.map(x => `<option value="${esc(x.p)}"${x.p === v.p ? ' selected' : ''}>${esc(x.p)} · ≈${x.gb} GB${x.gb > S.gpu ? ' · over your card' : ''}</option>`).join('')}</select></div>
         <div class="meter" id="chat-meter" style="border-top:0;padding-top:0">${meterHTML(m, v)}</div>
@@ -2186,7 +2193,7 @@ function viewModels(){
     <header class="page-head">
       <p class="eyebrow">Library · ${M.length} models · all under ${CAP} GB VRAM</p>
       <h1 class="display d-md">Model library</h1>
-      <p class="lede">Every model here has downloadable weights. Each version shows its estimated VRAM against your ${S.gpu} GB ${esc(gpuInfo().card)}. Free APIs that need no GPU are listed after the models. <a href="#benchmarks">See how they rank →</a></p>
+      <p class="lede">Every model here has downloadable weights. Each category is sorted from best to worst on its public leaderboard (as of ${RANK_DATE}); models not on a leaderboard yet come last. Each version shows its estimated VRAM against your ${S.gpu} GB ${esc(gpuInfo().card)}. <a href="#benchmarks">See the benchmarks →</a></p>
     </header>
     <div class="filters" role="group" aria-label="Filter models">
       ${['all', ...CAT_ORDER].map(c => `<button type="button" class="fchip" data-fcat="${c}" aria-pressed="${S.filters.cat === c}">${c === 'all' ? 'All' : CAT_LABEL[c]}<span class="n">${counts(c)}</span></button>`).join('')}
@@ -2200,13 +2207,14 @@ function viewModels(){
 }
 function modelCards(){
   const f = S.filters;
-  const list = M.filter(m => (f.cat === 'all' || m.cat === f.cat) && (!f.fit || minGB(m) <= S.gpu) && (!f.commercial || m.lic !== 'nc'));
+  const list = byRank(M.filter(m => (f.cat === 'all' || m.cat === f.cat) && (!f.fit || minGB(m) <= S.gpu) && (!f.commercial || m.lic !== 'nc')));
   if (!list.length) return `<p class="empty">No models match these filters. Turn one off, or pick a bigger GPU at the top.</p>`;
   return list.map(m => `
     <article class="mcard">
-      <div class="thumb"><canvas data-thumb="${m.id}" data-hover aria-hidden="true"></canvas><div class="tags"><span class="tag">${CAT_LABEL[m.cat]}</span>${tagsHTML(m)}</div></div>
+      <div class="thumb"><canvas data-thumb="${m.id}" data-hover aria-hidden="true"></canvas><div class="tags">${rankPill(m)}<span class="tag">${CAT_LABEL[m.cat]}</span>${tagsHTML(m)}</div></div>
       <div class="mbody">
         <div><h3>${esc(m.name)}</h3><p class="mmeta">${esc(m.maker)} · ${esc(m.params)} · ${esc(m.date)}</p></div>
+        ${rankLine(m)}
         <p class="mblurb">${esc(m.blurb)}</p>
         <div class="vars">${m.variants.map(v => `<div class="var"><span class="p" title="${esc(v.p)}">${esc(v.p)}</span><div class="bar" aria-hidden="true"><i class="${v.gb > S.gpu ? 'over' : ''}" style="width:${v.gb / CAP * 100}%"></i><b style="left:${S.gpu / CAP * 100}%"></b></div><span class="gb ${fitClass(v.gb)}">≈${v.gb} GB</span></div>`).join('')}</div>
         <div>${licHTML(m)}</div>
@@ -2219,6 +2227,38 @@ function modelCards(){
 /* ---------- BENCHMARKS ---------- */
 /* Numbers copied from public leaderboards on the read date below. Nothing here is estimated except the "fits in 100 GB" grouping for language models. */
 const BENCH_DATE = 'Nov 19, 2026';
+/* Where each library model stands on a public leaderboard, copied from the boards on RANK_DATE. Higher is better.
+   Models missing from RANK are not on the board yet. One board per category, so scores compare within a category only. */
+const RANK_DATE = 'Nov 19, 2026';
+const RANK_BOARD = {
+  video:{name:'Artificial Analysis Video Arena', what:'text to video, Elo', url:'https://artificialanalysis.ai/video/leaderboard/text-to-video?open-weights=true'},
+  image:{name:'Artificial Analysis Image Arena', what:'text to image, Elo', url:'https://artificialanalysis.ai/image/leaderboard/text-to-image?open-weights=true'},
+  '3d':{name:'3D Arena', what:'score from blind votes', url:'https://huggingface.co/spaces/3d-arena/3d-arena'},
+  speech:{name:'Artificial Analysis Speech Arena', what:'Elo', url:'https://artificialanalysis.ai/text-to-speech/leaderboard/provider-voice?open-weights=true'},
+  chat:{name:'Artificial Analysis Intelligence Index', what:'points', url:'https://artificialanalysis.ai/models/open-source'},
+};
+const RANK = {
+  'minimax-h3':1159, 'ltx-25':939,
+  'h3-image':1066, 'qwen-image-21':1047, 'flux3-klein':1041, 'fibo-20':1037, 'flux2-dev':1000, 'z-image-turbo':937, 'qwen-image':908, 'flux2-klein':840,
+  'hunyuan3d-21':1271, 'trellis2':1129, 'triposr':1081,
+  'fish-drama-3':1279, 'ming3-tts':1182, 'phonon-31m':1110, 'step-audio-editx':1101, 'kokoro':1060,
+  'nanbeige43-33b':20, 'qwen38-27b':20, 'k2-horizon-32b':14, 'k2-horizon-mova':14, 'nemotron35-super-vl':14, 'lfm3-17b':6, 'gpt-oss-120b':4,
+};
+function rankOf(m){
+  const sc = RANK[m.id]; if (sc == null) return null;
+  const peers = M.filter(x => x.cat === m.cat && RANK[x.id] != null);
+  return {pos:1 + peers.filter(x => RANK[x.id] > sc).length, of:peers.length, score:sc, tie:peers.filter(x => RANK[x.id] === sc).length > 1};
+}
+/* Category order first, then best score first; models not on a board keep their order after the ranked ones. */
+const byRank = list => list.slice().sort((a, b) => (CAT_ORDER.indexOf(a.cat) - CAT_ORDER.indexOf(b.cat)) || ((RANK[b.id] ?? -1e9) - (RANK[a.id] ?? -1e9)));
+function rankPill(m){ const r = rankOf(m); return r ? `<span class="tag tag-rank${r.pos === 1 ? ' r1' : r.pos <= 3 ? ' r3' : ''}" title="Rank among ${CAT_LABEL[m.cat].toLowerCase()} models here, by ${esc(RANK_BOARD[m.cat].name)}">#${r.pos}${r.tie ? '=' : ''}</span>` : ''; }
+function rankLine(m){
+  const b = RANK_BOARD[m.cat]; if (!b) return '';
+  const r = rankOf(m);
+  if (!r) return `<p class="rank-line muted">Not on the ${esc(b.name)} yet, so not ranked.</p>`;
+  return `<p class="rank-line"><b>#${r.pos}${r.tie ? ' (tied)' : ''}</b> of ${r.of} ranked ${esc(CAT_LABEL[m.cat].toLowerCase())} models here · ${r.score.toLocaleString('en-US')} ${esc(b.what)} · <a class="lnk" href="${b.url}" target="_blank" rel="noopener">${esc(b.name)} ↗</a></p>`;
+}
+
 const GROUP_COLOR = {lib:'var(--c-lib)', open:'var(--c-open)', ref:'var(--c-ref)'};
 const ELO_COLS = [['n','Model'],['e','Elo','num'],['ci','95% CI','num'],['v','Votes','num'],['d','Released']];
 const ELO_RANK_COLS = [['r','#','num'], ...ELO_COLS];
