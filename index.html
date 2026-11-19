@@ -33,6 +33,45 @@
   --r-s:8px; --r-m:14px; --r-l:22px;
 }
 [hidden]{display:none!important}
+.mcp-tabs{display:flex;gap:4px;justify-content:center;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);padding:0 16px}
+.mcp-tabs::-webkit-scrollbar{display:none}
+.mcp-tabs button{border:0;background:none;color:var(--muted);font-weight:600;font-size:14px;padding:12px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.mcp-tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--fg)}
+.mcp-hero{position:relative;display:grid;justify-items:center;text-align:center;gap:22px;padding:clamp(56px,11vw,140px) 0 clamp(40px,7vw,90px)}
+.mcp-hero::before{content:"";position:absolute;inset:10% 10% auto;height:60%;background:radial-gradient(closest-side,color-mix(in oklab,var(--accent) 14%,transparent),transparent);filter:blur(30px);z-index:-1}
+.mcp-hero h1{font-size:clamp(34px,6.2vw,78px);line-height:.98;max-width:16ch}
+.mcp-hero .lede{text-align:center}
+.mcp-chip{display:inline-block;padding:0 .18em;border-radius:.16em;background:#d97757;color:#fff}
+.mcp-brand{white-space:nowrap}
+.mcp-brand svg{width:.9em;height:.9em;vertical-align:-.1em;margin-right:.14em}
+.mcp-cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn.btn-white{background:var(--fg);color:var(--bg);border-color:var(--fg);box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.btn.btn-white:hover{background:#fff}
+.btn.btn-claude{background:#d97757;border-color:#d97757;color:#fff;box-shadow:inset 0 -3px 0 rgba(0,0,0,.16)}
+.btn.btn-claude:hover{background:#e3876a}
+@media (max-width:1500px) and (min-width:901px){.gpu-pill .lbl{display:none}.nav a{padding:7px 10px}}
+.mcp-status{margin:0;font-size:13px;display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
+.mcp-status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.mcp-status.on::before{background:var(--ok);box-shadow:0 0 0 4px color-mix(in oklab,var(--ok) 25%,transparent)}
+.mcp-status.off::before{background:var(--warn)}
+.mcp-show{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);border:1px solid var(--line);border-radius:var(--r-l);overflow:hidden;background:var(--surface)}
+.mcp-show-side{padding:clamp(18px,3vw,32px);display:grid;gap:18px;align-content:start}
+.mcp-ex-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.mcp-ex-tabs button{border:1px solid var(--line-2);background:var(--surface-2);color:var(--muted);border-radius:999px;padding:7px 13px;font-weight:600;font-size:13px;cursor:pointer}
+.mcp-ex-tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.mcp-prompt{margin:0;font-size:clamp(16px,1.6vw,19px);line-height:1.5;padding:16px 18px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
+.mcp-act{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mcp-act input{flex:1 1 240px;min-width:0;height:36px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);padding:0 12px}
+.mcp-show-art{position:relative;min-height:320px;background:var(--surface-3)}
+.mcp-show-art canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mcp .steps li p{margin:0;color:var(--muted);font-size:14px}
+.mcp .steps .mcp-act{margin-top:6px}
+.mcp-code{display:block;margin-top:8px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font:500 12.5px var(--f-mono);color:var(--fg);overflow-wrap:anywhere}
+.mcp-addr{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:18px;display:grid;gap:10px}
+.mcp-url{margin:0;font-size:14px;overflow-wrap:anywhere}
+.mcp-tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.mcp-tool{margin:0;color:var(--accent);font-size:12.5px}
+@media (max-width:820px){.mcp-show{grid-template-columns:minmax(0,1fr)}.mcp-show-art{min-height:220px;order:-1}}
 .gpu-steps{padding-left:1.2em;display:grid;gap:10px}
 .gpu-line{display:block;margin:8px 0;padding:8px 10px;border-radius:8px;background:var(--surface-3);font-size:12px;overflow-wrap:anywhere;user-select:all}
 .gpu-models{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}
@@ -453,6 +492,8 @@ table.bt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:620px}
       <span class="sep" aria-hidden="true"></span>
       <a href="#models" data-view="models">Models</a>
       <a href="#benchmarks" data-view="benchmarks">Benchmarks</a>
+      <span class="sep" aria-hidden="true"></span>
+      <a href="#mcp" data-view="mcp">MCP</a>
     </nav>
     <div class="top-actions">
       <button class="btn btn-accent" id="install" type="button" hidden>Install app</button>
@@ -624,6 +665,7 @@ const S = {
 };
 const savedSel = store.get('sel', {});
 for (const k in savedSel) { const x = anyById(savedSel[k]); if (x && x.cat === k && (byId[savedSel[k]] || k === 'chat')) S.sel[k] = savedSel[k]; }
+S.mcpClient = store.get('mcpClient', 'claude'); S.mcpEx = 'video';
 S.runOn = {video:'free', image:'free', '3d':'free', speech:'free', music:'free'};
 const savedRun = store.get('runOn', {});
 for (const k in savedRun) if (savedRun[k] === 'free' || savedRun[k] === 'gpu') S.runOn[k] = savedRun[k];
@@ -1861,6 +1903,127 @@ async function sendChat(){
   await pollChatSend(m.id === 'gpt-oss-20b' ? '' : m.name);
 }
 
+
+/* ---------- MCP: use Weightroom from Claude ---------- */
+const MCP_HOST = '';  // public address of the Weightroom MCP Space (no key); the private address adds the key
+const MCP_CLIENTS = [
+  {id:'claude', name:'Claude', where:'Claude'},
+  {id:'code', name:'Claude Code', where:'Claude Code'},
+  {id:'desktop', name:'Claude Desktop', where:'the Claude app'},
+  {id:'other', name:'Other', where:'any MCP app'},
+];
+const MCP_EX = [
+  {id:'video', art:'video', label:'Generate video', prompt:'Use Weightroom to make a 5-second 16:9 video with sound: a fishing boat leaves Jaffa port at sunrise, gulls circling, slow drone pull-back, waves and gull calls.'},
+  {id:'image', art:'image', label:'Generate image', prompt:'Use Weightroom to make a 16:9 cinematic image: a neon falafel stand on a rainy Tel Aviv street at night, reflections on wet asphalt.'},
+  {id:'3d', art:'3d', label:'Make a 3D model', prompt:'Use Weightroom to make a 3D model of a bronze garden lantern: first draw it alone on a white background, then turn that picture into a GLB.'},
+  {id:'speech', art:'speech', label:'Hebrew voice', prompt:'Use Weightroom to read this aloud in Hebrew, warm and calm: "ברוכים הבאים לסטודיו. היום נלמד ליצור וידאו מטקסט."'},
+  {id:'music', art:'music', label:'Write a song', prompt:'Use Weightroom to write and generate a 60-second Mizrahi pop song about summer in Eilat, with Hebrew lyrics and an oud hook.'},
+  {id:'models', art:'chat', label:'Pick a model', prompt:'Use Weightroom to list the video models that fit a 24 GB graphics card, and tell me which one to run.'},
+];
+const MCP_TOOLS = [
+  {n:'generate_image', t:'Images', d:'Z-Image Turbo, an open 6B model. Falls back to FLUX on Pollinations when the GPU minutes run out.', time:'About 10 seconds'},
+  {n:'generate_video', t:'Video with sound', d:'MiniMax H3, the top open video model. 2 to 14 seconds, 16:9, 9:16 or 1:1, from text or a first frame.', time:'1 to 3 minutes'},
+  {n:'image_to_3d', t:'3D models', d:'Hunyuan3D 2.1 turns one picture into a GLB. Free accounts get the shape; textures need Hugging Face PRO.', time:'1 to 3 minutes'},
+  {n:'text_to_speech', t:'Voice', d:'Chatterbox Multilingual in 23 languages, Hebrew included, with a calm-to-dramatic control.', time:'About 20 seconds'},
+  {n:'generate_music', t:'Music', d:'ACE-Step 1.5 writes songs up to 4 minutes, with lyrics in any language or as instrumentals.', time:'1 to 3 minutes'},
+  {n:'list_models', t:'Model advice', d:'The live Weightroom library: sizes, licenses and the GPU memory each model needs, filtered by your card.', time:'Instant'},
+];
+const mcpUrl = () => { const u = store.get('mcpUrl', ''); return /^https:\/\/[a-z0-9.-]+\/[A-Za-z0-9_-]{16,}\/mcp$/.test(u) ? u : ''; };
+const mcpHost = () => { const u = mcpUrl(); return u ? new URL(u).origin : MCP_HOST; };
+const mcpMasked = u => u.replace(/\/([A-Za-z0-9_-]{4})[A-Za-z0-9_-]+(\/mcp)$/, '/$1••••••••$2');
+function parseMcpLink(text){
+  const mt = String(text || '').match(/#mcp=([A-Za-z0-9_-]+)/); if (!mt) return null;
+  try { const b = mt[1].replace(/-/g, '+').replace(/_/g, '/'); const u = atob(b + '='.repeat((4 - b.length % 4) % 4)).trim();
+    return /^https:\/\/[a-z0-9.-]+\/[A-Za-z0-9_-]{16,}\/mcp$/.test(u) ? u : null; } catch { return null; }
+}
+let mcpHealth = null;
+async function mcpStatus(){
+  const el = $('#mcp-status'); const host = mcpHost(); if (!el) return;
+  if (!host) { el.className = 'mcp-status off'; el.textContent = 'Server address not set yet'; return; }
+  el.className = 'mcp-status wait'; el.textContent = 'Checking the server…';
+  try {
+    const r = await fetch(host + '/health', {cache:'no-store'}); mcpHealth = await r.json();
+    if (!mcpHealth.ok) throw 0;
+    el.className = 'mcp-status on';
+    el.textContent = `Server online · ${mcpHealth.tools.length} tools · ${mcpHealth.gpu_minutes === 'account' ? 'your Hugging Face GPU minutes' : 'shared free GPU minutes'}`;
+  } catch { el.className = 'mcp-status off'; el.textContent = 'Server is asleep or offline. Free Spaces wake up within a minute of the first request.'; }
+}
+const MCP_STEPS = {
+  claude: u => [
+    ['Open connector settings', `In Claude, go to <b>Settings → Connectors</b>.`, `<a class="btn" href="https://claude.ai/settings/connectors" target="_blank" rel="noopener">Open settings ↗</a>`],
+    ['Add Weightroom', `Choose <b>Add custom connector</b>. Name it <b>Weightroom</b> and paste your private address as the URL.`, u ? `<button class="btn btn-accent" type="button" data-copy="url">Copy address</button>` : ''],
+    ['Ask for anything', `In a chat, open <b>+</b>, then <b>Connectors</b>, and turn Weightroom on. Ask for a video, an image, a 3D model, a voice or a song.`, ''],
+  ],
+  code: u => [
+    ['Add the server', `Run this in your terminal:<code class="mcp-code">claude mcp add --transport http weightroom ${esc(u ? mcpMasked(u) : '<your address>')}</code>`, u ? `<button class="btn btn-accent" type="button" data-copy="code">Copy command</button>` : ''],
+    ['Check it', `Start <b>claude</b> and type <b>/mcp</b>. Weightroom should show as connected with 6 tools.`, ''],
+    ['Ask for anything', `Ask Claude Code to generate assets for your project, like sprites, a trailer clip, voice lines or a 3D prop.`, ''],
+  ],
+  desktop: u => [
+    ['Add it once', `Connectors you add on claude.ai appear in the Claude desktop and mobile apps automatically.`, `<a class="btn" href="https://claude.ai/settings/connectors" target="_blank" rel="noopener">Open settings ↗</a>`],
+    ['Or add it in the app', `In the Claude app, open <b>Settings → Connectors → Add custom connector</b> and paste your private address.`, u ? `<button class="btn btn-accent" type="button" data-copy="url">Copy address</button>` : ''],
+    ['Ask for anything', `Turn Weightroom on from the <b>+</b> menu in a chat, then ask.`, ''],
+  ],
+  other: u => [
+    ['Any MCP app', `Weightroom is a remote MCP server over Streamable HTTP, with no sign-in. Add it as a server URL in apps like Cursor, VS Code or ChatGPT developer mode.`, ''],
+    ['The address', `Paste your private address as the server URL.`, u ? `<button class="btn btn-accent" type="button" data-copy="url">Copy address</button>` : ''],
+    ['Keep it private', `Anyone with the address can use your free GPU minutes. If it leaks, ask for a new key and the old one stops working.`, ''],
+  ],
+};
+function viewMcp(){
+  const c = MCP_CLIENTS.find(x => x.id === S.mcpClient) || MCP_CLIENTS[0];
+  const ex = MCP_EX.find(x => x.id === S.mcpEx) || MCP_EX[0];
+  const u = mcpUrl();
+  const mark = `<svg viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="8" fill="var(--accent)"/><rect x="5" y="9" width="4" height="12" rx="1.5" fill="var(--accent-ink)"/><rect x="21" y="9" width="4" height="12" rx="1.5" fill="var(--accent-ink)"/><rect x="9" y="13.5" width="12" height="3" rx="1.2" fill="var(--accent-ink)"/></svg>`;
+  const steps = MCP_STEPS[c.id](u).map(([h, p, a]) => `<li><b>${h}</b><p>${p}</p>${a ? `<div class="mcp-act">${a}</div>` : ''}</li>`).join('');
+  return `
+  <div class="mcp">
+    <div class="mcp-tabs" role="tablist" aria-label="Where you use it">${MCP_CLIENTS.map(x => `<button type="button" role="tab" data-mcp-client="${x.id}" aria-selected="${x.id === c.id}">${esc(x.name)}</button>`).join('')}</div>
+    <div class="wrap">
+      <section class="mcp-hero" aria-labelledby="h-mcp">
+        <h1 id="h-mcp" class="display">Generate <span class="hl">video, images, 3D &amp; voice</span><br>in <span class="mcp-chip">${esc(c.name)}</span> with <span class="mcp-brand">${mark}Weightroom</span></h1>
+        <p class="lede">Weightroom MCP gives ${esc(c.where)} six tools that run open models for free on Hugging Face: MiniMax H3, Z-Image Turbo, Hunyuan3D, Chatterbox and ACE-Step.</p>
+        <div class="mcp-cta">
+          <button class="btn btn-lg btn-white" type="button" id="mcp-add">${c.id === 'code' ? 'Copy the install command' : c.id === 'other' ? 'Copy the server address' : 'Add Weightroom to Claude'}</button>
+          <a class="btn btn-lg" href="#mcp-connect" data-scroll="mcp-connect">How to connect?</a>
+        </div>
+        <p id="mcp-status" class="mcp-status wait">Checking the server…</p>
+      </section>
+
+      <section class="mcp-show" aria-label="Examples">
+        <div class="mcp-show-side">
+          <div class="mcp-ex-tabs" role="tablist" aria-label="Examples">${MCP_EX.map(x => `<button type="button" role="tab" data-mcp-ex="${x.id}" aria-selected="${x.id === ex.id}">${esc(x.label)}</button>`).join('')}</div>
+          <p class="mcp-prompt" dir="auto">${esc(ex.prompt)}</p>
+          <div class="mcp-act">
+            <a class="btn btn-claude" href="https://claude.ai/new?q=${encodeURIComponent(ex.prompt)}" target="_blank" rel="noopener">Try in Claude ↗</a>
+            <button class="btn" type="button" data-copy-text="${esc(ex.prompt)}">Copy prompt</button>
+          </div>
+        </div>
+        <div class="mcp-show-art"><canvas data-art="${ex.art}" aria-hidden="true"></canvas></div>
+      </section>
+
+      <section class="sec" id="mcp-connect" aria-labelledby="h-mcp-connect">
+        <div class="sec-head"><h2 id="h-mcp-connect" class="h-sec">Connect ${esc(c.name)}</h2><p class="muted">Three steps, about a minute.</p></div>
+        <ol class="steps">${steps}</ol>
+        <div class="mcp-addr">
+          <p class="eyebrow">Your private address</p>
+          ${u ? `<p class="mcp-url mono">${esc(mcpMasked(u))}</p>
+            <div class="mcp-act"><button class="btn btn-accent" type="button" data-copy="url">Copy address</button><button class="btn" type="button" id="mcp-forget">Remove from this device</button></div>
+            <p class="hint">Saved only on this device. Keep it private: anyone with it can use your free GPU minutes.</p>`
+          : `<p class="hint">It isn't on this device yet. Open the setup link you got once, or paste the address here.</p>
+            <div class="mcp-act"><input id="mcp-paste" type="text" autocomplete="off" spellcheck="false" placeholder="https://…hf.space/…/mcp"><button class="btn btn-accent" type="button" id="mcp-save">Save</button></div><p id="mcp-msg" class="hint"></p>`}
+        </div>
+      </section>
+
+      <section class="sec" aria-labelledby="h-mcp-tools">
+        <div class="sec-head"><h2 id="h-mcp-tools" class="h-sec">Six tools</h2><p class="muted">Claude picks the right one from what you ask.</p></div>
+        <div class="mcp-tools">${MCP_TOOLS.map(x => `<article class="pcard"><h3>${esc(x.t)}</h3><p class="mono mcp-tool">${esc(x.n)}</p><p>${esc(x.d)}</p><p class="by">${esc(x.time)}</p></article>`).join('')}</div>
+      </section>
+      <p class="foot">Weightroom MCP runs on a free Hugging Face Space. Video, 3D, voice and music use the daily free GPU minutes of the Hugging Face account behind it; images fall back to Pollinations when they run out. Claude is a trademark of Anthropic; Weightroom is an independent project.</p>
+    </div>
+  </div>`;
+}
+
 /* ---------- MODELS ---------- */
 function viewModels(){
   const counts = c => c === 'all' ? M.length : M.filter(m => m.cat === c).length;
@@ -2045,14 +2208,14 @@ function viewBench(){
 
 /* ---------- render & hydrate ---------- */
 const app = $('#app');
-const VIEWS = ['explore','video','image','3d','audio','chat','models','benchmarks'];
+const VIEWS = ['explore','video','image','3d','audio','chat','models','benchmarks','mcp'];
 S.btab = store.get('btab', 'text');
 function render(){
   stopPlaying();
   $$('.nav a').forEach(a => a.dataset.view === S.view ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   const v = S.view;
   const tipEl = $('#tip'); if (tipEl) tipEl.hidden = true;
-  app.innerHTML = v === 'explore' ? viewExplore() : v === 'models' ? viewModels() : v === 'chat' ? viewChat() : v === 'benchmarks' ? viewBench() : viewStudio(v);
+  app.innerHTML = v === 'explore' ? viewExplore() : v === 'models' ? viewModels() : v === 'chat' ? viewChat() : v === 'benchmarks' ? viewBench() : v === 'mcp' ? viewMcp() : viewStudio(v);
   $('#gpu').innerHTML = gpuOptions();
   hydrate();
 }
@@ -2090,6 +2253,7 @@ function hydrate(){
     addAnim(sb, fn, v === 'image' ? 'static' : 'always');
   }
   $$('#feed .gen').forEach(hydrateGen);
+  if (S.view === 'mcp') mcpStatus();
   if (userGens.some(g => g.status === 'running')) tick();
   const msgs = $('#msgs'); if (msgs) msgs.scrollTop = msgs.scrollHeight;
 }
@@ -2099,6 +2263,8 @@ function rerenderDock(){
   slot.innerHTML = dockHTML(S.view); hydrateThumbs(slot);
 }
 function route(){
+  const mcpLink = parseMcpLink(location.hash);
+  if (mcpLink) { store.set('mcpUrl', mcpLink); history.replaceState(null, '', location.pathname + location.search + '#mcp'); toast('Your Weightroom MCP address is saved on this device.'); }
   const linked = parseConnect(location.hash);
   if (linked) { history.replaceState(null, '', location.pathname + location.search); gpuConnect(linked); }
   const h = decodeURIComponent(location.hash.slice(1));
@@ -2151,6 +2317,27 @@ document.addEventListener('click', e => {
   const pl = t.closest('[data-play]'); if (pl) { play(pl.dataset.play); return; }
   const fc = t.closest('[data-fcat]'); if (fc) { S.filters.cat = fc.dataset.fcat; $$('[data-fcat]').forEach(b => b.setAttribute('aria-pressed', String(b === fc))); $('#mgrid').innerHTML = modelCards(); hydrateThumbs($('#mgrid')); return; }
   if (t.closest('#connect')) { fillSettings(); $('#drawer').hidden = false; $('#drawer [data-close]').focus(); return; }
+  const mc = t.closest('[data-mcp-client]'); if (mc) { S.mcpClient = mc.dataset.mcpClient; store.set('mcpClient', S.mcpClient); const y = window.scrollY; render(); window.scrollTo(0, y); return; }
+  const me = t.closest('[data-mcp-ex]'); if (me) { S.mcpEx = me.dataset.mcpEx; const y = window.scrollY; render(); window.scrollTo(0, y); return; }
+  const sc = t.closest('[data-scroll]'); if (sc) { e.preventDefault(); const tg = document.getElementById(sc.dataset.scroll); if (tg) tg.scrollIntoView({behavior: reduce ? 'auto' : 'smooth'}); return; }
+  const cp = t.closest('[data-copy], [data-copy-text]');
+  if (cp) {
+    const u = mcpUrl(); const what = cp.dataset.copy;
+    const text = cp.dataset.copyText != null ? cp.dataset.copyText : what === 'code' ? `claude mcp add --transport http weightroom ${u}` : u;
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => toast(what === 'code' ? 'Command copied. Paste it in your terminal.' : what === 'url' ? 'Address copied. Paste it as the connector URL.' : 'Prompt copied.'), () => toast('Copy did not work here. Select the text and copy it.'));
+    return;
+  }
+  if (t.closest('#mcp-add')) {
+    const u = mcpUrl(); const cl = S.mcpClient;
+    if (!u) { const tg = document.getElementById('mcp-connect'); if (tg) tg.scrollIntoView({behavior: reduce ? 'auto' : 'smooth'}); toast('Add your private address first, below.'); return; }
+    const text = cl === 'code' ? `claude mcp add --transport http weightroom ${u}` : u;
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => {}, () => {});
+    if (cl === 'claude' || cl === 'desktop') { window.open('https://claude.ai/settings/connectors', '_blank', 'noopener'); toast('Address copied. In Claude: Add custom connector, name it Weightroom, paste it as the URL.'); }
+    else toast(cl === 'code' ? 'Command copied. Paste it in your terminal.' : 'Address copied.');
+    return;
+  }
+  if (t.closest('#mcp-save')) { const v = ($('#mcp-paste').value || '').trim(); if (!/^https:\/\/[a-z0-9.-]+\/[A-Za-z0-9_-]{16,}\/mcp$/.test(v)) { $('#mcp-msg').textContent = 'That doesn\u2019t look like a Weightroom MCP address. It ends with /mcp.'; return; } store.set('mcpUrl', v); render(); toast('Saved on this device.'); return; }
+  if (t.closest('#mcp-forget')) { store.set('mcpUrl', ''); render(); toast('Removed from this device.'); return; }
   if (t.closest('#gpu-save')) { const c = parseConnect(($('#gpu-link').value || '').trim()); if (!c) { $('#gpu-msg').textContent = 'That isn\u2019t a Weightroom connect link. Copy the whole link that Weightroom GPU shows.'; return; } gpuConnect(c); return; }
   if (t.closest('#gpu-off')) { gpuDisconnect(); return; }
   if (t.closest('#gpu-retry')) { gpuStat = null; gpuErr = null; fillGpuPanel(); gpuCheck(); return; }
