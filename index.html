@@ -82,6 +82,7 @@ body{font:15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
 a{color:inherit}
 button,input,select,textarea{font:inherit;color:inherit}
+
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .mono{font-family:var(--f-mono);font-size:.86em;font-variant-numeric:tabular-nums}
@@ -472,6 +473,27 @@ table.bt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:620px}
   .fitstats dd{font-size:22px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* dropdowns: dark everywhere. Browsers with styleable selects get a custom dark list; the rest get dark native options. */
+select{color-scheme:dark}
+select option,select optgroup{background-color:var(--surface-2);color:var(--fg)}
+@supports (appearance:base-select){
+  select,.chip select,.gpu-pill select,.hero-card select,.field select,::picker(select){appearance:base-select;-webkit-appearance:base-select}
+  select{display:inline-flex;align-items:center;gap:6px}
+  select{white-space:nowrap}
+  select::picker-icon{content:'';width:12px;height:12px;flex:none;background-color:var(--muted);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat;transition:rotate .15s}
+  .gpu-pill select{overflow:hidden;text-overflow:ellipsis}
+  @media (max-width:640px){.gpu-pill select{max-width:170px}}
+  select:open::picker-icon{rotate:180deg}
+  .gpu-pill select,.hero-card select{background-image:none!important}
+  .gpu-pill select{padding:0 10px 0 2px}
+  .hero-card select{padding:0 12px}
+  .hero-card select::picker-icon{margin-left:auto}
+  ::picker(select){background:var(--surface);color:var(--fg);border:1px solid var(--line-2);border-radius:14px;padding:6px;margin-block:6px;box-shadow:0 22px 50px rgba(0,0,0,.6);min-width:max(anchor-size(width),170px);max-height:min(60vh,420px);overflow:auto}
+  select option{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:500;background:none;color:var(--fg);cursor:pointer}
+  select option:hover,select option:focus-visible{background:var(--surface-3);outline:none}
+  select option:checked{background:color-mix(in oklab,var(--accent) 16%,transparent);font-weight:600}
+  select option::checkmark{color:var(--accent);order:1;margin-left:auto}
+}
 </style>
 </head>
 <body>
