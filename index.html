@@ -512,19 +512,31 @@ const M = [
   {id:'hunyuanvideo-15',cat:'video',name:'HunyuanVideo 1.5',maker:'Tencent Hunyuan',params:'8.3B',date:'Nov 2025',variants:[{p:'BF16',gb:28},{p:'FP8',gb:16}],lic:'limited',license:'Tencent Hunyuan Community License',licNote:'Commercial use allowed with conditions. Not licensed in the EU, UK or South Korea.',tags:[],blurb:'Small enough for a 24 GB card, with strong faces and motion for its size.',steps:50,q:'HunyuanVideo-1.5',opts:{dur:[5,10],res:['480p','720p'],audio:false}},
 
   {id:'flux2-dev',cat:'image',name:'FLUX.2 [dev]',maker:'Black Forest Labs',params:'32B',date:'Nov 2025',variants:[{p:'BF16',gb:90},{p:'FP8',gb:48}],lic:'nc',license:'FLUX [dev] Non-Commercial License',licNote:'Free for personal and research use. Commercial use needs a license from Black Forest Labs.',tags:[],blurb:'Detailed, photoreal images and editing from up to 10 reference images.',steps:28,q:'FLUX.2-dev'},
-  {id:'qwen-image-21',cat:'image',name:'Qwen-Image-2.1',maker:'Alibaba Qwen',params:'7B + 8B encoder',date:'Sep 2026',variants:[{p:'BF16',gb:34},{p:'FP8',gb:18}],lic:'nc',license:'Qwen Research License',licNote:'Research and evaluation only. Commercial use needs a paid license.',tags:['top'],blurb:'Generation and editing in one model, with transparent backgrounds and edits across up to 10 images. Excellent text rendering.',steps:8,q:'Qwen-Image-2.1'},
+  {id:'qwen-image-21',cat:'image',name:'Qwen-Image-2.1',maker:'Alibaba Qwen',params:'7B + 8B encoder',date:'Sep 2026',variants:[{p:'BF16',gb:34},{p:'FP8',gb:18}],lic:'nc',license:'Qwen Research License',licNote:'Research and evaluation only. Commercial use needs a paid license.',tags:[],blurb:'Generation and editing in one model, with transparent backgrounds and edits across up to 10 images. Excellent text rendering.',steps:8,q:'Qwen-Image-2.1'},
   {id:'qwen-image',cat:'image',name:'Qwen-Image',maker:'Alibaba Qwen',params:'20B',date:'Aug 2025',variants:[{p:'BF16',gb:58},{p:'FP8',gb:30}],lic:'open',license:'Apache 2.0',tags:[],blurb:'The strongest Apache-licensed model for posters, packaging and anything with words in it. Pairs with Qwen-Image-Edit.',steps:30,q:'Qwen-Image'},
   {id:'z-image-turbo',cat:'image',name:'Z-Image Turbo',maker:'Alibaba Tongyi',params:'6B',date:'Nov 2025',variants:[{p:'BF16',gb:16},{p:'FP8',gb:10}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Photoreal images in 8 steps. The fastest good model here, and it runs on almost any card.',steps:8,q:'Z-Image-Turbo'},
   {id:'flux2-klein',cat:'image',name:'FLUX.2 [klein] 4B',maker:'Black Forest Labs',params:'4B',date:'Jan 2026',variants:[{p:'BF16',gb:13}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Small, quick FLUX for drafts, thumbnails and batch jobs.',steps:8,q:'FLUX.2-klein'},
+  {id:'h3-image',cat:'image',name:'MiniMax H3-Image',maker:'MiniMax',params:'33.1B + 33B text encoder',date:'Nov 2026',variants:[{p:'FP8',gb:75}],lic:'limited',license:'MiniMax H3-Image Community License',licNote:'A paid license is needed above $1M yearly revenue or to offer it as a hosted service. Not licensed in the US, EU, UK or South Korea.',tags:['new','top'],blurb:'Generation and editing up to native 4K, the top-rated open image model. It shares its large text encoder with MiniMax H3.',steps:30,q:'MiniMax-H3-Image'},
+  {id:'flux3-klein',cat:'image',name:'FLUX 3 Image Klein',maker:'Black Forest Labs',params:'5.6B + 4B encoder',date:'Oct 2026',variants:[{p:'BF16',gb:31},{p:'FP8',gb:26},{p:'NVFP4',gb:25}],lic:'limited',license:'FLUX Kommunity License',licNote:'Non-commercial use, plus commercial use of outputs under $5M yearly revenue. The recommended prompt upsampler adds about 28 GB.',tags:['new'],blurb:'Editing and generation in one model, with up to 10 reference images and boxes in the prompt to place things.',steps:16,q:'flux-3-image-klein'},
+  {id:'fibo-20',cat:'image',name:'Fibo 2.0',maker:'Bria',params:'8B',date:'Oct 2026',variants:[{p:'BF16',gb:18}],lic:'nc',license:'CC BY-NC 4.0',licNote:'Non-commercial only. Commercial use needs an agreement with Bria.',tags:['new'],blurb:'Generation and editing in one model, steered by structured JSON prompts for lighting, camera and layout. Trained only on licensed data.',steps:30,q:'Fibo-2.0'},
+  {id:'moss-image',cat:'image',name:'MOSS-Image',maker:'OpenMOSS',params:'5.1B',date:'Oct 2026',variants:[{p:'BF16',gb:12}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'A small Apache-licensed model that takes plain prompts, tag lists or JSON layouts to place text and objects.',steps:30,q:'MOSS-Image'},
 
   {id:'trellis2',cat:'3d',name:'TRELLIS.2',maker:'Microsoft',params:'4B',date:'Dec 2025',variants:[{p:'BF16',gb:24}],lic:'open',license:'MIT',tags:[],blurb:'One image to a 3D asset with PBR materials, at up to 1536³ resolution, under the permissive MIT license.',steps:25,q:'TRELLIS.2',opts:{tex:true}},
   {id:'hunyuan3d-21',cat:'3d',name:'Hunyuan3D 2.1',maker:'Tencent Hunyuan',params:'3.3B shape + 2B paint',date:'Jun 2025',variants:[{p:'Shape + paint',gb:29},{p:'Shape only',gb:10}],lic:'limited',license:'Tencent Hunyuan Community License',licNote:'Commercial use allowed with conditions. Not licensed in the EU, UK or South Korea.',tags:[],blurb:'Clean, production-ready meshes with physically based textures. Run shape only to save VRAM.',steps:30,q:'Hunyuan3D-2.1',opts:{tex:true}},
   {id:'hi3d-10',cat:'3d',name:'Hi3D v1.0',maker:'Hi3D',params:'3.7B (two 1.8B passes)',date:'Oct 2026',variants:[{p:'FP16 · 1536³',gb:96}],lic:'limited',license:'Hi3D Open License 1.0',licNote:'Commercial use allowed. Products built on it must show "Powered by Hi3D 1.0", and need a separate license above 200,000 monthly users or $1M monthly revenue.',tags:['new'],blurb:'Sharpens a rough mesh into very fine geometry, guided by a photo of the object, at up to 1536³. Geometry only, no textures. It needs a rough mesh from a model like Hunyuan3D first, and has only been tested on a 96 GB GPU.',steps:30,q:'Hi3Dv1.0',needsRef:true,opts:{tex:false}},
   {id:'triposr',cat:'3d',name:'TripoSR',maker:'Tripo AI × Stability AI',params:'Under 1B',date:'Mar 2024',variants:[{p:'FP16',gb:6}],lic:'open',license:'MIT',tags:[],blurb:'A rough mesh from one image in under a second. Good for blocking out a scene.',steps:1,q:'TripoSR',opts:{tex:false}},
+  {id:'idol',cat:'3d',name:'Idol',maker:'Speridlabs',params:'1.8B with encoders',date:'Oct 2026',variants:[{p:'FP16',gb:8}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'One photo to a colored 3D Gaussian splat of up to a million points in about 2 seconds, on 7.2 GB of VRAM. Splat output, not a mesh.',steps:1,q:'idol',opts:{tex:false}},
 
   {id:'chatterbox-ml',cat:'speech',name:'Chatterbox Multilingual V3',maker:'Resemble AI',params:'0.5B',date:'Jun 2026',variants:[{p:'FP16',gb:5}],lic:'open',license:'MIT',tags:['he'],blurb:'23 languages including Hebrew, voice cloning from a short clip, and an emotion intensity control. Outputs carry an inaudible watermark.',licNote:'Hebrew sounds best when vowel marks are added first with the Dicta diacritizer.',steps:1,q:'chatterbox-multilingual',langs:CB_LANGS},
   {id:'step-audio-editx',cat:'speech',name:'Step-Audio-EditX',maker:'StepFun',params:'3B',date:'Nov 2025',variants:[{p:'BF16',gb:12}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Speech you can edit after it is generated: change the emotion or speaking style, or add breaths and laughter.',steps:1,q:'Step-Audio-EditX',langs:['English','Chinese']},
   {id:'kokoro',cat:'speech',name:'Kokoro 82M',maker:'hexgrad',params:'82M',date:'Jan 2025',variants:[{p:'FP32',gb:1}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Tiny and very fast. Clean narration voices that run even without a GPU.',steps:1,q:'Kokoro-82M',langs:['English','Chinese','French','Hindi','Italian','Japanese','Portuguese','Spanish']},
+  {id:'fish-drama-3',cat:'speech',name:'Fish Audio Drama 3',maker:'Fish Audio',params:'35B MoE · 3B active',date:'Oct 2026',variants:[{p:'FP8',gb:44},{p:'INT4',gb:20}],lic:'limited',license:'Fish Audio Community License',licNote:'Free commercial use while yearly revenue is under $500K.',tags:['new','top'],blurb:'The top-rated open voice model, with expressive acting, voice cloning and edits to single words in a take.',steps:1,q:'drama-3',langs:['English','Chinese','Japanese','Korean','Spanish','Portuguese','French','German','Italian','Russian','Arabic','Hebrew','Turkish','Hindi']},
+  {id:'ming3-tts',cat:'speech',name:'Ming-3.0-tts',maker:'inclusionAI',params:'7.9B MoE · 1.3B active',date:'Sep 2026',variants:[{p:'BF16',gb:20}],lic:'open',license:'MIT',tags:['new'],blurb:'Voice cloning and voice design from a written description, in seven languages and Chinese dialects.',steps:1,q:'Ming-3.0-tts',langs:['Chinese','English','German','Spanish','French','Korean','Japanese']},
+  {id:'zonos3-mini',cat:'speech',name:'ZONOS3-Mini',maker:'Zyphra',params:'800M MoE · 100M active',date:'Nov 2026',variants:[{p:'FP16',gb:3}],lic:'open',license:'Apache 2.0',tags:['new','he'],blurb:'43 languages including Hebrew, with voice cloning, small enough to run in real time on a laptop or in the browser.',steps:1,q:'ZONOS3-Mini',langs:['English','Hebrew','Arabic','Chinese','Danish','Dutch','Finnish','French','German','Greek','Hindi','Italian','Japanese','Korean','Malay','Norwegian','Polish','Portuguese','Russian','Spanish','Swedish','Turkish']},
+  {id:'audio8-air',cat:'speech',name:'Audio8-TTS-Realistic-Air',maker:'Edge0',params:'0.6B + codec',date:'Oct 2026',variants:[{p:'FP32',gb:4}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'Realistic voice cloning from a short clip in 23 languages, in a 0.6B model.',steps:1,q:'Audio8-TTS-Realistic-Air',langs:['English','Chinese','Japanese','Korean','German','French','Spanish','Italian','Russian','Arabic','Finnish','Hindi','Malay','Dutch','Norwegian','Polish','Portuguese','Swedish','Turkish']},
+  {id:'phonon-31m',cat:'speech',name:'Phonon 31M',maker:'Gradium',params:'31M',date:'Oct 2026',variants:[{p:'BF16',gb:1}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'A tiny English voice model that ranks above many models a hundred times its size.',steps:1,q:'phonon-31m-en',langs:['English']},
+  {id:'underdog-woof',cat:'speech',name:'Underdog Woof',maker:'Conway Research',params:'38M',date:'Nov 2026',variants:[{p:'FP32',gb:1}],lic:'nc',license:'Underdog Non-Commercial License 1.0',licNote:'Free for non-commercial use with credit. Commercial use needs a license.',tags:['new'],blurb:'Two English voices in a 40 MB model that runs on a laptop CPU and reads numbers, dates and prices naturally.',steps:1,q:'Underdog-Woof',langs:['English']},
+  {id:'tiny-voca',cat:'speech',name:'tiny-voca',maker:'n4ze3m',params:'4.5M',date:'Nov 2026',variants:[{p:'FP32',gb:1}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'A 4.5M-parameter English voice model with two voices that runs 70 times faster than real time on a CPU.',steps:1,q:'tiny-voca',langs:['English']},
   {id:'ace-step-15',cat:'music',name:'ACE-Step 1.5',maker:'ACE Studio × StepFun',params:'3.5B',date:'Jan 2026',variants:[{p:'BF16',gb:8}],lic:'open',license:'MIT',tags:[],blurb:'Full songs with vocals and lyrics in seconds, trained on licensed music. Supports LoRA styles.',steps:27,q:'ACE-Step'},
 
   {id:'qwen38-27b',cat:'chat',name:'Qwen3.8-27B',maker:'Alibaba Qwen',params:'27B dense',date:'Aug 2026',variants:[{p:'BF16',gb:58},{p:'FP8',gb:32},{p:'Q4',gb:19}],lic:'open',license:'Apache 2.0',tags:['top'],blurb:'The strongest open model for its size. Reads text, images and video, with a 262K-token context window.',ctx:262144,q:'Qwen3.8-27B'},
@@ -533,6 +545,11 @@ const M = [
   {id:'k2-horizon-32b',cat:'chat',name:'K2-Horizon-32B',maker:'IFM',params:'32B dense',date:'Sep 2026',variants:[{p:'BF16',gb:77},{p:'FP8',gb:38},{p:'Q4',gb:21}],lic:'open',license:'Apache 2.0',tags:[],blurb:'A fully open dense model with a 512K-token context window. Training data and code are public too.',ctx:524288,q:'K2-Horizon-32B'},
   {id:'k2-horizon-mova',cat:'chat',name:'K2-Horizon-MoVA-36B-A4B',maker:'IFM',params:'36B MoE · 4B active',date:'Sep 2026',variants:[{p:'BF16',gb:82},{p:'FP8',gb:41},{p:'Q4',gb:23}],lic:'open',license:'Apache 2.0',tags:[],blurb:'The sparse K2-Horizon model. Only 4B parameters run per token, so it is quick, with a 512K-token context window.',ctx:524288,q:'K2-Horizon-MoVA-36B-A4B'},
   {id:'gpt-oss-20b',cat:'chat',name:'gpt-oss-20b',maker:'OpenAI',params:'21B MoE · 3.6B active',date:'Aug 2025',variants:[{p:'MXFP4',gb:16}],lic:'open',license:'Apache 2.0',tags:[],blurb:'A small, quick reasoning model for 16 GB cards and laptops.',ctx:131072,q:'gpt-oss-20b'},
+  {id:'nanbeige43-33b',cat:'chat',name:'Nanbeige4.3-33B',maker:'Nanbeige',params:'33B dense',date:'Oct 2026',variants:[{p:'BF16',gb:73},{p:'FP8',gb:37},{p:'Q4',gb:18}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'Tied for the highest Intelligence Index of any model that fits here, and built for agentic coding, with a 512K-token context window.',ctx:524288,q:'Nanbeige4.3-33B'},
+  {id:'nemotron35-super-vl',cat:'chat',name:'Nemotron 3.5 Super VL',maker:'NVIDIA',params:'120B MoE · 12B active',date:'Oct 2026',variants:[{p:'NVFP4',gb:68}],lic:'open',license:'OpenMDW 1.1',tags:['new'],blurb:'Reads images, documents and video as well as text, and is the fastest of the top open models. The NVFP4 build fits on one 80 GB card.',ctx:1048576,q:'Nemotron-3.5-Super-VL'},
+  {id:'flint',cat:'chat',name:'Flint',maker:'Recursive',params:'39.8B MoE · 2.5B active',date:'Oct 2026',variants:[{p:'BF16',gb:88},{p:'FP8',gb:44},{p:'Q4',gb:22}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'A coding-agent model that explores codebases, fixes bugs and writes tests, with a 256K-token context window.',ctx:262144,q:'RecursiveSI/flint'},
+  {id:'minicpm-v47',cat:'chat',name:'MiniCPM-V 4.7 35B-A3B',maker:'OpenBMB',params:'35B MoE · 3B active',date:'Oct 2026',variants:[{p:'BF16',gb:77},{p:'FP8',gb:39},{p:'Q4',gb:19}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'Understands single images, several images and video, and is tuned to run on small devices.',q:'MiniCPM-V-4.7'},
+  {id:'lfm3-17b',cat:'chat',name:'LFM3-1.7B',maker:'Liquid AI',params:'1.7B',date:'Oct 2026',variants:[{p:'BF16',gb:4},{p:'Q4',gb:1}],lic:'limited',license:'LFM Open License 1.0',licNote:'Free commercial use under $10M yearly revenue.',tags:['new'],blurb:'A tiny agent model with a 256K-token context window that fits on a phone or laptop at about 1 GB.',ctx:262144,q:'LFM3-1.7B'},
 ];
 const byId = Object.fromEntries(M.map(m => [m.id, m]));
 
@@ -1275,7 +1292,10 @@ const TWIN = {'minimax-h3':'h3','ltx-25':'h3','wan22':'h3','wan22-animate':'h3',
   'chatterbox-ml':'chatterbox','step-audio-editx':'chatterbox','kokoro':'chatterbox','ace-step-15':'ace',
   'qwen38-27b':'pollchat','gpt-oss-120b':'pollchat','k2-horizon-32b':'pollchat','k2-horizon-mova':'pollchat','qwen3-coder-next':'pollchat','gpt-oss-20b':'pollchat',
   'f-cf-image':'pollinations','f-gemini-tts':'chatterbox',
-  'f-gemma4':'pollchat','f-gemini-lite':'pollchat','f-groq-qwen':'pollchat','f-groq-oss':'pollchat','f-gemini-flash':'pollchat','f-or-minimax':'pollchat','f-openrouter':'pollchat'};
+  'f-gemma4':'pollchat','f-gemini-lite':'pollchat','f-groq-qwen':'pollchat','f-groq-oss':'pollchat','f-gemini-flash':'pollchat','f-or-minimax':'pollchat','f-openrouter':'pollchat',
+  'h3-image':'zimage','flux3-klein':'klein','fibo-20':'zimage','moss-image':'zimage','idol':'hunyuan3d',
+  'fish-drama-3':'chatterbox','ming3-tts':'chatterbox','zonos3-mini':'chatterbox','audio8-air':'chatterbox','phonon-31m':'chatterbox','underdog-woof':'chatterbox','tiny-voca':'chatterbox',
+  'nanbeige43-33b':'pollchat','nemotron35-super-vl':'pollchat','flint':'pollchat','minicpm-v47':'pollchat','lfm3-17b':'pollchat'};
 const SAME = {'minimax-h3':1,'z-image-turbo':1,'flux2-klein':1,'qwen-image-21':1,'hunyuan3d-21':1,'chatterbox-ml':1,'ace-step-15':1,'gpt-oss-20b':1};
 const runFor = m => (m && (m.run || TWIN[m.id])) || null;
 const LANG_CODE = {English:'en',Hebrew:'he',Arabic:'ar',Chinese:'zh',Danish:'da',Dutch:'nl',Finnish:'fi',French:'fr',German:'de',Greek:'el',Hindi:'hi',Italian:'it',Japanese:'ja',Korean:'ko',Malay:'ms',Norwegian:'no',Polish:'pl',Portuguese:'pt',Russian:'ru',Spanish:'es',Swahili:'sw',Swedish:'sv',Turkish:'tr'};
@@ -1886,17 +1906,17 @@ const GROUP_COLOR = {lib:'var(--c-lib)', open:'var(--c-open)', ref:'var(--c-ref)
 const ELO_COLS = [['n','Model'],['e','Elo','num'],['ci','95% CI','num'],['v','Votes','num'],['d','Released']];
 const ELO_RANK_COLS = [['r','#','num'], ...ELO_COLS];
 const T_ROWS = [
-  {n:'Nanbeige4.3-33B', by:'Nanbeige', p:'33B', ii:20, sp:null, tm:null, g:'open', run:'Dense 33B · fits at 8-bit'},
-  {n:'Qwen3.8 27B (Xhigh)', s:'Qwen3.8 27B', by:'Alibaba', p:'27B', ii:20, sp:47, tm:39.1, g:'lib', lib:'qwen38-27b'},
+  {n:'Nanbeige4.3-33B', by:'Nanbeige', p:'33B', ii:20, sp:null, tm:null, g:'lib', lib:'nanbeige43-33b'},
+  {n:'Qwen3.8 27B (Xhigh)', s:'Qwen3.8 27B', by:'Alibaba', p:'27B', ii:20, sp:47, tm:39.0, g:'lib', lib:'qwen38-27b'},
   {n:'K2 Horizon 32B', by:'Institute of Foundation Models', p:'32B', ii:14, sp:null, tm:null, g:'lib', lib:'k2-horizon-32b'},
   {n:'K2 Horizon MoVA 36B A4B', s:'K2 Horizon MoVA', by:'Institute of Foundation Models', p:'36B · 4B active', ii:14, sp:null, tm:null, g:'lib', lib:'k2-horizon-mova'},
-  {n:'Nemotron 3.5 Super VL', by:'NVIDIA', p:'120B · 12B active', ii:14, sp:315, tm:4.3, g:'open', run:'Fits at 4-bit (about 66 GB)'},
+  {n:'Nemotron 3.5 Super VL', by:'NVIDIA', p:'120B · 12B active', ii:14, sp:308, tm:4.4, g:'lib', lib:'nemotron35-super-vl'},
 ];
 const IMG = [
-  {r:1, n:'H3-Image', by:'MiniMax', e:1066, ci:'±14', v:3258, d:'Nov 2026', g:'open', run:'33.1B · BF16 weights 68.7 GB plus a separate text encoder; FP8 fits a 48 GB card', lic:'MiniMax H3-Image Community License'},
+  {r:1, n:'H3-Image', by:'MiniMax', e:1066, ci:'±14', v:3258, d:'Nov 2026', g:'lib', lib:'h3-image'},
   {r:2, n:'Qwen-Image-2.1', by:'Alibaba Qwen', e:1047, ci:'±12', v:6312, d:'Sep 2026', g:'lib', lib:'qwen-image-21'},
-  {r:3, n:'FLUX 3 Image Klein', by:'Black Forest Labs', e:1041, ci:'±11', v:5791, d:'Oct 2026', g:'open', run:'5.6B · about 11 GB in BF16', lic:'FLUX community license (check terms)'},
-  {r:4, n:'Fibo 2.0', by:'Bria', e:1037, ci:'±11', v:5741, d:'Oct 2026', g:'open', run:'8B · about 16 GB in BF16', lic:'CC BY-NC 4.0, non-commercial'},
+  {r:3, n:'FLUX 3 Image Klein', by:'Black Forest Labs', e:1041, ci:'±11', v:5791, d:'Oct 2026', g:'lib', lib:'flux3-klein'},
+  {r:4, n:'Fibo 2.0', by:'Bria', e:1037, ci:'±11', v:5741, d:'Oct 2026', g:'lib', lib:'fibo-20'},
   {r:5, n:'Ideogram 4.0 (Quality)', s:'Ideogram 4.0', by:'Ideogram', e:1026, ci:'±10', v:11275, d:'Jun 2026', g:'open', run:'9.3B · the nf4 build fits a 24 GB card', lic:'Non-commercial weights'},
 ];
 const T2V = [
@@ -1914,10 +1934,10 @@ const I2V = [
   {r:6, n:'LTX-2.3 Pro', s:'LTX-2.3', by:'Lightricks', e:837, ci:'±16', v:4968, d:'Mar 2026', g:'open', run:'The previous LTX release'},
 ];
 const TTS = [
-  {r:1, n:'Fish Audio Drama 3', s:'Fish Drama 3', by:'Fish Audio', e:1279, ci:'±16', v:1990, d:'Oct 2026', g:'open', run:'35B MoE, 3B active · a 48 GB card is advised', lic:'Fish Audio Community License; free commercial use under $500K revenue'},
+  {r:1, n:'Fish Audio Drama 3', s:'Fish Drama 3', by:'Fish Audio', e:1279, ci:'±16', v:1990, d:'Oct 2026', g:'lib', lib:'fish-drama-3'},
   {r:3, n:'Breeze TTS 2', by:'BreezeBlue', e:1229, ci:'±12', v:3138, d:'Aug 2026', g:'open', run:'3B', lic:'Non-commercial weights'},
-  {r:4, n:'Ming-3.0-tts', by:'inclusionAI', e:1182, ci:'±12', v:2803, d:'Oct 2026', g:'open', run:'The open tiny version is 7.9B MoE with 1.3B active', lic:'MIT'},
-  {r:5, n:'Phonon 31M (English)', s:'Phonon 31M', by:'Phonon', e:1110, ci:'±13', v:2042, d:'Oct 2026', g:'open', run:'31M parameters · English only'},
+  {r:4, n:'Ming-3.0-tts', by:'inclusionAI', e:1182, ci:'±12', v:2803, d:'Oct 2026', g:'lib', lib:'ming3-tts'},
+  {r:5, n:'Phonon 31M (English)', s:'Phonon 31M', by:'Phonon', e:1110, ci:'±13', v:2042, d:'Oct 2026', g:'lib', lib:'phonon-31m'},
   {r:6, n:'Step Audio EditX (Mar 2026)', s:'Step-Audio-EditX', by:'StepFun', e:1101, ci:'±11', v:2695, d:'Feb 2026', g:'lib', lib:'step-audio-editx', note:'Tied with Fish Audio S2 Pro at 1,101'},
 ];
 const R3D = [
@@ -1932,7 +1952,7 @@ const BENCH = {
   text:{label:'Language', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis, open source models','https://artificialanalysis.ai/models/open-source']],
     method:TOP_NOTE + ' The Intelligence Index v5.0.1 combines 9 evaluations. Speed and time per task are measured on API providers, not on your GPU. Fit is estimated from parameter count.',
-    take:'Nanbeige4.3-33B and Qwen3.8 27B tie for first at 20. Three models tie at 14: the new K2 Horizon 32B and K2 Horizon MoVA 36B A4B, now in your library, and Nemotron 3.5 Super VL, by far the fastest at 315 tokens per second. Muse Glimmer and Nemotron 3.5 Lightning drop out of the top five.',
+    take:'Nanbeige4.3-33B and Qwen3.8 27B tie for first at 20. K2 Horizon 32B, K2 Horizon MoVA 36B A4B and Nemotron 3.5 Super VL tie at 14, and Nemotron is by far the fastest at 308 tokens per second. All five are now in your library.',
     cards:[
       {title:'Intelligence', sub:'Artificial Analysis Intelligence Index · Higher is better', key:'ii', vlabel:'Intelligence Index', max:25, step:5, wide:true},
       {title:'Output speed', sub:'Output tokens per second on API providers · Higher is better', key:'sp', vlabel:'Tokens per second', max:400, step:100},
@@ -1942,7 +1962,7 @@ const BENCH = {
   image:{label:'Image', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis Image Arena, text to image','https://artificialanalysis.ai/image/leaderboard/text-to-image']],
     method:TOP_NOTE + ' Elo ratings come from blind pairwise votes by people. # is the rank among open-weights models.',
-    take:'H3-Image leads the open image models at 1,066 Elo. Qwen-Image-2.1 (1,047) is the only one of the five already in your library. FLUX.2 [dev] and Z-Image Turbo are no longer in the top five.',
+    take:'H3-Image leads the open image models at 1,066 Elo, ahead of Qwen-Image-2.1 (1,047), FLUX 3 Image Klein (1,041) and Fibo 2.0 (1,037), all four now in your library. Ideogram 4.0 (1,026) rounds out the five.',
     cards:[{title:'Text to image', sub:'AA-Image-T2I v2.1 · Elo · Higher is better · Axis starts at 900', key:'e', vlabel:'Elo', base:900, max:1100, step:50, wide:true, rows:IMG, cols:ELO_RANK_COLS}]},
   video:{label:'Video', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis Video Arena, text to video','https://artificialanalysis.ai/video/leaderboard/text-to-video'],['image to video','https://artificialanalysis.ai/video/leaderboard/image-to-video']],
@@ -1955,7 +1975,7 @@ const BENCH = {
   speech:{label:'Speech', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis Speech Arena, provider voices','https://artificialanalysis.ai/text-to-speech/leaderboard']],
     method:TOP_NOTE + ' Elo ratings come from blind pairwise votes on each provider’s own voices. # is the rank among open-weights models.',
-    take:'Fish Audio Drama 3 leads at 1,279 Elo. Step-Audio-EditX (1,101) is the only library model in the top five. Kokoro and Chatterbox, the Hebrew voice, rank lower.',
+    take:'Fish Audio Drama 3 leads at 1,279 Elo. Four of the five are now in your library: Drama 3, Ming-3.0-tts (1,182), Phonon 31M (1,110) and Step-Audio-EditX (1,101). Breeze TTS 2 (1,229) has non-commercial weights. Kokoro and Chatterbox, the Hebrew voice, rank lower.',
     cards:[{title:'Text to speech', sub:'AA Speech Arena · Elo · Higher is better · Axis starts at 1,000', key:'e', vlabel:'Elo', base:1000, max:1300, step:100, wide:true, rows:TTS, cols:ELO_RANK_COLS}]},
   '3d':{label:'3D', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['3D Arena on Hugging Face','https://huggingface.co/spaces/3d-arena/3d-arena']],
