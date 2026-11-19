@@ -38,6 +38,9 @@
 .tag-rank.r1{background:var(--accent);color:var(--accent-ink)}
 .mcard .tags .tag-rank{margin-right:0}
 .rank-line{margin:0;font-size:12.5px;color:var(--muted)}
+.munranked{grid-column:1/-1;display:grid;gap:2px;padding:14px 4px 2px;border-top:1px dashed var(--line-2);margin-top:6px}
+.munranked b{font:500 12px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--fg)}
+.munranked span{font-size:13px;color:var(--muted)}
 .rank-line b{color:var(--accent);font-family:var(--f-mono)}
 .rank-line .lnk{font-size:12.5px}
 .mcp-tabs{display:flex;gap:4px;justify-content:center;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);padding:0 16px}
@@ -1225,9 +1228,12 @@ function popHTML(mcat){
   const lib = byRank(M.filter(m => m.cat === mcat));
   const libItems = lib.map(m => { const v = bestVariant(m); return `<button type="button" class="pop-item" role="option" data-pick="${m.id}" aria-selected="${!freeSel && S.sel[mcat] === m.id}">
     <canvas data-thumb="${m.id}" aria-hidden="true"></canvas>
-    <span><b>${rankPill(m)}${esc(m.name)} ${tagsHTML(m)}</b><small>${esc(m.maker)} · ${esc(m.params)} · ${rankOf(m) ? RANK[m.id].toLocaleString('en-US') + ' ' + esc(RANK_UNIT[m.cat]) : 'not ranked yet'}</small></span>
+    <span><b>${rankPill(m)}${esc(m.name)} ${tagsHTML(m)}</b><small>${esc(m.maker)} · ${esc(m.params)} · ${rankOf(m) ? RANK[m.id].toLocaleString('en-US') + ' ' + esc(RANK_UNIT[m.cat]) : esc(m.date)}</small></span>
     <span class="fit ${fitClass(v.gb)}">${esc(v.p)}<br>≈${v.gb} GB</span></button>`; }).join('');
-  return `<p class="pop-head">Free APIs · ${CAT_LABEL[mcat]}</p>${freeItems}<p class="pop-head">${CAT_LABEL[mcat]} library · ${lib.length} models · sized for ${S.gpu} GB</p>${libItems}<a class="pop-foot lnk" href="#models">Compare every model →</a>`;
+  const ranked = lib.filter(m => rankOf(m)).length;
+  const libParts = libItems.split('</button>').filter(x => x.trim()).map(x => x + '</button>');
+  const libHTML = ranked && ranked < lib.length ? libParts.slice(0, ranked).join('') + `<p class="pop-head">Not ranked yet · no public score, newest first</p>` + libParts.slice(ranked).join('') : libParts.join('');
+  return `<p class="pop-head">Free APIs · ${CAT_LABEL[mcat]}</p>${freeItems}<p class="pop-head">${CAT_LABEL[mcat]} library · ${lib.length} models · best first · sized for ${S.gpu} GB</p>${libHTML}<a class="pop-foot lnk" href="#models">Compare every model →</a>`;
 }
 function feedFor(cats){
   return [...userGens.filter(g => cats.includes(g.cat)), ...EXAMPLES.filter(g => cats.includes(g.cat))];
@@ -2007,7 +2013,7 @@ function viewChat(){
           <p class="mgroup">Free APIs</p>
           ${FREE_OPTS.filter(f => f.cat === 'chat').map(f => { const p = PROV[f.prov]; return `<label class="mopt"><input type="radio" name="chatmodel" value="${f.id}"${f.id === m.id ? ' checked' : ''}><span><b>${esc(f.name)}${f.run || (f.prov === 'gemini' && GEMINI_PICK[f.id] && geminiKey()) ? ' <span class="tag tag-live">Works here</span>' : ''}</b><small>${esc(f.run ? p.name + ' · no key needed' : f.prov === 'gemini' && GEMINI_PICK[f.id] ? (geminiKey() ? p.name + ' · your key' : p.name + ' · add your free key in Settings') : p.name + ' · ' + p.key)}</small></span><span class="mono fit-ok">Free</span></label>`; }).join('')}
           <p class="mgroup">Your GPU</p>
-          ${byRank(M.filter(x => x.cat === 'chat')).map(x => { const bv = bestVariant(x); return `<label class="mopt"><input type="radio" name="chatmodel" value="${x.id}"${x.id === m.id ? ' checked' : ''}><span><b>${rankPill(x)}${esc(x.name)}</b><small>${esc(x.params)}${rankOf(x) ? ' · ' + RANK[x.id] + ' on the Intelligence Index' : ' · not ranked yet'}</small></span><span class="mono ${fitClass(bv.gb)}">${esc(bv.p)} ≈${bv.gb} GB</span></label>`; }).join('')}
+          ${byRank(M.filter(x => x.cat === 'chat')).map((x, i, arr) => (!rankOf(x) && (i === 0 || rankOf(arr[i - 1])) ? `<p class="mgroup">Not ranked yet · no public score</p>` : '') + (() => { const bv = bestVariant(x); return `<label class="mopt"><input type="radio" name="chatmodel" value="${x.id}"${x.id === m.id ? ' checked' : ''}><span><b>${rankPill(x)}${esc(x.name)}</b><small>${esc(x.params)}${rankOf(x) ? ' · ' + RANK[x.id] + ' on the Intelligence Index' : ' · ' + esc(x.date)}</small></span><span class="mono ${fitClass(bv.gb)}">${esc(bv.p)} ≈${bv.gb} GB</span></label>`; })()).join('')}
         </div>
         ${free ? `<div class="meter" id="chat-meter" style="border-top:0;padding-top:0">${freeMeterHTML(m, 'chat')}</div>` : `<div class="field"><label for="chat-prec">Precision</label><select id="chat-prec">${m.variants.map(x => `<option value="${esc(x.p)}"${x.p === v.p ? ' selected' : ''}>${esc(x.p)} · ≈${x.gb} GB${x.gb > S.gpu ? ' · over your card' : ''}</option>`).join('')}</select></div>
         <div class="meter" id="chat-meter" style="border-top:0;padding-top:0">${meterHTML(m, v)}</div>
@@ -2209,7 +2215,8 @@ function modelCards(){
   const f = S.filters;
   const list = byRank(M.filter(m => (f.cat === 'all' || m.cat === f.cat) && (!f.fit || minGB(m) <= S.gpu) && (!f.commercial || m.lic !== 'nc')));
   if (!list.length) return `<p class="empty">No models match these filters. Turn one off, or pick a bigger GPU at the top.</p>`;
-  return list.map(m => `
+  const divided = new Set();
+  return list.map(m => (rankOf(m) || divided.has(m.cat) || !RANK_BOARD[m.cat] ? '' : (divided.add(m.cat), `<div class="munranked"><b>${esc(CAT_LABEL[m.cat])} · not on a leaderboard yet</b><span>${UNRANKED_HINT}</span></div>`)) + `
     <article class="mcard">
       <div class="thumb"><canvas data-thumb="${m.id}" data-hover aria-hidden="true"></canvas><div class="tags">${rankPill(m)}<span class="tag">${CAT_LABEL[m.cat]}</span>${tagsHTML(m)}</div></div>
       <div class="mbody">
@@ -2251,12 +2258,21 @@ function rankOf(m){
   return {pos:1 + peers.filter(x => RANK[x.id] > sc).length, of:peers.length, score:sc, tie:peers.filter(x => RANK[x.id] === sc).length > 1};
 }
 /* Category order first, then best score first; models not on a board keep their order after the ranked ones. */
-const byRank = list => list.slice().sort((a, b) => (CAT_ORDER.indexOf(a.cat) - CAT_ORDER.indexOf(b.cat)) || ((RANK[b.id] ?? -1e9) - (RANK[a.id] ?? -1e9)));
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const dateNum = d => { const mt = String(d || '').match(/(?:([A-Z][a-z]{2})\s+)?(\d{4})/); return mt ? +mt[2] * 12 + (mt[1] ? MONTHS.indexOf(mt[1]) : 0) : 0; };
+const byRank = list => list.slice().sort((a, b) => (CAT_ORDER.indexOf(a.cat) - CAT_ORDER.indexOf(b.cat))
+  || ((RANK[a.id] == null) - (RANK[b.id] == null))
+  || (RANK[a.id] != null ? RANK[b.id] - RANK[a.id] : dateNum(b.date) - dateNum(a.date)));
+/* What is known about a model that has no leaderboard score yet, from public reports. */
+const RANK_NOTE = {
+  'hi3d-10':'Not on 3D Arena yet. Its makers report it beat the other methods in their own comparison on detail and multi-view fidelity; no independent leaderboard has tested it yet.',
+};
+const UNRANKED_HINT = 'No public score yet. That says nothing about quality; newer models often aren\u2019t tested yet. Newest first.';
 function rankPill(m){ const r = rankOf(m); return r ? `<span class="tag tag-rank${r.pos === 1 ? ' r1' : r.pos <= 3 ? ' r3' : ''}" title="Rank among ${CAT_LABEL[m.cat].toLowerCase()} models here, by ${esc(RANK_BOARD[m.cat].name)}">#${r.pos}${r.tie ? '=' : ''}</span>` : ''; }
 function rankLine(m){
   const b = RANK_BOARD[m.cat]; if (!b) return '';
   const r = rankOf(m);
-  if (!r) return `<p class="rank-line muted">Not on the ${esc(b.name)} yet, so not ranked.</p>`;
+  if (!r) return `<p class="rank-line muted">${esc(RANK_NOTE[m.id] || `Not on the ${b.name} yet, so it has no score. That doesn\u2019t mean it\u2019s weaker.`)}</p>`;
   return `<p class="rank-line"><b>#${r.pos}${r.tie ? ' (tied)' : ''}</b> of ${r.of} ranked ${esc(CAT_LABEL[m.cat].toLowerCase())} models here · ${r.score.toLocaleString('en-US')} ${esc(b.what)} · <a class="lnk" href="${b.url}" target="_blank" rel="noopener">${esc(b.name)} ↗</a></p>`;
 }
 
