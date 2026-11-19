@@ -1324,7 +1324,7 @@ async function enhance(){
     enhCtl = null; const b = $('#enhance'); if (b) { b.removeAttribute('aria-busy'); b.querySelector('span').textContent = 'Enhance'; }
   }
 }
-function persistGens(){ store.set('gens', userGens.slice(0, 30).map(({_file, ...g}) => g)); }
+function persistGens(){ store.set('gens', userGens.slice(0, 30).map(({_file, _gp, ...g}) => g)); }
 let ticker = null;
 function tick(){
   if (ticker) return;
@@ -1509,7 +1509,8 @@ function realCard(g){
   const m = anyById(g.model); const audio = g.cat === 'speech' || g.cat === 'music'; const r = g.result || {};
   const info = [m ? m.name : g.model, ...Object.values(g.opts || {})].map(esc).join(' · ');
   let media;
-  if (g.status === 'working') media = `<div class="gen-media${audio ? ' is-audio' : ''} working"><div class="prog"><span class="prog-label mono">${esc(WORK_LABEL[g.run] || 'Working')}</span><div class="prog-track ind"><i></i></div></div></div>`;
+  if (g.status === 'working') { const x = g.run === 'gpu' && g.pid ? gpuProg(g) : null, w = x && x.pct != null;
+    media = `<div class="gen-media${audio ? ' is-audio' : ''} working"><div class="prog"><span class="prog-label mono">${esc(x ? x.label : WORK_LABEL[g.run] || 'Working')}</span><div class="prog-track${w ? '' : ' ind'}"><i${w ? ` style="width:${x.pct}%"` : ''}></i></div></div></div>`; }
   else if (g.status === 'error') media = `<div class="gen-media${audio ? ' is-audio' : ''} failed"><p class="gerr">${esc(g.error || 'Something went wrong.')}</p></div>`;
   else if (r.type === 'image') media = `<div class="gen-media"><img src="${esc(r.url)}" alt="${esc(g.prompt)}" loading="lazy"></div>`;
   else if (r.type === 'video') media = `<div class="gen-media"><video src="${esc(r.url)}" controls playsinline preload="metadata"></video></div>`;
@@ -1782,10 +1783,72 @@ function comfyExecError(st){
   if (/out of memory|OutOfMemory|allocat/i.test(t)) return 'Your GPU ran out of memory. Try a smaller size or a shorter clip, or close other programs that use the GPU.';
   return t.slice(0, 240);
 }
+/* Live progress: ComfyUI's WebSocket says which node is running and each sampling step, for jobs sent with client_id 'weightroom'. */
+let gpuWs = null;
+const gpuWatch = new Map();  // prompt id -> generation being waited on
+function gpuWsOpen(){
+  const c = gpuConn(); if (!c || (gpuWs && gpuWs.readyState <= 1)) return;
+  let ws; try { ws = new WebSocket(c.u.replace(/^http/, 'ws') + '/ws?clientId=weightroom&wrkey=' + encodeURIComponent(c.k)); } catch (e) { return; }
+  gpuWs = ws;
+  ws.onmessage = ev => {
+    if (typeof ev.data !== 'string') return;
+    let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+    const d = m.data || {};
+    /* after a reconnect ComfyUI repeats the running node without a prompt id */
+    const g = gpuWatch.get(d.prompt_id) || (!d.prompt_id && gpuWatch.size === 1 ? [...gpuWatch.values()][0] : null);
+    if (!g) return;
+    const p = g._gp || (g._gp = {nodes:{}});
+    if (m.type === 'executing' && d.node) { if (p.node && p.node !== d.node && p.nodes[p.node]) p.nodes[p.node].state = 'finished'; p.node = d.node; p.nodes[d.node] = p.nodes[d.node] || {state:'running', value:0, max:1}; }
+    else if (m.type === 'progress' && d.node) { p.node = d.node; p.nodes[d.node] = {state:'running', value:d.value, max:d.max}; }
+    else if (m.type === 'progress_state') { for (const [id, n] of Object.entries(d.nodes || {})) { p.nodes[id] = {state:n.state, value:n.value, max:n.max}; if (n.state === 'running') p.node = id; } }
+    else if (m.type === 'execution_cached') { for (const id of d.nodes || []) p.nodes[id] = {state:'finished', value:1, max:1}; }
+    else return;
+    p.queued = false; gpuShowProg(g);
+  };
+  ws.onclose = () => { if (gpuWs === ws) gpuWs = null; };
+}
+const gpuStage = cls => /^(KSampler|KSamplerAdvanced|SamplerCustom|SamplerCustomAdvanced)$|TTS$/.test(cls) ? 'sample' : /Loader|Checkpoint|AttentionBackend|SparseAttention|ModelSampling/.test(cls) ? 'load'
+  : /Upscale/.test(cls) ? 'upscale' : /Decode|VoxelToMesh/.test(cls) ? 'decode' : /^(Save|Create|Preview)/.test(cls) ? 'save' : /TextEncode|ToVideo$|Conditioning$|VisionEncode/.test(cls) ? 'encode' : 'other';
+const GPU_STAGE_W = {sample:60, encode:8, decode:10, upscale:4, load:1, save:1, other:.5};
+const GPU_STAGE_ORDER = {load:0, encode:1, other:1, sample:2, upscale:3, decode:4, save:5};
+const clock = ms => { const t = Math.max(0, Math.round(ms / 1000)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+function gpuProg(g){
+  const t = clock(Date.now() - g.t0), p = g._gp;
+  if (!p || (!p.node && !p.queued)) return {label:`${WORK_LABEL.gpu} · ${t}`, pct:null};
+  if (!p.node) return {label:`Waiting in line on your GPU · ${t}`, pct:null};
+  let cls = g.gcls;
+  if (!cls) { try { cls = g.gcls = Object.fromEntries(Object.entries(GPU_WF[g.local](g, null)).map(([k, n]) => [k, n.class_type])); } catch (e) { cls = {}; } }
+  const ids = Object.keys(cls), at = GPU_STAGE_ORDER[gpuStage(cls[p.node] || '')] || 0;
+  let total = 0, done = 0;
+  for (const id of ids) {
+    const st = gpuStage(cls[id]), w = GPU_STAGE_W[st], n = p.nodes[id]; total += w;
+    if (n ? n.state === 'finished' : GPU_STAGE_ORDER[st] < at) done += w;  /* after a reconnect, earlier stages count as done */
+    else if (n && n.max > 1) done += w * Math.min(1, n.value / n.max);
+  }
+  const pct = total ? Math.max(1, Math.min(99, Math.round(done / total * 100))) : null;
+  const n = p.nodes[p.node] || {}, stage = gpuStage(cls[p.node] || '');
+  const second = stage === 'sample' && ids.some(id => id !== p.node && gpuStage(cls[id]) === 'sample' && (p.nodes[id] || {}).state === 'finished');
+  const what = stage === 'sample' ? (n.max > 1 && n.value >= 1 ? `${second ? 'Adding detail' : 'Generating'} · step ${n.value} of ${n.max}` : second ? 'Adding detail' : 'Loading the model onto the GPU')
+    : stage === 'load' ? 'Loading the model' : stage === 'upscale' ? 'Upscaling' : stage === 'decode' ? 'Decoding' : stage === 'save' ? 'Saving' : stage === 'encode' ? 'Reading the prompt' : 'Preparing';
+  return {label:`${what}${pct == null ? '' : ' · ' + pct + '%'} · ${t}`, pct};
+}
+function gpuShowProg(g){
+  const el = document.getElementById(g.id); if (!el || g.status !== 'working') return;
+  const lab = el.querySelector('.prog-label'), bar = el.querySelector('.prog-track'); if (!lab || !bar) return;
+  const x = gpuProg(g);
+  lab.textContent = x.label; bar.classList.toggle('ind', x.pct == null); bar.firstElementChild.style.width = x.pct == null ? '' : x.pct + '%';
+}
 async function gpuWait(g){
+  gpuWatch.set(g.pid, g);
+  try { return await gpuPoll(g); }
+  finally { gpuWatch.delete(g.pid); if (!gpuWatch.size && gpuWs) { gpuWs.close(); gpuWs = null; } }
+}
+async function gpuPoll(g){
   const want = GPU_KIND[g.cat]; let lost = 0, away = 0;
   for (;;) {
+    gpuWsOpen();
     await gpuSleep(2500);
+    gpuShowProg(g);
     let h;
     try { const r = await gpuFetch('/history/' + encodeURIComponent(g.pid)); h = await r.json(); away = 0; }
     catch (e) { if (++away > 24) throw e; continue; }
@@ -1804,6 +1867,7 @@ async function gpuWait(g){
     try {
       const q = await (await gpuFetch('/queue')).json();
       const inQueue = [...(q.queue_running || []), ...(q.queue_pending || [])].some(x => x && x[1] === g.pid);
+      if ((q.queue_pending || []).some(x => x && x[1] === g.pid)) (g._gp || (g._gp = {nodes:{}})).queued = true;
       if (inQueue) lost = 0; else if (++lost > 3) throw new Error('Your GPU lost this job, maybe because it restarted. Try again.');
     } catch (err) { if (/lost this job/.test(err.message)) throw err; }
   }
@@ -1827,7 +1891,8 @@ RUNNERS.gpu = async function(g){
     if (!resp.ok) throw new Error('Could not draw a reference picture. Add a photo with +, or install Z-Image Turbo on your GPU.');
     img = await gpuUpload(new File([await padWhite(await resp.blob())], 'reference.png', {type:'image/png'}));
   }
-  const r = await gpuFetch('/prompt', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({prompt:GPU_WF[id](g, img), client_id:'weightroom'})});
+  const wf = GPU_WF[id](g, img); g.gcls = Object.fromEntries(Object.entries(wf).map(([k, n]) => [k, n.class_type]));
+  const r = await gpuFetch('/prompt', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({prompt:wf, client_id:'weightroom'})});
   const d = await r.json().catch(() => ({}));
   if (!r.ok || !d.prompt_id) throw new Error(comfyError(d));
   g.pid = d.prompt_id; persistGens();
