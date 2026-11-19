@@ -17,6 +17,10 @@ An installable web app for open-weight AI models: video, image, 3D, voice, music
 
 Hugging Face jobs use free GPU minutes. Add your own Hugging Face token in **Settings** for more; it stays on your device.
 
+## Your own GPU
+
+Run every studio on your NVIDIA card (16 GB or more) or a free Kaggle GPU: see [gpu/README.md](gpu/README.md). In short, double-click [`Weightroom-GPU.bat`](https://danielzar2013-code.github.io/Weightroom/gpu/Weightroom-GPU.bat) on Windows, or run one line in a Kaggle notebook, and open the link it prints.
+
 ## Install
 
 - **Windows:** open the link in Edge or Chrome, then click **Install** in the address bar. It appears in the Start menu.

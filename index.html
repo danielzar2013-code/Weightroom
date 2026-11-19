@@ -33,6 +33,11 @@
   --r-s:8px; --r-m:14px; --r-l:22px;
 }
 [hidden]{display:none!important}
+.gpu-steps{padding-left:1.2em;display:grid;gap:10px}
+.gpu-line{display:block;margin:8px 0;padding:8px 10px;border-radius:8px;background:var(--surface-3);font-size:12px;overflow-wrap:anywhere;user-select:all}
+.gpu-models{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}
+.gpu-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:10px;background:var(--surface-2)}
+.gpu-row span:first-child{display:grid}.gpu-row small{color:var(--muted)}
 html,body{background:var(--bg);color:var(--fg)}
 body{font:15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
@@ -463,6 +468,8 @@ table.bt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:620px}
   <div class="drawer-panel" role="dialog" aria-modal="true">
     <div style="display:flex;justify-content:flex-end"><button class="btn" type="button" data-close>Close</button></div>
     <h2 id="drawer-title" class="h-sec">Settings</h2>
+    <h3>Your GPU</h3>
+    <div class="set-field" id="gpu-panel"></div>
     <div class="set-field">
       <label for="hf-token"><b>Hugging Face token</b> (optional)</label>
       <input id="hf-token" type="password" autocomplete="off" spellcheck="false" placeholder="hf_…">
@@ -475,9 +482,8 @@ table.bt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:620px}
       <li><b>Images</b> with FLUX on Pollinations (no account) or Z-Image Turbo on Hugging Face.</li>
       <li><b>Video</b> with MiniMax H3, <b>3D</b> with Hunyuan3D 2.1, and <b>speech</b> in 23 languages, Hebrew included, with Chatterbox. All on Hugging Face.</li>
       <li><b>Chat</b> with gpt-oss-20b on Pollinations (no account).</li>
+      <li><b>Your GPU</b>: connect your PC or a free Kaggle GPU below, and every studio in Your GPU mode runs there with no daily limits.</li>
     </ol>
-    <h3>Your own GPU</h3>
-    <p>The Your GPU mode shows how each model would run on your card. Connecting a GPU server comes next; until then those jobs are a preview.</p>
     <h3>Install</h3>
     <p>Windows: open this page in Edge or Chrome and choose Install in the address bar. Android: open it in Chrome and choose Install app in the menu. iPhone: Share, then Add to Home Screen.</p>
   </div>
@@ -490,6 +496,7 @@ table.bt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:620px}
 'use strict';
 const CAP = 100;
 const GPUS = [
+  {gb:16, card:'RTX 4080 / 5080'},
   {gb:24, card:'RTX 4090'},
   {gb:32, card:'RTX 5090'},
   {gb:48, card:'RTX A6000 / L40S'},
@@ -625,7 +632,8 @@ function sampleErrorCopy(e){
   }
 }
 let userGens = (store.get('gens', []) || []).filter(g => g && g.real && anyById(g.model));
-userGens.forEach(g => { if (g.real && g.status === 'working') { g.status = 'error'; g.error = 'Stopped when the app closed. Run it again.'; } });
+const gpuResume = [];
+userGens.forEach(g => { if (g.real && g.status === 'working') { if (g.run === 'gpu' && g.pid) gpuResume.push(g); else { g.status = 'error'; g.error = 'Stopped when the app closed. Run it again.'; } } });
 
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -1033,7 +1041,7 @@ function viewStudio(view){
       <div id="dock-slot" style="width:100%;display:flex;justify-content:center">${dockHTML(view)}</div>
     </section>
     <section class="feed" aria-labelledby="h-feed">
-      <div class="feed-head"><h2 id="h-feed" class="h-sec">Your generations</h2><p>Cards marked Example come with the studio. Free API jobs run for real. Your GPU jobs show a preview until a GPU server is connected.</p></div>
+      <div class="feed-head"><h2 id="h-feed" class="h-sec">Your generations</h2><p>Cards marked Example come with the studio. Free API jobs run for real. Your GPU jobs run on your own GPU once you connect it in Settings, and free on Hugging Face until then.</p></div>
       <div class="grid" id="feed">${feedFor(cats).map(genCard).join('')}</div>
     </section>
     ${footHTML()}
@@ -1105,8 +1113,8 @@ function meterHTML(m, v){
   const note = over
     ? `This version needs about ${v.gb - S.gpu} GB more than your card has. It can still run with CPU offload, but much slower.`
     : `${esc(m.name)} ${esc(v.p)} fits your ${S.gpu} GB ${esc(gpuInfo().card)} with about ${S.gpu - v.gb} GB to spare.${m.licNote ? ' ' + esc(m.licNote) : ''}`;
-  const rk = runFor(m);
-  const runNote = !rk ? '' : SAME[m.id] ? ` No GPU is connected yet, so it runs free on ${RUN_HOST(rk)}.` : ` No GPU is connected yet, so ${RUN_NAME[rk]} runs in its place, free on ${RUN_HOST(rk)}.`;
+  const rk = runFor(m), lm = gpuConn() ? GPU_MODELS[m.cat] : null;
+  const runNote = lm ? (lm === m.id ? ' It runs on your GPU.' : ` ${GPU_INFO[lm].name} runs in its place on your GPU.`) : !rk ? '' : SAME[m.id] ? ` No GPU is connected yet, so it runs free on ${RUN_HOST(rk)}.` : ` No GPU is connected yet, so ${RUN_NAME[rk]} runs in its place, free on ${RUN_HOST(rk)}.`;
   return `<span class="mono">VRAM</span><div class="meter-track" role="img" aria-label="${v.gb} of ${S.gpu} GB"><i class="${over ? 'over' : ''}" style="width:${pct}%"></i></div><span class="mono">≈${v.gb} / ${S.gpu} GB</span><p class="note${over ? ' warn' : ''}">${note}${runNote}</p>`;
 }
 function popHTML(mcat){
@@ -1167,7 +1175,12 @@ function generate(){
   if (!prompt && !S.ref) { toast('Write a prompt first.'); ta.focus(); return; }
   const steps = free ? 1 : (m.steps || 30);
   const g = {id:'g' + Date.now().toString(36), cat:mcat, model:m.id, p: free ? 'Free API' : v.p, prompt:prompt || 'From reference image', opts:readOpts(), seed:hash(prompt + Date.now()), status:'running', t0:Date.now(), dur: free ? 4500 : Math.min(7500, 3200 + steps * 90), steps, gb: free ? 0 : v.gb, prov: free ? m.prov : null, ref: ['video','image','3d'].includes(mcat) && S.ref ? S.ref.thumb : null};
-  const runKey = runFor(m);
+  const local = !free && gpuConn() ? GPU_MODELS[mcat] : null;
+  const runKey = local ? null : runFor(m);
+  if (local) {
+    g.real = true; g.status = 'working'; g.run = 'gpu'; g.local = local; g._file = S.refFile || null;
+    if (local !== m.id) { g.ranOn = GPU_INFO[local].name; g.sub = true; }
+  }
   if (runKey) {
     g.real = true; g.status = 'working'; g.run = runKey; g._file = S.refFile || null;
     if (!m.run) { g.ranOn = RUN_NAME[runKey]; g.sub = !SAME[m.id]; if (g.sub) toast(`${m.name} isn't connected yet, so ${RUN_NAME[runKey]} makes this one.`); }
@@ -1342,7 +1355,7 @@ const RUNNERS = {
     return {type:'audio', url};
   },
 };
-const WORK_LABEL = {klein:'Generating on Hugging Face', qwenimg:'Generating on Hugging Face', ace:'Writing the song on Hugging Face · 1 to 3 min', pollinations:'Drawing on Pollinations', zimage:'Generating on Hugging Face', h3:'Making the video on Hugging Face · 1 to 3 min', hunyuan3d:'Building the 3D model on Hugging Face · 1 to 3 min', chatterbox:'Recording the voice on Hugging Face'};
+const WORK_LABEL = {klein:'Generating on Hugging Face', qwenimg:'Generating on Hugging Face', ace:'Writing the song on Hugging Face · 1 to 3 min', pollinations:'Drawing on Pollinations', zimage:'Generating on Hugging Face', h3:'Making the video on Hugging Face · 1 to 3 min', hunyuan3d:'Building the 3D model on Hugging Face · 1 to 3 min', chatterbox:'Recording the voice on Hugging Face', gpu:'Running on your GPU · the first run loads the model'};
 function realCard(g){
   const m = anyById(g.model); const audio = g.cat === 'speech' || g.cat === 'music'; const r = g.result || {};
   const info = [m ? m.name : g.model, ...Object.values(g.opts || {})].map(esc).join(' · ');
@@ -1355,8 +1368,293 @@ function realCard(g){
   else if (r.type === 'model') media = `<div class="gen-media"><model-viewer src="${esc(r.url)}" camera-controls auto-rotate shadow-intensity="1" alt="${esc(g.prompt)}"></model-viewer></div>`;
   else media = `<div class="gen-media failed"><p class="gerr">This result is no longer available.</p></div>`;
   const actions = g.status === 'done' && r.url ? `<div class="gen-actions"><a class="lnk" href="${esc(r.url)}" target="_blank" rel="noopener" download>Download ↓</a></div>`
-    : g.status === 'error' ? `<div class="gen-actions"><button class="lnk" type="button" data-retry="${g.id}">Try again</button></div>` : '';
-  return `<article class="gen" id="${g.id}">${media}<div class="gen-meta"><p class="gen-prompt" dir="auto">${esc(g.prompt)}</p><p class="gen-info mono">${info}</p>${g.ranOn ? `<p class="gen-info">${g.sub ? 'Made with ' + esc(g.ranOn) + ' because this model isn\u2019t connected yet.' : 'Ran free on ' + esc(RUN_HOST(g.run)) + ' because no GPU is connected.'}</p>` : ''}${r.note ? `<p class="gen-info">${esc(r.note)}</p>` : ''}${actions}</div></article>`;
+    : g.status === 'error' ? `<div class="gen-actions">${g.needInstall ? `<button class="lnk" type="button" data-gpu-install="${g.needInstall}">Install on your GPU</button>` : ''}<button class="lnk" type="button" data-retry="${g.id}">Try again</button></div>` : '';
+  return `<article class="gen" id="${g.id}">${media}<div class="gen-meta"><p class="gen-prompt" dir="auto">${esc(g.prompt)}</p><p class="gen-info mono">${info}</p>${g.run === 'gpu' ? `<p class="gen-info">${g.sub ? 'Made on your GPU with ' + esc(g.ranOn) + ' because ' + esc(m ? m.name : 'this model') + ' isn\u2019t set up for your GPU yet.' : 'Made on your GPU.'}</p>` : g.ranOn ? `<p class="gen-info">${g.sub ? 'Made with ' + esc(g.ranOn) + ' because this model isn\u2019t connected yet.' : 'Ran free on ' + esc(RUN_HOST(g.run)) + ' because no GPU is connected.'}</p>` : ''}${r.note ? `<p class="gen-info">${esc(r.note)}</p>` : ''}${actions}</div></article>`;
+}
+
+/* ---------- your own GPU: ComfyUI with the Weightroom bridge, on a PC or on Kaggle ---------- */
+/* What runs on a connected 16 GB GPU, per studio. Other models in the library run as these, with a note on the card. */
+const GPU_MODELS = {video:'wan22-5b', image:'z-image-turbo', '3d':'hunyuan3d-21', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
+const GPU_INFO = {
+  'z-image-turbo':{name:'Z-Image Turbo', size:'21 GB', what:'Images'},
+  'wan22-5b':{name:'Wan 2.2 5B', size:'18 GB', what:'Video'},
+  'hunyuan3d-21':{name:'Hunyuan3D 2.1', size:'7.4 GB', what:'3D'},
+  'chatterbox-ml':{name:'Chatterbox Multilingual', size:'3.2 GB', what:'Speech'},
+  'ace-step-15':{name:'ACE-Step 1.5', size:'10 GB', what:'Music'},
+  'gpt-oss-20b':{name:'gpt-oss-20b', size:'13 GB', what:'Chat'},
+};
+const GPU_PICK = {video:'wan22', image:'z-image-turbo', '3d':'hunyuan3d-21', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
+const KAGGLE_LINE = '!curl -fsSL https://danielzar2013-code.github.io/Weightroom/gpu/linux.sh -o /tmp/wr.sh && bash /tmp/wr.sh';
+const WAN_NEG = "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走";
+let gpuStat = null, gpuErr = null, gpuPollT = null;
+const gpuSleep = ms => new Promise(r => setTimeout(r, ms));
+const gpuConn = () => { const c = store.get('gpuConn', null); return c && c.u && c.k ? c : null; };
+const gpuCard = () => gpuStat ? String(gpuStat.gpu && gpuStat.gpu.name || 'GPU').replace(/^cuda:\d+\s*/, '').replace(/\s*:\s*\S+$/, '').replace(/^NVIDIA (GeForce )?/, '') : '';
+function parseConnect(text){
+  const mt = String(text || '').match(/#gpu=([A-Za-z0-9_-]+)/); if (!mt) return null;
+  try {
+    const b = mt[1].replace(/-/g, '+').replace(/_/g, '/');
+    const j = JSON.parse(atob(b + '='.repeat((4 - b.length % 4) % 4)));
+    const u = String(j.u || '').replace(/\/+$/, ''), k = String(j.k || '');
+    if (!/^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(u) && !/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i.test(u)) return null;
+    if (!/^[A-Za-z0-9_-]{16,128}$/.test(k)) return null;
+    return {u, k};
+  } catch { return null; }
+}
+const GPU_AWAY = 'Your GPU isn’t reachable. Start Weightroom GPU on your PC or in Kaggle, then open the new link it shows.';
+async function gpuFetch(path, opts = {}){
+  const c = gpuConn(); if (!c) throw new Error('No GPU is connected. Connect one in Settings.');
+  let r;
+  try { r = await fetch(c.u + path, {...opts, headers:{...(opts.headers || {}), Authorization:'Bearer ' + c.k}}); }
+  catch (e) { if (e && e.name === 'AbortError') throw e; throw new Error(GPU_AWAY); }
+  if (r.status === 401) throw new Error('Your GPU turned down the key. Open the link from Weightroom GPU again.');
+  if (r.status === 502 || r.status === 503 && path !== '/weightroom/chat' || r.status === 530) throw new Error(GPU_AWAY);
+  return r;
+}
+async function gpuCheck(){
+  if (!gpuConn()) { gpuStat = null; gpuErr = null; fillGpuPanel(); return null; }
+  try {
+    const r = await gpuFetch('/weightroom/info');
+    if (!r.ok) throw new Error(r.status === 404 ? 'That ComfyUI doesn’t have the Weightroom add-on. Start it with Weightroom GPU.' : 'Your GPU answered with an error (' + r.status + ').');
+    gpuStat = await r.json(); gpuErr = null;
+  } catch (e) { gpuStat = null; gpuErr = e.message; }
+  fillGpuPanel();
+  const busy = gpuStat && Object.values(gpuStat.models).some(x => x.state === 'downloading');
+  clearTimeout(gpuPollT); if (busy) gpuPollT = setTimeout(gpuCheck, 2500);
+  return gpuStat;
+}
+async function gpuConnect(c){
+  store.set('gpuConn', c);
+  for (const k in S.runOn) S.runOn[k] = 'gpu';
+  for (const k in GPU_PICK) if (anyById(GPU_PICK[k])) S.sel[k] = GPU_PICK[k];
+  store.set('runOn', S.runOn); store.set('sel', S.sel);
+  fillSettings(); $('#drawer').hidden = false;
+  const st = await gpuCheck();
+  if (st) {
+    const vram = st.gpu && st.gpu.vram_gb || 0; const fit = GPUS.filter(x => x.gb <= vram + 1).pop() || GPUS[0];
+    S.gpu = fit.gb; store.set('gpu', fit.gb); S.prec = {};
+    toast(`Connected to your ${gpuCard()}.`);
+  } else toast('Saved, but your GPU didn’t answer yet.');
+  render();
+}
+function gpuDisconnect(){ store.set('gpuConn', null); gpuStat = null; gpuErr = null; clearTimeout(gpuPollT); fillGpuPanel(); render(); toast('Disconnected. Your GPU jobs run free on Hugging Face again.'); }
+async function gpuInstall(id){
+  $('#drawer').hidden = false; fillSettings();
+  try {
+    const r = await gpuFetch('/weightroom/install', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:id})});
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Your GPU could not start the download (' + r.status + ').');
+    toast(`Downloading ${GPU_INFO[id].name} to your GPU (${GPU_INFO[id].size}).`);
+  } catch (e) { toast(e.message); }
+  gpuCheck();
+}
+function gpuRow(id){
+  const x = gpuStat.models[id] || {}; const info = GPU_INFO[id];
+  let right;
+  if (x.ready) right = '<span class="fit fit-ok">Installed</span>';
+  else if (x.state === 'downloading') { const pct = x.total ? Math.floor(x.done / x.total * 100) : 0; right = `<span class="mono">Downloading ${pct}%${x.total ? ' of ' + (x.total / 1e9).toFixed(1) + ' GB' : ''}</span>`; }
+  else if (x.missing === 'addon') right = '<span class="hint">Add-on missing. Run Weightroom GPU again.</span>';
+  else if (x.missing === 'ollama') right = '<span class="hint">Chat needs Ollama. Run Weightroom GPU again.</span>';
+  else right = `${x.state === 'error' ? `<span class="hint">Stopped: ${esc(x.error || 'download failed')}. </span>` : ''}<button class="btn" type="button" data-gpu-install="${id}">${x.state === 'error' ? 'Resume' : 'Install'} · ${info.size}</button>`;
+  return `<li class="gpu-row"><span><b>${esc(info.name)}</b><small>${esc(info.what)}</small></span>${right}</li>`;
+}
+function fillGpuPanel(){
+  const el = $('#gpu-panel'); if (!el) return;
+  const c = gpuConn();
+  const setup = `<ol class="gpu-steps">
+      <li><b>On your PC (Windows, NVIDIA):</b> <a class="lnk" href="gpu/Weightroom-GPU.bat" download>download Weightroom-GPU.bat</a> and double-click it. If Windows warns you, choose More info, then Run anyway. The first run installs everything in 15 to 30 minutes, then this app opens connected. Keep its window open while you work.</li>
+      <li><b>On Kaggle (free GPU):</b> make a new notebook, turn on GPU T4 x2 and Internet in its settings, paste this line into a cell and run it. Then open the link it prints, or scan its QR code with your phone.<code class="gpu-line">${esc(KAGGLE_LINE)}</code><button class="btn" type="button" id="gpu-copy">Copy line</button></li>
+    </ol>`;
+  const paste = `<label for="gpu-link"><b>Connect link</b></label><input id="gpu-link" type="text" autocomplete="off" spellcheck="false" placeholder="https://danielzar2013-code.github.io/Weightroom/#gpu=…"><div class="set-row"><button class="btn btn-accent" type="button" id="gpu-save">Connect</button></div><p id="gpu-msg" class="hint"></p>`;
+  if (!c) { el.innerHTML = `<p>Run every studio on your own NVIDIA card (16 GB or more) or a free Kaggle GPU, with no daily limits.</p>${setup}${paste}`; return; }
+  if (gpuErr) { el.innerHTML = `<p class="gerr">${esc(gpuErr)}</p><div class="set-row"><button class="btn" type="button" id="gpu-retry">Check again</button><button class="btn" type="button" id="gpu-off">Disconnect</button></div><details><summary>Start or set up your GPU</summary>${setup}${paste}</details>`; return; }
+  if (!gpuStat) { el.innerHTML = '<p class="hint">Checking your GPU…</p>'; return; }
+  el.innerHTML = `<p><b>Connected:</b> ${esc(gpuCard())} · ${gpuStat.gpu.vram_gb} GB${gpuStat.ram_gb ? ' · ' + gpuStat.ram_gb + ' GB RAM' : ''}</p>
+    <p class="hint">Install the models you want. Each one downloads once to your GPU's disk. Every studio in Your GPU mode then runs there.</p>
+    <ul class="gpu-models">${Object.keys(GPU_INFO).map(gpuRow).join('')}</ul>
+    <div class="set-row"><button class="btn" type="button" id="gpu-retry">Refresh</button><button class="btn" type="button" id="gpu-off">Disconnect</button></div>`;
+}
+async function gpuUpload(file){
+  const fd = new FormData(); fd.append('image', file, file.name || 'reference.png'); fd.append('overwrite', 'true');
+  const r = await gpuFetch('/upload/image', {method:'POST', body:fd});
+  if (!r.ok) throw new Error('Your GPU could not take the picture (' + r.status + ').');
+  const d = await r.json(); return d.subfolder ? d.subfolder + '/' + d.name : d.name;
+}
+/* Workflows in ComfyUI's API format, from the official ComfyUI templates. */
+function zimageNodes(text, w, h, seed, save){
+  const n = {
+    '1':{class_type:'UNETLoader', inputs:{unet_name:'z_image_turbo_bf16.safetensors', weight_dtype:'default'}},
+    '2':{class_type:'CLIPLoader', inputs:{clip_name:'qwen_3_4b.safetensors', type:'lumina2', device:'default'}},
+    '3':{class_type:'VAELoader', inputs:{vae_name:'ae.safetensors'}},
+    '4':{class_type:'ModelSamplingAuraFlow', inputs:{model:['1', 0], shift:3}},
+    '5':{class_type:'CLIPTextEncode', inputs:{text, clip:['2', 0]}},
+    '6':{class_type:'ConditioningZeroOut', inputs:{conditioning:['5', 0]}},
+    '7':{class_type:'EmptySD3LatentImage', inputs:{width:w, height:h, batch_size:1}},
+    '8':{class_type:'KSampler', inputs:{model:['4', 0], seed, steps:8, cfg:1, sampler_name:'res_multistep', scheduler:'simple', positive:['5', 0], negative:['6', 0], latent_image:['7', 0], denoise:1}},
+    '9':{class_type:'VAEDecode', inputs:{samples:['8', 0], vae:['3', 0]}},
+  };
+  if (save) n['10'] = {class_type:'SaveImage', inputs:{images:['9', 0], filename_prefix:'weightroom/image'}};
+  return n;
+}
+const WAN_DIMS = {480:{'16:9':[832,480],'9:16':[480,832],'1:1':[640,640]}, 704:{'16:9':[1280,704],'9:16':[704,1280],'1:1':[960,960]}};
+const GPU_WF = {
+  'z-image-turbo'(g){ const [w, h] = PSIZE[g.opts.aspect] || [1024, 1024]; return zimageNodes(g.prompt, w, h, g.seed, true); },
+  'hunyuan3d-21'(g, img){
+    const n = img ? {'20':{class_type:'LoadImage', inputs:{image:img}}} : zimageNodes(g.prompt + ', single object, centered, plain white background, three-quarter view, studio light', 1024, 1024, g.seed, false);
+    const image = img ? ['20', 0] : ['9', 0];
+    Object.assign(n, {
+      '21':{class_type:'ImageOnlyCheckpointLoader', inputs:{ckpt_name:'hunyuan_3d_v2.1.safetensors'}},
+      '22':{class_type:'ModelSamplingAuraFlow', inputs:{model:['21', 0], shift:1, sampling:'flow'}},
+      '23':{class_type:'CLIPVisionEncode', inputs:{clip_vision:['21', 1], image, crop:'center'}},
+      '24':{class_type:'Hunyuan3Dv2Conditioning', inputs:{clip_vision_output:['23', 0]}},
+      '25':{class_type:'EmptyLatentHunyuan3Dv2', inputs:{resolution:4096, batch_size:1}},
+      '26':{class_type:'KSampler', inputs:{model:['22', 0], seed:g.seed, steps:30, cfg:5, sampler_name:'euler', scheduler:'normal', positive:['24', 0], negative:['24', 1], latent_image:['25', 0], denoise:1}},
+      '27':{class_type:'VAEDecodeHunyuan3D', inputs:{samples:['26', 0], vae:['21', 2], num_chunks:8000, octree_resolution:256}},
+      '28':{class_type:'VoxelToMesh', inputs:{voxel:['27', 0], algorithm:'surface net', threshold:0.6}},
+      '29':{class_type:'SaveGLB', inputs:{mesh:['28', 0], filename_prefix:'weightroom/3d'}},
+    });
+    return n;
+  },
+  'wan22-5b'(g, img){
+    const [w, h] = WAN_DIMS[/480/.test(g.opts.res || '') ? 480 : 704][g.opts.aspect] || WAN_DIMS[704]['16:9'];
+    const length = Math.round(Math.min(5, parseFloat(g.opts.duration) || 5) * 24) + 1;
+    const n = {
+      '30':{class_type:'UNETLoader', inputs:{unet_name:'wan2.2_ti2v_5B_fp16.safetensors', weight_dtype:'default'}},
+      '31':{class_type:'CLIPLoader', inputs:{clip_name:'umt5_xxl_fp8_e4m3fn_scaled.safetensors', type:'wan', device:'default'}},
+      '32':{class_type:'VAELoader', inputs:{vae_name:'wan2.2_vae.safetensors'}},
+      '33':{class_type:'ModelSamplingSD3', inputs:{model:['30', 0], shift:8}},
+      '34':{class_type:'CLIPTextEncode', inputs:{text:g.prompt, clip:['31', 0]}},
+      '35':{class_type:'CLIPTextEncode', inputs:{text:WAN_NEG, clip:['31', 0]}},
+      '36':{class_type:'Wan22ImageToVideoLatent', inputs:{vae:['32', 0], width:w, height:h, length, batch_size:1}},
+      '38':{class_type:'KSampler', inputs:{model:['33', 0], seed:g.seed, steps:20, cfg:5, sampler_name:'uni_pc', scheduler:'simple', positive:['34', 0], negative:['35', 0], latent_image:['36', 0], denoise:1}},
+      '39':{class_type:'VAEDecode', inputs:{samples:['38', 0], vae:['32', 0]}},
+      '40':{class_type:'CreateVideo', inputs:{images:['39', 0], fps:24}},
+      '41':{class_type:'SaveVideo', inputs:{video:['40', 0], filename_prefix:'weightroom/video', format:'auto', 'format.codec':'auto'}},
+    };
+    if (img) { n['37'] = {class_type:'LoadImage', inputs:{image:img}}; n['36'].inputs.start_image = ['37', 0]; }
+    return n;
+  },
+  'ace-step-15'(g){
+    const secs = {'30s':30, '60s':60, '2 min':120, '4 min':240}[g.opts.duration] || 60;
+    const lines = g.prompt.split('\n'); const tags = lines[0].trim();
+    const lyrics = g.opts.vocals === 'Instrumental' ? '[Instrumental]' : (lines.slice(1).join('\n').trim() || '[Instrumental]');
+    return {
+      '50':{class_type:'CheckpointLoaderSimple', inputs:{ckpt_name:'ace_step_1.5_turbo_aio.safetensors'}},
+      '51':{class_type:'ModelSamplingAuraFlow', inputs:{model:['50', 0], shift:3}},
+      '52':{class_type:'TextEncodeAceStepAudio1.5', inputs:{clip:['50', 1], tags, lyrics, seed:g.seed, bpm:120, duration:secs, timesignature:'4', language:/[֐-׿]/.test(lyrics) ? 'he' : 'en', keyscale:'C major', generate_audio_codes:true, cfg_scale:2, temperature:0.85, top_p:0.9, top_k:0, min_p:0}},
+      '53':{class_type:'ConditioningZeroOut', inputs:{conditioning:['52', 0]}},
+      '54':{class_type:'EmptyAceStep1.5LatentAudio', inputs:{seconds:secs, batch_size:1}},
+      '55':{class_type:'KSampler', inputs:{model:['51', 0], seed:g.seed, steps:8, cfg:1, sampler_name:'euler', scheduler:'simple', positive:['52', 0], negative:['53', 0], latent_image:['54', 0], denoise:1}},
+      '56':{class_type:'VAEDecodeAudio', inputs:{samples:['55', 0], vae:['50', 2]}},
+      '57':{class_type:'SaveAudioAdvanced', inputs:{audio:['56', 0], filename_prefix:'weightroom/music', format:'mp3', 'format.quality':'V0'}},
+    };
+  },
+  'chatterbox-ml'(g){
+    const lang = LANG_CODE[g.opts.lang] ? g.opts.lang : 'English';
+    return {
+      '60':{class_type:'FL_ChatterboxMultilingualTTS', inputs:{text:g.prompt.slice(0, 1000), language:`${lang} (${LANG_CODE[lang]})`, exaggeration:{Neutral:.5, Warm:.6, Excited:.8, Calm:.35}[g.opts.emotion] ?? .5, cfg_weight:0.5, temperature:0.8, repetition_penalty:2, min_p:0.05, top_p:1, seed:g.seed % 4294967295, use_cpu:false, keep_model_loaded:false}},
+      '61':{class_type:'SaveAudioAdvanced', inputs:{audio:['60', 0], filename_prefix:'weightroom/speech', format:'mp3', 'format.quality':'V0'}},
+    };
+  },
+};
+const GPU_KIND = {image:'image', video:'video', '3d':'model', speech:'audio', music:'audio'};
+function fileKind(name){
+  const ext = String(name).split('.').pop().toLowerCase();
+  return /^(png|jpe?g|webp)$/.test(ext) ? 'image' : /^(mp4|webm|mov|mkv)$/.test(ext) ? 'video' : /^(mp3|flac|wav|ogg|opus|m4a)$/.test(ext) ? 'audio' : /^(glb|gltf)$/.test(ext) ? 'model' : null;
+}
+function comfyFiles(outputs){
+  const out = [];
+  for (const k in outputs || {}) for (const key in outputs[k]) { const v = outputs[k][key]; if (Array.isArray(v)) v.forEach(f => { if (f && typeof f === 'object' && f.filename) out.push(f); }); }
+  return out;
+}
+function comfyError(d){
+  const ne = d && d.node_errors && Object.values(d.node_errors)[0];
+  const raw = ne && ne.errors && ne.errors[0] ? `${ne.class_type}: ${ne.errors[0].message}${ne.errors[0].details ? ' (' + ne.errors[0].details + ')' : ''}` : d && d.error ? (d.error.message || '') + (d.error.details ? ' ' + d.error.details : '') : 'Your GPU turned down the job.';
+  if (/FL_Chatterbox/.test(raw) && /does not exist|not found/i.test(raw)) return 'The Chatterbox add-on is missing on your GPU. Run Weightroom GPU again to add it.';
+  if (/value not in list/i.test(raw)) return 'A model file is missing on your GPU. Install the model again in Settings. (' + raw.slice(0, 160) + ')';
+  return raw.slice(0, 240);
+}
+function comfyExecError(st){
+  const m = (st.messages || []).find(x => x[0] === 'execution_error'); const e = m ? m[1] : {};
+  const t = `${e.node_type ? e.node_type + ': ' : ''}${e.exception_message || 'The job failed on your GPU.'}`;
+  if (/out of memory|OutOfMemory|allocat/i.test(t)) return 'Your GPU ran out of memory. Try a smaller size or a shorter clip, or close other programs that use the GPU.';
+  return t.slice(0, 240);
+}
+async function gpuWait(g){
+  const want = GPU_KIND[g.cat]; let lost = 0, away = 0;
+  for (;;) {
+    await gpuSleep(2500);
+    let h;
+    try { const r = await gpuFetch('/history/' + encodeURIComponent(g.pid)); h = await r.json(); away = 0; }
+    catch (e) { if (++away > 24) throw e; continue; }
+    const e = h[g.pid];
+    if (e) {
+      const st = e.status || {};
+      if (st.status_str === 'error') throw new Error(comfyExecError(st));
+      if (st.completed || st.status_str === 'success') {
+        const files = comfyFiles(e.outputs); const f = files.find(x => x.type === 'output' && fileKind(x.filename) === want) || files.find(x => fileKind(x.filename) === want);
+        if (!f) throw new Error('Your GPU finished but sent back no file. Try again.');
+        const c = gpuConn();
+        return {type:want, url:`${c.u}/view?filename=${encodeURIComponent(f.filename)}&subfolder=${encodeURIComponent(f.subfolder || '')}&type=${encodeURIComponent(f.type || 'output')}&wrkey=${encodeURIComponent(c.k)}`};
+      }
+      continue;
+    }
+    try {
+      const q = await (await gpuFetch('/queue')).json();
+      const inQueue = [...(q.queue_running || []), ...(q.queue_pending || [])].some(x => x && x[1] === g.pid);
+      if (inQueue) lost = 0; else if (++lost > 3) throw new Error('Your GPU lost this job, maybe because it restarted. Try again.');
+    } catch (err) { if (/lost this job/.test(err.message)) throw err; }
+  }
+}
+RUNNERS.gpu = async function(g){
+  const id = g.local;
+  const st = await gpuCheck(); if (!st) throw new Error(gpuErr || GPU_AWAY);
+  const x = st.models[id] || {};
+  if (!x.ready) {
+    if (x.missing === 'addon') throw new Error('The Chatterbox add-on is missing on your GPU. Run Weightroom GPU again to add it.');
+    if (x.state === 'downloading') throw new Error(`${GPU_INFO[id].name} is still downloading to your GPU. Try again when it finishes.`);
+    g.needInstall = id; throw new Error(`${GPU_INFO[id].name} isn’t installed on your GPU yet. Install it (${GPU_INFO[id].size}, once), then try again.`);
+  }
+  let img = null;
+  if (g._file && (g.cat === 'video' || g.cat === '3d')) img = await gpuUpload(g._file);
+  else if (g.cat === '3d' && !(st.models['z-image-turbo'] || {}).ready) {
+    const resp = await fetch(pollImageUrl(g.prompt + ', single object, centered, plain white background, three-quarter view, studio light', '1:1', g.seed));
+    if (!resp.ok) throw new Error('Could not draw a reference picture. Add a photo with +, or install Z-Image Turbo on your GPU.');
+    img = await gpuUpload(new File([await resp.blob()], 'reference.jpg', {type:'image/jpeg'}));
+  }
+  const r = await gpuFetch('/prompt', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({prompt:GPU_WF[id](g, img), client_id:'weightroom'})});
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok || !d.prompt_id) throw new Error(comfyError(d));
+  g.pid = d.prompt_id; persistGens();
+  const out = await gpuWait(g);
+  if (g.cat === '3d' && g.opts.texture === 'PBR textures') out.note = 'Textures aren’t available on your GPU yet, so this model came out untextured.';
+  return out;
+};
+async function gpuResumeRun(g){
+  try { g.result = await gpuWait(g); g.status = 'done'; if (g.result.type === 'model') loadModelViewer(); }
+  catch (e) { g.status = 'error'; g.error = errText(e); }
+  persistGens(); swapCard(g);
+}
+async function gpuChatSend(standIn){
+  const box = $('#msgs');
+  box.insertAdjacentHTML('beforeend', `<div class="msg assistant"><p class="msg-who">gpt-oss-20b · your GPU${standIn ? ' · ' + esc(standIn) + ' isn’t set up for your GPU yet' : ''}</p><div class="msg-body thinking" dir="auto">Thinking…</div></div>`);
+  const bubble = box.lastElementChild.querySelector('.msg-body'); box.scrollTop = box.scrollHeight;
+  const sys = (($('#sys') && $('#sys').value) || '').trim();
+  const msgs = [{role:'system', content:`You are the assistant inside Weightroom, the app the user is using right now, running on the user's own GPU. Weightroom generates images, video, 3D models, speech and music with open-weight models, on the user's GPU or free through Pollinations and Hugging Face, and shows which models fit the user's GPU and how they rank on public benchmarks. If you are not sure about something, say so instead of guessing.${sys ? ' ' + sys : ''} Reply in the language the user writes in. Keep answers short unless asked for detail.`}];
+  for (const x of S.chat.slice(-20)) { if (x.role === 'user') msgs.push({role:'user', content:x.text}); else if (x.role === 'assistant' && x.text) msgs.push({role:'assistant', content:x.text}); }
+  chatCtl = new AbortController(); setSendBtn(true);
+  try {
+    const st = gpuStat || await gpuCheck(); const x = st && st.models['gpt-oss-20b'];
+    if (st && x && !x.ready) throw new Error(x.missing === 'ollama' ? 'Chat on your GPU needs Ollama. Run Weightroom GPU again to add it.' : 'gpt-oss-20b isn’t installed on your GPU yet. Install it in Settings, under Your GPU (13 GB, once).');
+    const r = await gpuFetch('/weightroom/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'gpt-oss-20b', messages:msgs}), signal:chatCtl.signal});
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(/not found/i.test(d.error || '') ? 'gpt-oss-20b isn’t installed on your GPU yet. Install it in Settings, under Your GPU (13 GB, once).' : (d.error || 'Your GPU answered with an error (' + r.status + ').'));
+    const text = String(d.text || '').trim(); if (!text) throw new Error('The model returned an empty answer. Try again.');
+    bubble.classList.remove('thinking'); bubble.textContent = text; S.chat.push({role:'assistant', model:'gpu-oss', text});
+  } catch (e) {
+    const el = bubble.closest('.msg'); if (el) el.remove();
+    if (!(e && e.name === 'AbortError')) pushChat({role:'notice', text:String((e && e.message) || e)});
+  } finally { chatCtl = null; setSendBtn(false); const b = $('#msgs'); if (b) b.scrollTop = b.scrollHeight; }
 }
 let mvLoaded = false;
 function loadModelViewer(){ if (mvLoaded) return; mvLoaded = true; const sc = document.createElement('script'); sc.type = 'module'; sc.src = 'https://cdn.jsdelivr.net/npm/@google/model-viewer@4.3.1/dist/model-viewer.min.js'; document.head.appendChild(sc); }
@@ -1395,7 +1693,7 @@ async function pollChatSend(standIn){
 }
 
 /* settings, install, offline */
-function fillSettings(){ const i = $('#hf-token'); if (i) i.value = store.get('hfToken', ''); const st = $('#hf-status'); if (st) st.textContent = hfToken() ? 'A token is saved on this device.' : 'No token saved. Free jobs use this device’s small anonymous quota.'; }
+function fillSettings(){ fillGpuPanel(); const i = $('#hf-token'); if (i) i.value = store.get('hfToken', ''); const st = $('#hf-status'); if (st) st.textContent = hfToken() ? 'A token is saved on this device.' : 'No token saved. Free jobs use this device’s small anonymous quota.'; }
 let deferredInstall = null;
 addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; const b = $('#install'); if (b) b.hidden = false; });
 addEventListener('appinstalled', () => { const b = $('#install'); if (b) b.hidden = true; toast('Weightroom is installed.'); });
@@ -1536,6 +1834,7 @@ async function sendChat(){
     return;
   }
   const m = byId[sel];
+  if (gpuConn()) { await gpuChatSend(m.id === 'gpt-oss-20b' ? '' : m.name); return; }
   await pollChatSend(m.id === 'gpt-oss-20b' ? '' : m.name);
 }
 
@@ -1776,6 +2075,8 @@ function rerenderDock(){
   slot.innerHTML = dockHTML(S.view); hydrateThumbs(slot);
 }
 function route(){
+  const linked = parseConnect(location.hash);
+  if (linked) { history.replaceState(null, '', location.pathname + location.search); gpuConnect(linked); }
   const h = decodeURIComponent(location.hash.slice(1));
   S.view = VIEWS.includes(h) ? h : 'explore';
   render(); window.scrollTo(0, 0);
@@ -1826,6 +2127,11 @@ document.addEventListener('click', e => {
   const pl = t.closest('[data-play]'); if (pl) { play(pl.dataset.play); return; }
   const fc = t.closest('[data-fcat]'); if (fc) { S.filters.cat = fc.dataset.fcat; $$('[data-fcat]').forEach(b => b.setAttribute('aria-pressed', String(b === fc))); $('#mgrid').innerHTML = modelCards(); hydrateThumbs($('#mgrid')); return; }
   if (t.closest('#connect')) { fillSettings(); $('#drawer').hidden = false; $('#drawer [data-close]').focus(); return; }
+  if (t.closest('#gpu-save')) { const c = parseConnect(($('#gpu-link').value || '').trim()); if (!c) { $('#gpu-msg').textContent = 'That isn\u2019t a Weightroom connect link. Copy the whole link that Weightroom GPU shows.'; return; } gpuConnect(c); return; }
+  if (t.closest('#gpu-off')) { gpuDisconnect(); return; }
+  if (t.closest('#gpu-retry')) { gpuStat = null; gpuErr = null; fillGpuPanel(); gpuCheck(); return; }
+  if (t.closest('#gpu-copy')) { (navigator.clipboard ? navigator.clipboard.writeText(KAGGLE_LINE) : Promise.reject()).then(() => toast('Copied. Paste it into a Kaggle notebook cell.'), () => toast('Select the line and copy it.')); return; }
+  const gi = t.closest('[data-gpu-install]'); if (gi) { gpuInstall(gi.dataset.gpuInstall); return; }
   if (t.closest('#hf-save')) { const v = ($('#hf-token').value || '').trim(); if (v && !/^hf_/.test(v)) { $('#hf-status').textContent = 'That does not look like a Hugging Face token. It should start with hf_.'; return; } store.set('hfToken', v); spaceClients = {}; fillSettings(); toast(v ? 'Token saved on this device.' : 'Token removed.'); return; }
   if (t.closest('#hf-clear')) { store.set('hfToken', ''); spaceClients = {}; fillSettings(); toast('Token removed.'); return; }
   if (t.closest('#install')) { if (deferredInstall) { deferredInstall.prompt(); deferredInstall.userChoice.finally(() => { deferredInstall = null; $('#install').hidden = true; }); } return; }
@@ -1864,6 +2170,7 @@ addEventListener('scroll', hideTip, {passive:true});
 
 addEventListener('hashchange', route);
 route();
+if (gpuConn() && !gpuStat) gpuCheck().then(() => gpuResume.forEach(gpuResumeRun));
 })();
 </script>
 
