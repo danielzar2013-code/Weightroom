@@ -357,6 +357,7 @@ table.bt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:620px}
 .badge{position:absolute;top:10px;left:10px;font:500 10px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;padding:3px 7px;border-radius:5px;background:rgba(0,0,0,.6);color:var(--fg)}
 .badge-demo{color:var(--warn)}
 .corner{position:absolute;top:10px;right:10px;padding:3px 7px;border-radius:5px;background:rgba(0,0,0,.6);font-size:11px}
+.gen-media .ref-inset{inset:auto 10px 10px auto;width:56px;height:56px;background:#fff;z-index:2;}
 .ref-inset{position:absolute;right:10px;bottom:10px;width:46px;height:46px;object-fit:cover;border-radius:8px;border:2px solid var(--fg);box-shadow:0 6px 20px rgba(0,0,0,.5)}
 .play{position:absolute;left:12px;bottom:12px;height:34px;padding:0 12px 0 10px;border-radius:999px;border:0;background:var(--fg);color:var(--bg);font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .prog{position:absolute;inset:auto 0 0 0;padding:12px;display:grid;gap:7px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
@@ -1381,6 +1382,46 @@ function pollImageUrl(prompt, aspect, seed){
   const [w, h] = PSIZE[aspect] || [1024, 1024];
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed % 100000}&model=flux&nologo=true`;
 }
+
+/* 3D from a description: the 3D model is built from a picture, so that picture must show the whole object, centered,
+   on a plain background, without touching the edges. */
+function refPrompt(text){
+  const what = String(text).trim()
+    .replace(/^(please\s+)?(create|make|generate|build|draw|give|model|render)\s+(me\s+)?(a\s+3d\s+model\s+of\s+|a\s+model\s+of\s+)?/i, '')
+    .replace(/^(בבקשה\s+)?(תיצור|צור|תעשה|תכין|תבנה|תצייר|תייצר)\s+(לי\s+)?(מודל\s+(תלת[-\s]?ממד(י)?\s+)?(של\s+)?)?(את\s+)?/, '')
+    .replace(/[.!?\s]+$/, '');
+  return `${what || text}. The complete ${what || 'object'} shown whole, nothing cut off at the edges, centered with empty space around it, isolated on a pure white background, three-quarter view, soft even studio light, clean product render, no text, no shadow`;
+}
+async function padWhite(blob, size = 1024, fill = .8){
+  const bmp = await createImageBitmap(blob);
+  const cv = document.createElement('canvas'); cv.width = cv.height = size;
+  const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, size, size);
+  const k = Math.min(size * fill / bmp.width, size * fill / bmp.height);
+  const w = bmp.width * k, h = bmp.height * k; x.drawImage(bmp, (size - w) / 2, (size - h) / 2, w, h);
+  return new Promise(res => cv.toBlob(res, 'image/png'));
+}
+async function thumbOfBlob(blob, size = 160){
+  const bmp = await createImageBitmap(blob); const cv = document.createElement('canvas'); cv.width = cv.height = size;
+  cv.getContext('2d').drawImage(bmp, 0, 0, size, size); return cv.toDataURL('image/jpeg', .8);
+}
+/* Z-Image Turbo first (sharp, follows the framing instructions); Pollinations only as a last resort, with a note. */
+async function reference3D(g){
+  const prompt = refPrompt(g.prompt);
+  try {
+    const c = await space('Tongyi-MAI/Z-Image-Turbo');
+    const r = await c.predict('/generate', {prompt, resolution:ZRES['1:1'], seed:g.seed % 100000, steps:8, shift:3, random_seed:true, gallery_images:[]});
+    const url = fileUrl(r.data && r.data[0] && r.data[0][0]); if (!url) throw new Error('no image');
+    const resp = await fetch(url); if (!resp.ok) throw new Error('could not fetch the image');
+    return {blob:await padWhite(await resp.blob()), by:'Z-Image Turbo'};
+  } catch (e) {
+    const why = String((e && (e.message || e.title)) || e);
+    const resp = await fetch(pollImageUrl(prompt, '1:1', g.seed)).catch(() => null);
+    if (!resp || !resp.ok || !(resp.headers.get('content-type') || '').startsWith('image/')) {
+      throw new Error(/quota|limit/i.test(why) ? 'The free GPU minutes for drawing a reference picture are used up, and the backup picture service isn\u2019t answering. Add a photo of the object with +, or try again later.' : 'Could not draw a reference picture right now. Add a photo of the object with +, or try again in a minute.');
+    }
+    return {blob:await padWhite(await resp.blob()), by:'Pollinations', weak:true};
+  }
+}
 const RUNNERS = {
   async klein(g){
     const c = await space('black-forest-labs/FLUX.2-klein-4B'); const [w, h] = PSIZE[g.opts.aspect] || [1024, 1024];
@@ -1424,11 +1465,11 @@ const RUNNERS = {
   },
   async hunyuan3d(g){
     const c = await space('tencent/Hunyuan3D-2.1'); const { handle_file } = await gradio();
-    let file = g._file;
+    let file = g._file, refNote = '';
     if (!file) {
-      const resp = await fetch(pollImageUrl(g.prompt + ', single object, centered, plain white background, three-quarter view, studio light', '1:1', g.seed));
-      if (!resp.ok || !(resp.headers.get('content-type') || '').startsWith('image/')) throw new Error('Could not draw a reference picture right now. Add a photo with + or try again in a minute.');
-      file = await resp.blob();
+      const ref = await reference3D(g);
+      file = ref.blob; g.refAuto = await thumbOfBlob(ref.blob).catch(() => null); persistGens();
+      refNote = ref.weak ? 'The reference picture came from a busy backup service, so this model may be rough. For a better result, add a photo of the object with +.' : `Built from a reference picture that ${ref.by} drew first (bottom right).`;
     }
     const args = () => ({image:handle_file(file), steps:30, guidance_scale:5, seed:g.seed % 100000, octree_resolution:256, check_box_rembg:true, num_chunks:8000, randomize_seed:true});
     let textured = g.opts.texture !== 'Untextured', note = '', r = null;
@@ -1439,7 +1480,7 @@ const RUNNERS = {
     }
     if (!r) r = await c.predict('/shape_generation', args());
     const url = fileUrl(textured ? (r.data[1] || r.data[0]) : r.data[0]); if (!url) throw new Error('No 3D file came back. Try again.');
-    return {type:'model', url, note};
+    return {type:'model', url, note:[note, refNote].filter(Boolean).join(' ')};
   },
   async chatterbox(g){
     const c = await space('ResembleAI/Chatterbox-Multilingual-TTS-V3');
@@ -1459,7 +1500,7 @@ function realCard(g){
   else if (r.type === 'image') media = `<div class="gen-media"><img src="${esc(r.url)}" alt="${esc(g.prompt)}" loading="lazy"></div>`;
   else if (r.type === 'video') media = `<div class="gen-media"><video src="${esc(r.url)}" controls playsinline preload="metadata"></video></div>`;
   else if (r.type === 'audio') media = `<div class="gen-media is-audio audio-done"><audio src="${esc(r.url)}" controls preload="metadata"></audio></div>`;
-  else if (r.type === 'model') media = `<div class="gen-media"><model-viewer src="${esc(r.url)}" camera-controls auto-rotate shadow-intensity="1" alt="${esc(g.prompt)}"></model-viewer></div>`;
+  else if (r.type === 'model') media = `<div class="gen-media"><model-viewer src="${esc(r.url)}" camera-controls auto-rotate shadow-intensity="1" alt="${esc(g.prompt)}"></model-viewer>${g.refAuto ? `<img class="ref-inset" src="${esc(g.refAuto)}" alt="Reference picture the 3D model was built from">` : ''}</div>`;
   else media = `<div class="gen-media failed"><p class="gerr">This result is no longer available.</p></div>`;
   const actions = g.status === 'done' && r.url ? `<div class="gen-actions"><a class="lnk" href="${esc(r.url)}" target="_blank" rel="noopener" download>Download ↓</a></div>`
     : g.status === 'error' ? `<div class="gen-actions">${g.needInstall ? `<button class="lnk" type="button" data-gpu-install="${g.needInstall}">Install on your GPU</button>` : ''}<button class="lnk" type="button" data-retry="${g.id}">Try again</button></div>` : '';
@@ -1594,7 +1635,7 @@ const WAN_DIMS = {480:{'16:9':[832,480],'9:16':[480,832],'1:1':[640,640]}, 704:{
 const GPU_WF = {
   'z-image-turbo'(g){ const [w, h] = PSIZE[g.opts.aspect] || [1024, 1024]; return zimageNodes(g.prompt, w, h, g.seed, true); },
   'hunyuan3d-21'(g, img){
-    const n = img ? {'20':{class_type:'LoadImage', inputs:{image:img}}} : zimageNodes(g.prompt + ', single object, centered, plain white background, three-quarter view, studio light', 1024, 1024, g.seed, false);
+    const n = img ? {'20':{class_type:'LoadImage', inputs:{image:img}}} : zimageNodes(refPrompt(g.prompt), 1024, 1024, g.seed, false);
     const image = img ? ['20', 0] : ['9', 0];
     Object.assign(n, {
       '21':{class_type:'ImageOnlyCheckpointLoader', inputs:{ckpt_name:'hunyuan_3d_v2.1.safetensors'}},
@@ -1712,9 +1753,9 @@ RUNNERS.gpu = async function(g){
   let img = null;
   if (g._file && (g.cat === 'video' || g.cat === '3d')) img = await gpuUpload(g._file);
   else if (g.cat === '3d' && !(st.models['z-image-turbo'] || {}).ready) {
-    const resp = await fetch(pollImageUrl(g.prompt + ', single object, centered, plain white background, three-quarter view, studio light', '1:1', g.seed));
+    const resp = await fetch(pollImageUrl(refPrompt(g.prompt), '1:1', g.seed));
     if (!resp.ok) throw new Error('Could not draw a reference picture. Add a photo with +, or install Z-Image Turbo on your GPU.');
-    img = await gpuUpload(new File([await resp.blob()], 'reference.jpg', {type:'image/jpeg'}));
+    img = await gpuUpload(new File([await padWhite(await resp.blob())], 'reference.png', {type:'image/png'}));
   }
   const r = await gpuFetch('/prompt', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({prompt:GPU_WF[id](g, img), client_id:'weightroom'})});
   const d = await r.json().catch(() => ({}));
