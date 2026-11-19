@@ -39,10 +39,11 @@ Install each model from the app: **Settings**, then **Your GPU**.
 | Studio | Runs on your GPU | Download |
 |---|---|---|
 | Image | Z-Image Turbo | 21 GB |
-| Video | Wan 2.2 5B (5 s, up to 720p) | 18 GB |
+| Video | MiniMax H3 Singularity V2 (with sound, 480p or 768p; 8-step turbo LoRA, Sol-Attn sparse attention, H3 latent upscaler for 768p; needs 32 GB+ RAM) | 34 GB |
+| Video, lighter | Wan 2.2 5B (5 s, up to 720p, no sound), used when Singularity isn't installed | 18 GB |
 | 3D | Hunyuan3D 2.1 (shape) | 7.4 GB |
 | Speech | Chatterbox Multilingual | 3.2 GB |
 | Music | ACE-Step 1.5 | 10 GB |
 | Chat | gpt-oss-20b (Ollama) | 13 GB |
 
-Other library models run as the model above for their studio, and the result card says so. MiniMax H3 and LTX-2.5 need more than 16 GB.
+Other library models run as the model above for their studio, and the result card says so. The original MiniMax H3 and LTX-2.5 need more than 16 GB; on your GPU, MiniMax H3 runs as Singularity V2 (a pruned W4A8 build that fits).

@@ -35,6 +35,14 @@ HF = "https://huggingface.co/"
 
 # Weightroom model id -> what it needs. File entries: (ComfyUI model folder, file name, Hugging Face path).
 CATALOG = {
+    "minimax-h3-singularity": {"name": "MiniMax H3 Singularity V2", "files": [
+        ("diffusion_models", "Minimax-h3_Singularity_ref2va_v2_pruned_w4a8.safetensors", "WAS/Minimax-h3_Singularity_v2_pruned/resolve/main/Minimax-h3_Singularity_ref2va_v2_pruned_w4a8.safetensors"),
+        ("text_encoders", "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors", "Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors"),
+        ("vae", "minimax_h3_video_vae_int8_convrot.safetensors", "Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_video_vae_int8_convrot.safetensors"),
+        ("vae", "minimax_h3_audio_vae_fp32.safetensors", "Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_audio_vae_fp32.safetensors"),
+        ("loras", "minimax_h3_ref2v_turbo_8step_v1.1_768p_comfyui_bf16.safetensors", "lightx2v/Minimax-h3-Turbo/resolve/main/minimax_h3_ref2v_turbo_8step_v1.1_768p_comfyui_bf16.safetensors"),
+        ("latent_upscale_models", "minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors", "LBH-123-AI/Minimax_h3_latent_Upscaler/resolve/main/minimax_h3_latent_upscaler_3d_conv_v1/minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors"),
+    ]},
     "z-image-turbo": {"name": "Z-Image Turbo", "files": [
         ("diffusion_models", "z_image_turbo_bf16.safetensors", "Comfy-Org/Z-Image-Turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors"),
         ("text_encoders", "qwen_3_4b.safetensors", "Comfy-Org/Z-Image-Turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors"),
@@ -293,11 +301,17 @@ async def info(request):
     with JOBS_LOCK:  # read the jobs before asking Ollama, so a pull that just finished shows as installed
         jobs = {mid: dict(j) for mid, j in JOBS.items()}
     om = await _ollama_models()
+    try:  # ComfyUI's INT8 "comfy kitchen attention" exists only on GPUs that support it
+        import comfy.ldm.modules.attention as attn
+        kitchen = bool(getattr(attn, "COMFY_KITCHEN_INT8_ATTENTION_IS_AVAILABLE", False))
+    except Exception:
+        kitchen = False
     return web.json_response({
         "bridge": VERSION,
         "gpu": gpu,
         "ram_gb": round(psutil.virtual_memory().total / 2**30, 1),
         "ollama": om is not None,
+        "features": {"kitchen_attention": kitchen},
         "models": {mid: {"name": e["name"], **status(mid, om, jobs.get(mid) or {})} for mid, e in CATALOG.items()},
     })
 

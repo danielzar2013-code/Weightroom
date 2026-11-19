@@ -587,6 +587,7 @@ const GPUS = [
 const CB_LANGS = ['English','Hebrew','Arabic','Chinese','Danish','Dutch','Finnish','French','German','Greek','Hindi','Italian','Japanese','Korean','Malay','Norwegian','Polish','Portuguese','Russian','Spanish','Swahili','Swedish','Turkish'];
 const M = [
   {id:'minimax-h3',cat:'video',name:'MiniMax H3',maker:'MiniMax',params:'33B',date:'Aug 2026',variants:[{p:'BF16',gb:80},{p:'FP8',gb:44}],lic:'limited',license:'MiniMax H3 Community License',licNote:'Free commercial use under $20M yearly revenue. Self-hosting is not licensed in the US, EU, UK or South Korea.',tags:['top'],blurb:'Text and image to video with native stereo sound, up to 15 seconds. The open weights render up to 768p locally.',steps:30,q:'MiniMax-H3',opts:{dur:[5,10,15],res:['768p'],audio:true}},
+  {id:'minimax-h3-singularity',cat:'video',name:'MiniMax H3 Singularity V2',maker:'AIGC-Singularity (community)',params:'33B pruned',date:'Oct 2026',variants:[{p:'BF16',gb:72},{p:'INT8 pruned',gb:24},{p:'W4A8 pruned',gb:15}],lic:'limited',license:'MiniMax H3 Community License',licNote:'A community fine-tune of MiniMax H3, so the H3 license applies: free commercial use under $20M yearly revenue; self-hosting is not licensed in the US, EU, UK or South Korea. The 4-bit build is by WAS.',tags:['new'],blurb:'A community fine-tune of MiniMax H3 with steadier motion, sharper distant faces, less waxy skin and stronger action and effects shots. Video with sound from text, a photo or references. On your GPU it runs in 8 steps with sparse attention, and 768p uses a fast draft plus latent upscaling.',steps:8,q:'Minimax-h3_Singularity',opts:{dur:[5,10],res:['480p','768p'],audio:true}},
   {id:'ltx-25',cat:'video',name:'LTX-2.5',maker:'Lightricks',params:'22B',date:'Aug 2026',variants:[{p:'BF16',gb:52},{p:'FP8',gb:30}],lic:'limited',license:'LTX open-weights license',licNote:'Source-available, not OSI open source. Read the terms before commercial use.',tags:[],blurb:'Picture and sound in one pass, with native multi-shot sequences. The fastest of the large video models.',steps:8,q:'LTX-2.5',opts:{dur:[5,10],res:['720p','1080p'],audio:true}},
   {id:'wan22',cat:'video',name:'Wan 2.2 A14B',maker:'Alibaba Wan',params:'27B MoE · 14B active',date:'Jul 2025',variants:[{p:'BF16',gb:64},{p:'FP8',gb:34}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Text and image to video with precise camera and lighting control. Two expert models split the denoising work.',steps:40,q:'Wan2.2',opts:{dur:[5],res:['480p','720p'],audio:false}},
   {id:'wan22-animate',cat:'video',name:'Wan 2.2 Animate',maker:'Alibaba Wan',params:'14B',date:'Sep 2025',variants:[{p:'BF16',gb:40},{p:'FP8',gb:24}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Motion swap. Drive a character photo with the movement from a reference clip, or replace the person in a video.',steps:20,q:'Wan2.2-Animate',needsRef:true,opts:{dur:[5],res:['720p'],audio:false}},
@@ -1215,7 +1216,7 @@ function meterHTML(m, v){
   const note = over
     ? `This version needs about ${v.gb - S.gpu} GB more than your card has. It can still run with CPU offload, but much slower.`
     : `${esc(m.name)} ${esc(v.p)} fits your ${S.gpu} GB ${esc(gpuInfo().card)} with about ${S.gpu - v.gb} GB to spare.${m.licNote ? ' ' + esc(m.licNote) : ''}`;
-  const rk = runFor(m), lm = gpuConn() ? GPU_MODELS[m.cat] : null;
+  const rk = runFor(m), lm = gpuConn() ? localModel(m.cat) : null;
   const runNote = lm ? (lm === m.id ? ' It runs on your GPU.' : ` ${GPU_INFO[lm].name} runs in its place on your GPU.`) : !rk ? '' : SAME[m.id] ? ` No GPU is connected yet, so it runs free on ${RUN_HOST(rk)}.` : ` No GPU is connected yet, so ${RUN_NAME[rk]} runs in its place, free on ${RUN_HOST(rk)}.`;
   return `<span class="mono">VRAM</span><div class="meter-track" role="img" aria-label="${v.gb} of ${S.gpu} GB"><i class="${over ? 'over' : ''}" style="width:${pct}%"></i></div><span class="mono">≈${v.gb} / ${S.gpu} GB</span><p class="note${over ? ' warn' : ''}">${note}${runNote}</p>`;
 }
@@ -1280,7 +1281,7 @@ function generate(){
   if (!prompt && !S.ref) { toast('Write a prompt first.'); ta.focus(); return; }
   const steps = free ? 1 : (m.steps || 30);
   const g = {id:'g' + Date.now().toString(36), cat:mcat, model:m.id, p: free ? 'Free API' : v.p, prompt:prompt || 'From reference image', opts:readOpts(), seed:hash(prompt + Date.now()), status:'running', t0:Date.now(), dur: free ? 4500 : Math.min(7500, 3200 + steps * 90), steps, gb: free ? 0 : v.gb, prov: free ? m.prov : null, ref: ['video','image','3d'].includes(mcat) && S.ref ? S.ref.thumb : null};
-  const local = !free && gpuConn() ? GPU_MODELS[mcat] : null;
+  const local = !free && gpuConn() ? localModel(mcat) : null;
   const runKey = local ? null : runFor(m);
   if (local) {
     g.real = true; g.status = 'working'; g.run = 'gpu'; g.local = local; g._file = S.refFile || null;
@@ -1371,7 +1372,7 @@ const QSIZE = {'1:1':[1328,1328],'4:5':[1140,1472],'3:4':[1140,1472],'16:9':[166
 const RUN_NAME = {h3:'MiniMax H3', pollinations:'FLUX on Pollinations', zimage:'Z-Image Turbo', klein:'FLUX.2 [klein] 4B', qwenimg:'Qwen-Image-2.1', hunyuan3d:'Hunyuan3D 2.1', chatterbox:'Chatterbox', ace:'ACE-Step 1.5', pollchat:'gpt-oss-20b'};
 const RUN_HOST = k => (k === 'pollinations' || k === 'pollchat') ? 'Pollinations' : 'Hugging Face';
 /* Library models and key-only APIs that are not connected run on their twin: the same model where a free Space exists, otherwise the closest one. */
-const TWIN = {'minimax-h3':'h3','ltx-25':'h3','wan22':'h3','wan22-animate':'h3','hunyuanvideo-15':'h3',
+const TWIN = {'minimax-h3':'h3','minimax-h3-singularity':'h3','ltx-25':'h3','wan22':'h3','wan22-animate':'h3','hunyuanvideo-15':'h3',
   'flux2-dev':'klein','qwen-image-21':'qwenimg','qwen-image':'qwenimg','z-image-turbo':'zimage','flux2-klein':'klein',
   'trellis2':'hunyuan3d','hunyuan3d-21':'hunyuan3d','triposr':'hunyuan3d','hi3d-10':'hunyuan3d',
   'chatterbox-ml':'chatterbox','step-audio-editx':'chatterbox','kokoro':'chatterbox','ace-step-15':'ace',
@@ -1517,21 +1518,25 @@ function realCard(g){
   else media = `<div class="gen-media failed"><p class="gerr">This result is no longer available.</p></div>`;
   const actions = g.status === 'done' && r.url ? `<div class="gen-actions"><a class="lnk" href="${esc(r.url)}" target="_blank" rel="noopener" download>Download ↓</a></div>`
     : g.status === 'error' ? `<div class="gen-actions">${!gpuConn() && /GPU minutes/.test(g.error || '') ? `<button class="lnk" type="button" data-open-gpu>Run on my computer instead</button>` : ''}${g.needInstall ? `<button class="lnk" type="button" data-gpu-install="${g.needInstall}">Install on your GPU</button>` : ''}<button class="lnk" type="button" data-retry="${g.id}">Try again</button></div>` : '';
-  return `<article class="gen" id="${g.id}">${media}<div class="gen-meta"><p class="gen-prompt" dir="auto">${esc(g.prompt)}</p><p class="gen-info mono">${info}</p>${g.run === 'gpu' ? `<p class="gen-info">${g.sub ? 'Made on your GPU with ' + esc(g.ranOn) + ' because ' + esc(m ? m.name : 'this model') + ' isn\u2019t set up for your GPU yet.' : 'Made on your GPU.'}</p>` : g.ranOn ? `<p class="gen-info">${g.sub ? 'Made with ' + esc(g.ranOn) + ' because this model isn\u2019t connected yet.' : 'Ran free on ' + esc(RUN_HOST(g.run)) + ' because no GPU is connected.'}</p>` : ''}${r.note ? `<p class="gen-info">${esc(r.note)}</p>` : ''}${actions}</div></article>`;
+  return `<article class="gen" id="${g.id}">${media}<div class="gen-meta"><p class="gen-prompt" dir="auto">${esc(g.prompt)}</p><p class="gen-info mono">${info}</p>${g.run === 'gpu' && g.status !== 'error' ? `<p class="gen-info">${g.sub ? 'Made on your GPU with ' + esc(g.ranOn) + ' because ' + esc(m ? m.name : 'this model') + ' isn\u2019t set up for your GPU yet.' : 'Made on your GPU.'}</p>` : g.ranOn ? `<p class="gen-info">${g.sub ? 'Made with ' + esc(g.ranOn) + ' because this model isn\u2019t connected yet.' : 'Ran free on ' + esc(RUN_HOST(g.run)) + ' because no GPU is connected.'}</p>` : ''}${r.note ? `<p class="gen-info">${esc(r.note)}</p>` : ''}${actions}</div></article>`;
 }
 
 /* ---------- your own GPU: ComfyUI with the Weightroom bridge, on a PC or on Kaggle ---------- */
 /* What runs on a connected 16 GB GPU, per studio. Other models in the library run as these, with a note on the card. */
-const GPU_MODELS = {video:'wan22-5b', image:'z-image-turbo', '3d':'hunyuan3d-21', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
+const GPU_MODELS = {video:'minimax-h3-singularity', image:'z-image-turbo', '3d':'hunyuan3d-21', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
+/* Per studio, the models your GPU can run, best first; the first one installed is used. */
+const GPU_PREF = {video:['minimax-h3-singularity', 'wan22-5b']};
+const localModel = cat => { const prefs = GPU_PREF[cat] || [GPU_MODELS[cat]]; return prefs.find(id => gpuStat && gpuStat.models && gpuStat.models[id] && gpuStat.models[id].ready) || prefs[0]; };
 const GPU_INFO = {
+  'minimax-h3-singularity':{name:'MiniMax H3 Singularity V2', size:'34 GB', what:'Video with sound · 8-step turbo, fast attention, 768p upscaling · needs 32 GB+ RAM'},
   'z-image-turbo':{name:'Z-Image Turbo', size:'21 GB', what:'Images'},
-  'wan22-5b':{name:'Wan 2.2 5B', size:'18 GB', what:'Video'},
+  'wan22-5b':{name:'Wan 2.2 5B', size:'18 GB', what:'Video, lighter, no sound'},
   'hunyuan3d-21':{name:'Hunyuan3D 2.1', size:'7.4 GB', what:'3D'},
   'chatterbox-ml':{name:'Chatterbox Multilingual', size:'3.2 GB', what:'Speech'},
   'ace-step-15':{name:'ACE-Step 1.5', size:'10 GB', what:'Music'},
   'gpt-oss-20b':{name:'gpt-oss-20b', size:'13 GB', what:'Chat'},
 };
-const GPU_PICK = {video:'wan22', image:'z-image-turbo', '3d':'hunyuan3d-21', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
+const GPU_PICK = {video:'minimax-h3-singularity', image:'z-image-turbo', '3d':'hunyuan3d-21', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
 const KAGGLE_LINE = '!curl -fsSL https://danielzar2013-code.github.io/Weightroom/gpu/linux.sh -o /tmp/wr.sh && bash /tmp/wr.sh';
 const WAN_NEG = "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走";
 let gpuStat = null, gpuErr = null, gpuPollT = null;
@@ -1663,6 +1668,55 @@ const GPU_WF = {
     });
     return n;
   },
+  'minimax-h3-singularity'(g, img){
+    /* 480p: one fast pass at ~0.4 MP. 768p: a ~0.2 MP draft, the MiniMax H3 latent upscaler, then a 3-step detail pass. */
+    const hi = /768/.test(g.opts.res || '');
+    const asp = ['16:9', '9:16', '1:1'].includes(g.opts.aspect) ? g.opts.aspect : '16:9';
+    const [w, h] = (hi ? {'16:9':[608,352], '9:16':[352,608], '1:1':[448,448]} : {'16:9':[864,480], '9:16':[480,864], '1:1':[640,640]})[asp];
+    const [tw, th] = {'16:9':[1344,768], '9:16':[768,1344], '1:1':[1024,1024]}[asp];
+    const secs = Math.min(15, parseFloat(g.opts.duration) || 5);
+    const length = 5 + 17 * Math.max(7, Math.round((secs * 24 - 5) / 17));
+    const kitchen = !!(gpuStat && gpuStat.features && gpuStat.features.kitchen_attention);
+    const n = {
+      '70':{class_type:'UNETLoader', inputs:{unet_name:'Minimax-h3_Singularity_ref2va_v2_pruned_w4a8.safetensors', weight_dtype:'default'}},
+      '71':{class_type:'LoraLoaderModelOnly', inputs:{model:['70', 0], lora_name:'minimax_h3_ref2v_turbo_8step_v1.1_768p_comfyui_bf16.safetensors', strength_model:1}},
+      '72':{class_type:'CLIPLoader', inputs:{clip_name:'qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors', type:'minimax', device:'default'}},
+      '73':{class_type:'VAELoader', inputs:{vae_name:'minimax_h3_video_vae_int8_convrot.safetensors'}},
+      '74':{class_type:'VAELoader', inputs:{vae_name:'minimax_h3_audio_vae_fp32.safetensors'}},
+      '75':{class_type:'MiniMaxH3ReferenceToVideo', inputs:{clip:['72', 0], vae:['73', 0], audio_vae:['74', 0], prompt:img ? 'Use <Picture 1> as the reference. ' + g.prompt : g.prompt, width:w, height:h, length, ref_image_size:'match'}},
+      '76':{class_type:'RandomNoise', inputs:{noise_seed:g.seed}},
+      '78':{class_type:'KSamplerSelect', inputs:{sampler_name:'res_multistep'}},
+    };
+    /* Faster attention: ComfyUI's INT8 kitchen attention for the dense parts (when this GPU supports it), and training-free
+       Sol-Attn sparse attention after the first 20% of the steps, with the first three blocks always dense. */
+    let model = ['71', 0];
+    if (kitchen) { n['86'] = {class_type:'ModelAttentionBackend', inputs:{model, attention:'comfy kitchen attention'}}; model = ['86', 0]; }
+    n['87'] = {class_type:'BlockSparseAttention', inputs:{model, selection:'sol-attn', 'selection.tau':1.3, start_percent:0.2, end_percent:1, dense_blocks:'0-2', min_tokens:12288, extra_tokens:256, sink_conditioning:'exact_kv_and_rows', verbose:false}};
+    model = ['87', 0];
+    Object.assign(n, {
+      '77':{class_type:'BasicGuider', inputs:{model, conditioning:['75', 0]}},
+      '79':{class_type:'BasicScheduler', inputs:{model, scheduler:'simple', steps:8, denoise:1}},
+      '80':{class_type:'SamplerCustomAdvanced', inputs:{noise:['76', 0], guider:['77', 0], sampler:['78', 0], sigmas:['79', 0], latent_image:['75', 1]}},
+    });
+    let out = ['80', 0];
+    if (hi) {
+      Object.assign(n, {
+        '88':{class_type:'LatentUpscaleModelLoader', inputs:{model_name:'minimax_h3_latent_upscaler_3d_conv_v1_bf16.safetensors'}},
+        '89':{class_type:'MiniMaxH3LatentUpscaleWithModel', inputs:{model:['88', 0], samples:['80', 0], width:tw, height:th}},
+        '90':{class_type:'ManualSigmas', inputs:{sigmas:'0.9035, 0.6316, 0.3158, 0.0000'}},
+        '91':{class_type:'SamplerCustomAdvanced', inputs:{noise:['76', 0], guider:['77', 0], sampler:['78', 0], sigmas:['90', 0], latent_image:['89', 0]}},
+      });
+      out = ['91', 0];
+    }
+    Object.assign(n, {
+      '81':{class_type:'VAEDecode', inputs:{samples:out, vae:['73', 0]}},
+      '82':{class_type:'VAEDecodeAudio', inputs:{samples:out, vae:['74', 0]}},
+      '83':{class_type:'CreateVideo', inputs:{images:['81', 0], fps:24, audio:['82', 0]}},
+      '84':{class_type:'SaveVideo', inputs:{video:['83', 0], filename_prefix:'weightroom/h3', format:'auto', 'format.codec':'auto'}},
+    });
+    if (img) { n['85'] = {class_type:'LoadImage', inputs:{image:img}}; n['75'].inputs['ref_images.ref_image_0'] = ['85', 0]; }
+    return n;
+  },
   'wan22-5b'(g, img){
     const [w, h] = WAN_DIMS[/480/.test(g.opts.res || '') ? 480 : 704][g.opts.aspect] || WAN_DIMS[704]['16:9'];
     const length = Math.round(Math.min(5, parseFloat(g.opts.duration) || 5) * 24) + 1;
@@ -1755,8 +1809,11 @@ async function gpuWait(g){
   }
 }
 RUNNERS.gpu = async function(g){
-  const id = g.local;
   const st = await gpuCheck(); if (!st) throw new Error(gpuErr || GPU_AWAY);
+  /* Pick again with the GPU's current list: the best installed model for this studio. */
+  const best = localModel(g.cat);
+  if (best !== g.local && (st.models[best] || {}).ready) { g.local = best; const m = anyById(g.model); g.sub = !!(m && best !== m.id); g.ranOn = g.sub ? GPU_INFO[best].name : null; }
+  const id = g.local;
   const x = st.models[id] || {};
   if (!x.ready) {
     if (x.missing === 'addon') throw new Error('The Chatterbox add-on is missing on your GPU. Run Weightroom GPU again to add it.');
