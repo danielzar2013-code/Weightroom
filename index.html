@@ -1225,7 +1225,7 @@ function popHTML(mcat){
   const lib = byRank(M.filter(m => m.cat === mcat));
   const libItems = lib.map(m => { const v = bestVariant(m); return `<button type="button" class="pop-item" role="option" data-pick="${m.id}" aria-selected="${!freeSel && S.sel[mcat] === m.id}">
     <canvas data-thumb="${m.id}" aria-hidden="true"></canvas>
-    <span><b>${rankPill(m)}${esc(m.name)} ${tagsHTML(m)}</b><small>${esc(m.maker)} · ${esc(m.params)}${rankOf(m) ? '' : ' · not ranked yet'}</small></span>
+    <span><b>${rankPill(m)}${esc(m.name)} ${tagsHTML(m)}</b><small>${esc(m.maker)} · ${esc(m.params)} · ${rankOf(m) ? RANK[m.id].toLocaleString('en-US') + ' ' + esc(RANK_UNIT[m.cat]) : 'not ranked yet'}</small></span>
     <span class="fit ${fitClass(v.gb)}">${esc(v.p)}<br>≈${v.gb} GB</span></button>`; }).join('');
   return `<p class="pop-head">Free APIs · ${CAT_LABEL[mcat]}</p>${freeItems}<p class="pop-head">${CAT_LABEL[mcat]} library · ${lib.length} models · sized for ${S.gpu} GB</p>${libItems}<a class="pop-foot lnk" href="#models">Compare every model →</a>`;
 }
@@ -2237,6 +2237,7 @@ const RANK_BOARD = {
   speech:{name:'Artificial Analysis Speech Arena', what:'Elo', url:'https://artificialanalysis.ai/text-to-speech/leaderboard/provider-voice?open-weights=true'},
   chat:{name:'Artificial Analysis Intelligence Index', what:'points', url:'https://artificialanalysis.ai/models/open-source'},
 };
+const RANK_UNIT = {video:'Elo', image:'Elo', '3d':'3D Arena score', speech:'Elo', chat:'Intelligence Index'};
 const RANK = {
   'minimax-h3':1159, 'ltx-25':939,
   'h3-image':1066, 'qwen-image-21':1047, 'flux3-klein':1041, 'fibo-20':1037, 'flux2-dev':1000, 'z-image-turbo':937, 'qwen-image':908, 'flux2-klein':840,
