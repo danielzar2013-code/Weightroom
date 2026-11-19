@@ -80,7 +80,15 @@ fi
 if ! command -v ollama >/dev/null 2>&1; then
   say "Installing Ollama for chat"
   if [ "$(id -u)" -eq 0 ]; then
-    curl -fsSL https://ollama.com/install.sh | sh
+    # Ollama's installer needs zstd to unpack, and Kaggle doesn't have it.
+    if ! command -v zstd >/dev/null 2>&1; then
+      if command -v apt-get >/dev/null 2>&1; then
+        (apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq zstd) >/dev/null 2>&1 || true
+      elif command -v dnf >/dev/null 2>&1; then
+        dnf install -y -q zstd >/dev/null 2>&1 || true
+      fi
+    fi
+    curl -fsSL https://ollama.com/install.sh | sh || echo "Ollama didn't install. Chat stays off; everything else works." >&2
   else
     echo "Ollama needs root to install here. Chat stays off; everything else works." >&2
   fi
