@@ -1506,7 +1506,7 @@ const RUNNERS = {
 };
 const WORK_LABEL = {klein:'Generating on Hugging Face', qwenimg:'Generating on Hugging Face', ace:'Writing the song on Hugging Face · 1 to 3 min', pollinations:'Drawing on Pollinations', zimage:'Generating on Hugging Face', h3:'Making the video on Hugging Face · 1 to 3 min', hunyuan3d:'Building the 3D model on Hugging Face · 1 to 3 min', chatterbox:'Recording the voice on Hugging Face', gpu:'Running on your GPU · the first run loads the model'};
 function realCard(g){
-  const m = anyById(g.model); const audio = g.cat === 'speech' || g.cat === 'music'; const r = g.result || {};
+  const m = anyById(g.model); const audio = g.cat === 'speech' || g.cat === 'music'; const r0 = g.result || {}; const r = g.run === 'gpu' ? {...r0, url: gpuFileUrl(r0)} : r0;
   const info = [m ? m.name : g.model, ...Object.values(g.opts || {})].map(esc).join(' · ');
   let media;
   if (g.status === 'working') { const x = g.run === 'gpu' && g.pid ? gpuProg(g) : null, w = x && x.pct != null;
@@ -1543,6 +1543,14 @@ const WAN_NEG = "色调艳丽，过曝，静态，细节模糊不清，字幕，
 let gpuStat = null, gpuErr = null, gpuPollT = null;
 const gpuSleep = ms => new Promise(r => setTimeout(r, ms));
 const gpuConn = () => { const c = store.get('gpuConn', null); return c && c.u && c.k ? c : null; };
+/* A result from your GPU keeps the tunnel address it was made with, and that address changes each time the GPU starts.
+   Point it at the connection you have now, so older results still open. */
+function gpuFileUrl(r){
+  const c = gpuConn(), u = r && r.url;
+  if (!c || !u || !u.includes('/view?')) return u;
+  const q = u.split('/view?')[1].replace(/&?wrkey=[^&]*/, '');
+  return c.u.replace(/\/+$/, '') + '/view?' + q + (q ? '&' : '') + 'wrkey=' + encodeURIComponent(c.k);
+}
 const gpuCard = () => gpuStat ? String(gpuStat.gpu && gpuStat.gpu.name || 'GPU').replace(/^cuda:\d+\s*/, '').replace(/\s*:\s*\S+$/, '').replace(/^NVIDIA (GeForce )?/, '') : '';
 function parseConnect(text){
   const mt = String(text || '').match(/#gpu=([A-Za-z0-9_-]+)/); if (!mt) return null;
