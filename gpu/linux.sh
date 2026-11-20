@@ -113,6 +113,12 @@ PIDS=()
 cleanup() { for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null || true; done; }
 trap cleanup EXIT INT TERM
 
+# On Kaggle, keep videos and pictures in /kaggle/working: with "Files only" persistence that folder comes back next session, /tmp doesn't.
+OUT_ARGS=()
+if [ -d /kaggle/working ]; then
+  OUTDIR=/kaggle/working/weightroom-output; mkdir -p "$OUTDIR"; OUT_ARGS=(--output-directory "$OUTDIR")
+fi
+
 COMFY_GPU=""; OLLAMA_GPU=""
 if [ "$GPUS" -ge 2 ]; then COMFY_GPU=0; OLLAMA_GPU=1; SHARED=0; else SHARED=1; fi
 
@@ -129,7 +135,7 @@ say "Starting ComfyUI (the first start takes a minute or two)"
 (
   cd "$COMFY"
   if [ -n "$COMFY_GPU" ]; then export CUDA_VISIBLE_DEVICES="$COMFY_GPU"; fi
-  WEIGHTROOM_KEY="$KEY" WEIGHTROOM_SHARED_GPU="$SHARED" exec "$PY" main.py --listen 127.0.0.1 --port "$PORT" --enable-cors-header "$APP_ORIGIN"
+  WEIGHTROOM_KEY="$KEY" WEIGHTROOM_SHARED_GPU="$SHARED" exec "$PY" main.py --listen 127.0.0.1 --port "$PORT" --enable-cors-header "$APP_ORIGIN" ${OUT_ARGS[@]+"${OUT_ARGS[@]}"}
 ) > "$LOGS/comfyui.log" 2>&1 &
 COMFY_PID=$!
 PIDS+=("$COMFY_PID")

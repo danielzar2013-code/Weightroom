@@ -29,6 +29,7 @@ It installs [ComfyUI](https://github.com/Comfy-Org/ComfyUI) `v0.45.5` with two a
    ```
 
 3. Open the link it prints, or scan the QR code. ComfyUI uses the first T4 and chat uses the second.
+4. To keep your videos between sessions, set **Persistence** to **Files only** in the notebook's session options, and stop the session with the stop button. Videos and pictures are saved in `/kaggle/working/weightroom-output`. Models are not kept: they download again each session.
 
 `linux.sh` also works on any Linux machine with an NVIDIA GPU.
 
