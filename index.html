@@ -2355,10 +2355,10 @@ function modelCards(){
 
 /* ---------- BENCHMARKS ---------- */
 /* Numbers copied from public leaderboards on the read date below. Nothing here is estimated except the "fits in 100 GB" grouping for language models. */
-const BENCH_DATE = 'Nov 19, 2026';
+const BENCH_DATE = 'Nov 20, 2026';
 /* Where each library model stands on a public leaderboard, copied from the boards on RANK_DATE. Higher is better.
    Models missing from RANK are not on the board yet. One board per category, so scores compare within a category only. */
-const RANK_DATE = 'Nov 19, 2026';
+const RANK_DATE = 'Nov 20, 2026';
 const RANK_BOARD = {
   video:{name:'Artificial Analysis Video Arena', what:'text to video, Elo', url:'https://artificialanalysis.ai/video/leaderboard/text-to-video?open-weights=true'},
   image:{name:'Artificial Analysis Image Arena', what:'text to image, Elo', url:'https://artificialanalysis.ai/image/leaderboard/text-to-image?open-weights=true'},
@@ -2371,7 +2371,7 @@ const RANK = {
   'minimax-h3':1159, 'ltx-25':939,
   'h3-image':1066, 'qwen-image-21':1047, 'flux3-klein':1041, 'fibo-20':1037, 'flux2-dev':1000, 'z-image-turbo':937, 'qwen-image':908, 'flux2-klein':840,
   'hunyuan3d-21':1271, 'trellis2':1129, 'triposr':1081,
-  'fish-drama-3':1279, 'ming3-tts':1182, 'phonon-31m':1110, 'step-audio-editx':1101, 'kokoro':1060,
+  'fish-drama-3':1277, 'ming3-tts':1179, 'phonon-31m':1108, 'step-audio-editx':1100, 'kokoro':1060,
   'nanbeige43-33b':20, 'qwen38-27b':20, 'k2-horizon-32b':14, 'k2-horizon-mova':14, 'nemotron35-super-vl':14, 'lfm3-17b':6, 'gpt-oss-120b':4,
 };
 function rankOf(m){
@@ -2403,10 +2403,10 @@ const ELO_COLS = [['n','Model'],['e','Elo','num'],['ci','95% CI','num'],['v','Vo
 const ELO_RANK_COLS = [['r','#','num'], ...ELO_COLS];
 const T_ROWS = [
   {n:'Nanbeige4.3-33B', by:'Nanbeige', p:'33B', ii:20, sp:null, tm:null, g:'lib', lib:'nanbeige43-33b'},
-  {n:'Qwen3.8 27B (Xhigh)', s:'Qwen3.8 27B', by:'Alibaba', p:'27B', ii:20, sp:47, tm:39.0, g:'lib', lib:'qwen38-27b'},
+  {n:'Qwen3.8 27B (Xhigh)', s:'Qwen3.8 27B', by:'Alibaba', p:'27B', ii:20, sp:48, tm:38.2, g:'lib', lib:'qwen38-27b'},
   {n:'K2 Horizon 32B', by:'Institute of Foundation Models', p:'32B', ii:14, sp:null, tm:null, g:'lib', lib:'k2-horizon-32b'},
   {n:'K2 Horizon MoVA 36B A4B', s:'K2 Horizon MoVA', by:'Institute of Foundation Models', p:'36B · 4B active', ii:14, sp:null, tm:null, g:'lib', lib:'k2-horizon-mova'},
-  {n:'Nemotron 3.5 Super VL', by:'NVIDIA', p:'120B · 12B active', ii:14, sp:308, tm:4.4, g:'lib', lib:'nemotron35-super-vl'},
+  {n:'Nemotron 3.5 Super VL', by:'NVIDIA', p:'120B · 12B active', ii:14, sp:289, tm:4.7, g:'lib', lib:'nemotron35-super-vl'},
 ];
 const IMG = [
   {r:1, n:'H3-Image', by:'MiniMax', e:1066, ci:'±14', v:3258, d:'Nov 2026', g:'lib', lib:'h3-image'},
@@ -2430,25 +2430,25 @@ const I2V = [
   {r:6, n:'LTX-2.3 Pro', s:'LTX-2.3', by:'Lightricks', e:837, ci:'±16', v:4968, d:'Mar 2026', g:'open', run:'The previous LTX release'},
 ];
 const TTS = [
-  {r:1, n:'Fish Audio Drama 3', s:'Fish Drama 3', by:'Fish Audio', e:1279, ci:'±16', v:1990, d:'Oct 2026', g:'lib', lib:'fish-drama-3'},
-  {r:3, n:'Breeze TTS 2', by:'BreezeBlue', e:1229, ci:'±12', v:3138, d:'Aug 2026', g:'open', run:'3B', lic:'Non-commercial weights'},
-  {r:4, n:'Ming-3.0-tts', by:'inclusionAI', e:1182, ci:'±12', v:2803, d:'Oct 2026', g:'lib', lib:'ming3-tts'},
-  {r:5, n:'Phonon 31M (English)', s:'Phonon 31M', by:'Phonon', e:1110, ci:'±13', v:2042, d:'Oct 2026', g:'lib', lib:'phonon-31m'},
-  {r:6, n:'Step Audio EditX (Mar 2026)', s:'Step-Audio-EditX', by:'StepFun', e:1101, ci:'±11', v:2695, d:'Feb 2026', g:'lib', lib:'step-audio-editx', note:'Tied with Fish Audio S2 Pro at 1,101'},
+  {r:1, n:'Fish Audio Drama 3', s:'Fish Drama 3', by:'Fish Audio', e:1277, ci:'±16', v:1996, d:'Oct 2026', g:'lib', lib:'fish-drama-3'},
+  {r:3, n:'Breeze TTS 2', by:'BreezeBlue', e:1228, ci:'±12', v:3145, d:'Aug 2026', g:'open', run:'3B', lic:'Non-commercial weights'},
+  {r:4, n:'Ming-3.0-tts', by:'inclusionAI', e:1179, ci:'±12', v:2802, d:'Oct 2026', g:'lib', lib:'ming3-tts'},
+  {r:5, n:'Phonon 31M (English)', s:'Phonon 31M', by:'Phonon', e:1108, ci:'±13', v:2055, d:'Oct 2026', g:'lib', lib:'phonon-31m'},
+  {r:6, n:'Fish Audio S2 Pro', s:'Fish S2 Pro', by:'Fish Audio', e:1101, ci:'±11', v:3091, d:'Mar 2026', g:'open', run:'4.6B', lic:'Fish Audio Research License, non-commercial', note:'Step-Audio-EditX, in your library, is one point behind at 1,100'},
 ];
 const R3D = [
-  {r:2, n:'TRELLIS-3DGS', s:'TRELLIS', by:'Microsoft', e:1399, v:4844, g:'open', run:'Gaussian-splat output. The same model with mesh output scores 1,303', lic:'MIT'},
+  {r:2, n:'TRELLIS-3DGS', s:'TRELLIS', by:'Microsoft', e:1398, v:4844, g:'open', run:'Gaussian-splat output. The same model with mesh output scores 1,303', lic:'MIT'},
   {r:8, n:'Hunyuan3D-2', by:'Tencent', e:1283, v:5250, g:'open', lic:'Tencent Hunyuan Community License'},
-  {r:9, n:'Hunyuan3D-2.1', by:'Tencent', e:1272, v:2231, g:'lib', lib:'hunyuan3d-21'},
-  {r:10, n:'InstantMesh', by:'TencentARC', e:1270, v:11616, g:'open'},
-  {r:11, n:'SAM-3D-Objects-3DGS', s:'SAM 3D Objects', by:'Meta', e:1269, v:1428, g:'open', lic:'SAM License'},
+  {r:9, n:'Hunyuan3D-2.1', by:'Tencent', e:1271, v:2231, g:'lib', lib:'hunyuan3d-21'},
+  {r:10, n:'InstantMesh', by:'TencentARC', e:1269, v:11616, g:'open'},
+  {r:11, n:'SAM-3D-Objects-3DGS', s:'SAM 3D Objects', by:'Meta', e:1268, v:1428, g:'open', lic:'SAM License'},
 ];
 const TOP_NOTE = 'Only models you can download and run in up to 100 GB of VRAM are shown. Commercial and closed models are left out. Modes or previews of the same model count once, at their best score.';
 const BENCH = {
   text:{label:'Language', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis, open source models','https://artificialanalysis.ai/models/open-source']],
     method:TOP_NOTE + ' The Intelligence Index v5.0.1 combines 9 evaluations. Speed and time per task are measured on API providers, not on your GPU. Fit is estimated from parameter count.',
-    take:'Nanbeige4.3-33B and Qwen3.8 27B tie for first at 20. K2 Horizon 32B, K2 Horizon MoVA 36B A4B and Nemotron 3.5 Super VL tie at 14, and Nemotron is by far the fastest at 308 tokens per second. All five are now in your library.',
+    take:'Nanbeige4.3-33B and Qwen3.8 27B tie for first at 20. K2 Horizon 32B, K2 Horizon MoVA 36B A4B and Nemotron 3.5 Super VL tie at 14, and Nemotron is by far the fastest at 289 tokens per second. All five are now in your library.',
     cards:[
       {title:'Intelligence', sub:'Artificial Analysis Intelligence Index · Higher is better', key:'ii', vlabel:'Intelligence Index', max:25, step:5, wide:true},
       {title:'Output speed', sub:'Output tokens per second on API providers · Higher is better', key:'sp', vlabel:'Tokens per second', max:400, step:100},
@@ -2471,12 +2471,12 @@ const BENCH = {
   speech:{label:'Speech', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis Speech Arena, provider voices','https://artificialanalysis.ai/text-to-speech/leaderboard']],
     method:TOP_NOTE + ' Elo ratings come from blind pairwise votes on each provider’s own voices. # is the rank among open-weights models.',
-    take:'Fish Audio Drama 3 leads at 1,279 Elo. Four of the five are now in your library: Drama 3, Ming-3.0-tts (1,182), Phonon 31M (1,110) and Step-Audio-EditX (1,101). Breeze TTS 2 (1,229) has non-commercial weights. Kokoro and Chatterbox, the Hebrew voice, rank lower.',
+    take:'Fish Audio Drama 3 leads at 1,277 Elo. Three of the five are in your library: Drama 3, Ming-3.0-tts (1,179) and Phonon 31M (1,108). Breeze TTS 2 (1,228) and Fish Audio S2 Pro (1,101) have non-commercial weights. Fish S2 Pro edges Step-Audio-EditX (1,100) out of the top five by one point.',
     cards:[{title:'Text to speech', sub:'AA Speech Arena · Elo · Higher is better · Axis starts at 1,000', key:'e', vlabel:'Elo', base:1000, max:1300, step:100, wide:true, rows:TTS, cols:ELO_RANK_COLS}]},
   '3d':{label:'3D', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['3D Arena on Hugging Face','https://huggingface.co/spaces/3d-arena/3d-arena']],
     method:TOP_NOTE + ' 3D Arena ranks image-to-3D models by human votes between two results. New models start at 1,200, where the axis starts. # is the overall rank, including commercial models.',
-    take:'TRELLIS with Gaussian-splat output leads the open models at 1,399. Hunyuan3D 2.1 (1,272) is the only library model in the top five. TRELLIS.2 (1,129) and TripoSR (1,080) are not.',
+    take:'TRELLIS with Gaussian-splat output leads the open models at 1,398. Hunyuan3D 2.1 (1,271) is the only library model in the top five. TRELLIS.2 (1,129) and TripoSR (1,081) are not.',
     cards:[{title:'Image to 3D', sub:'3D Arena · Elo-style score · Higher is better · Axis starts at 1,200', key:'e', vlabel:'Score', base:1200, max:1400, step:50, wide:true, rows:R3D, cols:[['r','#','num'],['n','Model'],['by','Creator'],['e','Score','num'],['v','Votes','num']]}]},
 };
 const fmtNum = v => Number(v).toLocaleString('en-US');
