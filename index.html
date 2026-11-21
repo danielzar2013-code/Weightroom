@@ -631,6 +631,7 @@ const M = [
   {id:'nemotron35-super-vl',cat:'chat',name:'Nemotron 3.5 Super VL',maker:'NVIDIA',params:'120B MoE · 12B active',date:'Oct 2026',variants:[{p:'NVFP4',gb:68}],lic:'open',license:'OpenMDW 1.1',tags:['new'],blurb:'Reads images, documents and video as well as text, and is the fastest of the top open models. The NVFP4 build fits on one 80 GB card.',ctx:1048576,q:'Nemotron-3.5-Super-VL'},
   {id:'flint',cat:'chat',name:'Flint',maker:'Recursive',params:'39.8B MoE · 2.5B active',date:'Oct 2026',variants:[{p:'BF16',gb:88},{p:'FP8',gb:44},{p:'Q4',gb:22}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'A coding-agent model that explores codebases, fixes bugs and writes tests, with a 256K-token context window.',ctx:262144,q:'RecursiveSI/flint'},
   {id:'minicpm-v47',cat:'chat',name:'MiniCPM-V 4.7 35B-A3B',maker:'OpenBMB',params:'35B MoE · 3B active',date:'Oct 2026',variants:[{p:'BF16',gb:77},{p:'FP8',gb:39},{p:'Q4',gb:19}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'Understands single images, several images and video, and is tuned to run on small devices.',q:'MiniCPM-V-4.7'},
+  {id:'inkling2-mini',cat:'chat',name:'Inkling 2 Mini',maker:'Thinking Machines',params:'26.4B MoE · 3.4B active',date:'Nov 2026',variants:[{p:'NVFP4 + MXFP8',gb:32}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'Reads images as well as text, ties for the top Intelligence Index score here and finishes tasks far faster than the others at that level, with a 1M-token context window. The makers recommend 32 GB of VRAM.',ctx:1048576,q:'Inkling-2-Mini'},
   {id:'lfm3-17b',cat:'chat',name:'LFM3-1.7B',maker:'Liquid AI',params:'1.7B',date:'Oct 2026',variants:[{p:'BF16',gb:4},{p:'Q4',gb:1}],lic:'limited',license:'LFM Open License 1.0',licNote:'Free commercial use under $10M yearly revenue.',tags:['new'],blurb:'A tiny agent model with a 256K-token context window that fits on a phone or laptop at about 1 GB.',ctx:262144,q:'LFM3-1.7B'},
 ];
 const byId = Object.fromEntries(M.map(m => [m.id, m]));
@@ -1381,7 +1382,7 @@ const TWIN = {'minimax-h3':'h3','minimax-h3-singularity':'h3','ltx-25':'h3','wan
   'f-gemma4':'pollchat','f-gemini-lite':'pollchat','f-groq-qwen':'pollchat','f-groq-oss':'pollchat','f-gemini-flash':'pollchat','f-or-minimax':'pollchat','f-openrouter':'pollchat',
   'h3-image':'zimage','flux3-klein':'klein','fibo-20':'zimage','moss-image':'zimage','idol':'hunyuan3d',
   'fish-drama-3':'chatterbox','ming3-tts':'chatterbox','zonos3-mini':'chatterbox','audio8-air':'chatterbox','phonon-31m':'chatterbox','underdog-woof':'chatterbox','tiny-voca':'chatterbox',
-  'nanbeige43-33b':'pollchat','nemotron35-super-vl':'pollchat','flint':'pollchat','minicpm-v47':'pollchat','lfm3-17b':'pollchat'};
+  'nanbeige43-33b':'pollchat','nemotron35-super-vl':'pollchat','flint':'pollchat','minicpm-v47':'pollchat','lfm3-17b':'pollchat','inkling2-mini':'pollchat'};
 const SAME = {'minimax-h3':1,'z-image-turbo':1,'flux2-klein':1,'qwen-image-21':1,'hunyuan3d-21':1,'chatterbox-ml':1,'ace-step-15':1,'gpt-oss-20b':1};
 const runFor = m => (m && (m.run || TWIN[m.id])) || null;
 const LANG_CODE = {English:'en',Hebrew:'he',Arabic:'ar',Chinese:'zh',Danish:'da',Dutch:'nl',Finnish:'fi',French:'fr',German:'de',Greek:'el',Hindi:'hi',Italian:'it',Japanese:'ja',Korean:'ko',Malay:'ms',Norwegian:'no',Polish:'pl',Portuguese:'pt',Russian:'ru',Spanish:'es',Swahili:'sw',Swedish:'sv',Turkish:'tr'};
@@ -2363,10 +2364,10 @@ function modelCards(){
 
 /* ---------- BENCHMARKS ---------- */
 /* Numbers copied from public leaderboards on the read date below. Nothing here is estimated except the "fits in 100 GB" grouping for language models. */
-const BENCH_DATE = 'Nov 20, 2026';
+const BENCH_DATE = 'Nov 21, 2026';
 /* Where each library model stands on a public leaderboard, copied from the boards on RANK_DATE. Higher is better.
    Models missing from RANK are not on the board yet. One board per category, so scores compare within a category only. */
-const RANK_DATE = 'Nov 20, 2026';
+const RANK_DATE = 'Nov 21, 2026';
 const RANK_BOARD = {
   video:{name:'Artificial Analysis Video Arena', what:'text to video, Elo', url:'https://artificialanalysis.ai/video/leaderboard/text-to-video?open-weights=true'},
   image:{name:'Artificial Analysis Image Arena', what:'text to image, Elo', url:'https://artificialanalysis.ai/image/leaderboard/text-to-image?open-weights=true'},
@@ -2376,11 +2377,11 @@ const RANK_BOARD = {
 };
 const RANK_UNIT = {video:'Elo', image:'Elo', '3d':'3D Arena score', speech:'Elo', chat:'Intelligence Index'};
 const RANK = {
-  'minimax-h3':1159, 'ltx-25':939,
-  'h3-image':1066, 'qwen-image-21':1047, 'flux3-klein':1041, 'fibo-20':1037, 'flux2-dev':1000, 'z-image-turbo':937, 'qwen-image':908, 'flux2-klein':840,
+  'minimax-h3':1161, 'ltx-25':938,
+  'h3-image':1066, 'qwen-image-21':1048, 'flux3-klein':1041, 'fibo-20':1037, 'flux2-dev':1000, 'z-image-turbo':938, 'qwen-image':910, 'flux2-klein':840,
   'hunyuan3d-21':1271, 'trellis2':1129, 'triposr':1081,
   'fish-drama-3':1277, 'ming3-tts':1179, 'phonon-31m':1108, 'step-audio-editx':1100, 'kokoro':1060,
-  'nanbeige43-33b':20, 'qwen38-27b':20, 'k2-horizon-32b':14, 'k2-horizon-mova':14, 'nemotron35-super-vl':14, 'lfm3-17b':6, 'gpt-oss-120b':4,
+  'nanbeige43-33b':20, 'inkling2-mini':20, 'qwen38-27b':20, 'k2-horizon-32b':14, 'k2-horizon-mova':14, 'nemotron35-super-vl':14, 'lfm3-17b':6, 'gpt-oss-120b':4,
 };
 function rankOf(m){
   const sc = RANK[m.id]; if (sc == null) return null;
@@ -2411,24 +2412,25 @@ const ELO_COLS = [['n','Model'],['e','Elo','num'],['ci','95% CI','num'],['v','Vo
 const ELO_RANK_COLS = [['r','#','num'], ...ELO_COLS];
 const T_ROWS = [
   {n:'Nanbeige4.3-33B', by:'Nanbeige', p:'33B', ii:20, sp:null, tm:null, g:'lib', lib:'nanbeige43-33b'},
-  {n:'Qwen3.8 27B (Xhigh)', s:'Qwen3.8 27B', by:'Alibaba', p:'27B', ii:20, sp:48, tm:38.2, g:'lib', lib:'qwen38-27b'},
+  {n:'Inkling 2 Mini', by:'Thinking Machines', p:'26B · 5.4B active', ii:20, sp:280, tm:9.0, g:'lib', lib:'inkling2-mini'},
+  {n:'Qwen3.8 27B (Xhigh)', s:'Qwen3.8 27B', by:'Alibaba', p:'27B', ii:20, sp:53, tm:34.5, g:'lib', lib:'qwen38-27b'},
   {n:'K2 Horizon 32B', by:'Institute of Foundation Models', p:'32B', ii:14, sp:null, tm:null, g:'lib', lib:'k2-horizon-32b'},
   {n:'K2 Horizon MoVA 36B A4B', s:'K2 Horizon MoVA', by:'Institute of Foundation Models', p:'36B · 4B active', ii:14, sp:null, tm:null, g:'lib', lib:'k2-horizon-mova'},
-  {n:'Nemotron 3.5 Super VL', by:'NVIDIA', p:'120B · 12B active', ii:14, sp:289, tm:4.7, g:'lib', lib:'nemotron35-super-vl'},
+  {n:'Nemotron 3.5 Super VL', by:'NVIDIA', p:'120B · 12B active', ii:14, sp:312, tm:4.4, g:'lib', lib:'nemotron35-super-vl'},
 ];
 const IMG = [
-  {r:1, n:'H3-Image', by:'MiniMax', e:1066, ci:'±14', v:3258, d:'Nov 2026', g:'lib', lib:'h3-image'},
-  {r:2, n:'Qwen-Image-2.1', by:'Alibaba Qwen', e:1047, ci:'±12', v:6312, d:'Sep 2026', g:'lib', lib:'qwen-image-21'},
-  {r:3, n:'FLUX 3 Image Klein', by:'Black Forest Labs', e:1041, ci:'±11', v:5791, d:'Oct 2026', g:'lib', lib:'flux3-klein'},
-  {r:4, n:'Fibo 2.0', by:'Bria', e:1037, ci:'±11', v:5741, d:'Oct 2026', g:'lib', lib:'fibo-20'},
-  {r:5, n:'Ideogram 4.0 (Quality)', s:'Ideogram 4.0', by:'Ideogram', e:1026, ci:'±10', v:11275, d:'Jun 2026', g:'open', run:'9.3B · the nf4 build fits a 24 GB card', lic:'Non-commercial weights'},
+  {r:1, n:'H3-Image', by:'MiniMax', e:1066, ci:'±14', v:3344, d:'Nov 2026', g:'lib', lib:'h3-image'},
+  {r:2, n:'Qwen-Image-2.1', by:'Alibaba Qwen', e:1048, ci:'±12', v:6403, d:'Sep 2026', g:'lib', lib:'qwen-image-21'},
+  {r:3, n:'FLUX 3 Image Klein', by:'Black Forest Labs', e:1041, ci:'±11', v:5875, d:'Oct 2026', g:'lib', lib:'flux3-klein'},
+  {r:4, n:'Fibo 2.0', by:'Bria', e:1037, ci:'±11', v:5827, d:'Oct 2026', g:'lib', lib:'fibo-20'},
+  {r:5, n:'Ideogram 4.0 (Quality)', s:'Ideogram 4.0', by:'Ideogram', e:1027, ci:'±10', v:11358, d:'Jun 2026', g:'open', run:'9.3B · the nf4 build fits a 24 GB card', lic:'Non-commercial weights'},
 ];
 const T2V = [
-  {r:1, n:'MiniMax H3 (768p)', by:'MiniMax', e:1159, ci:'±13', v:8225, d:'Jul 2026', g:'lib', lib:'minimax-h3'},
-  {r:2, n:'Hyperflow H3', by:'Community', e:1154, ci:'±14', v:4928, d:'Sep 2026', g:'open', run:'A compressed few-step version of MiniMax H3. Not an official MiniMax release'},
-  {r:3, n:'Pika H3 Flex', by:'Pika', e:1124, ci:'±14', v:5136, d:'Oct 2026', g:'open', run:'LoRA adapters on top of MiniMax H3, so it needs the H3 base weights and the same VRAM', lic:'MiniMax H3 Community License'},
-  {r:4, n:'LTX-2.5 Fast', s:'LTX-2.5', by:'Lightricks', e:939, ci:'±14', v:5170, d:'Aug 2026', g:'lib', lib:'ltx-25', note:'Fast and Pro modes score 939 and 938'},
-  {r:6, n:'LTX-2.3 Pro', s:'LTX-2.3', by:'Lightricks', e:885, ci:'±15', v:5640, d:'Mar 2026', g:'open', run:'The previous LTX release'},
+  {r:1, n:'MiniMax H3 (768p)', by:'MiniMax', e:1161, ci:'±12', v:8542, d:'Jul 2026', g:'lib', lib:'minimax-h3'},
+  {r:2, n:'Hyperflow H3', by:'Community', e:1155, ci:'±14', v:5217, d:'Sep 2026', g:'open', run:'A compressed few-step version of MiniMax H3. Not an official MiniMax release'},
+  {r:3, n:'Pika H3 Flex', by:'Pika', e:1125, ci:'±14', v:5432, d:'Oct 2026', g:'open', run:'LoRA adapters on top of MiniMax H3, so it needs the H3 base weights and the same VRAM', lic:'MiniMax H3 Community License'},
+  {r:4, n:'LTX-2.5 Fast', s:'LTX-2.5', by:'Lightricks', e:938, ci:'±14', v:5489, d:'Aug 2026', g:'lib', lib:'ltx-25', note:'Fast and Pro modes score 938 and 937'},
+  {r:6, n:'LTX-2.3 Pro', s:'LTX-2.3', by:'Lightricks', e:887, ci:'±14', v:5954, d:'Mar 2026', g:'open', run:'The previous LTX release'},
 ];
 const I2V = [
   {r:1, n:'MiniMax H3 (768p)', by:'MiniMax', e:1134, ci:'±14', v:6594, d:'Jul 2026', g:'lib', lib:'minimax-h3'},
@@ -2447,7 +2449,7 @@ const TTS = [
 const R3D = [
   {r:2, n:'TRELLIS-3DGS', s:'TRELLIS', by:'Microsoft', e:1398, v:4844, g:'open', run:'Gaussian-splat output. The same model with mesh output scores 1,303', lic:'MIT'},
   {r:8, n:'Hunyuan3D-2', by:'Tencent', e:1283, v:5250, g:'open', lic:'Tencent Hunyuan Community License'},
-  {r:9, n:'Hunyuan3D-2.1', by:'Tencent', e:1271, v:2231, g:'lib', lib:'hunyuan3d-21'},
+  {r:9, n:'Hunyuan3D-2.1', by:'Tencent', e:1271, v:2232, g:'lib', lib:'hunyuan3d-21'},
   {r:10, n:'InstantMesh', by:'TencentARC', e:1269, v:11616, g:'open'},
   {r:11, n:'SAM-3D-Objects-3DGS', s:'SAM 3D Objects', by:'Meta', e:1268, v:1428, g:'open', lic:'SAM License'},
 ];
@@ -2456,7 +2458,7 @@ const BENCH = {
   text:{label:'Language', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis, open source models','https://artificialanalysis.ai/models/open-source']],
     method:TOP_NOTE + ' The Intelligence Index v5.0.1 combines 9 evaluations. Speed and time per task are measured on API providers, not on your GPU. Fit is estimated from parameter count.',
-    take:'Nanbeige4.3-33B and Qwen3.8 27B tie for first at 20. K2 Horizon 32B, K2 Horizon MoVA 36B A4B and Nemotron 3.5 Super VL tie at 14, and Nemotron is by far the fastest at 289 tokens per second. All five are now in your library.',
+    take:'Three models tie for first at 20: Nanbeige4.3-33B, Qwen3.8 27B and the new Inkling 2 Mini, which is far quicker per task (9 minutes against 34.5 for Qwen). K2 Horizon 32B, K2 Horizon MoVA 36B A4B and Nemotron 3.5 Super VL tie at 14, so all six are shown; Nemotron is the fastest at 312 tokens per second. All six are in your library.',
     cards:[
       {title:'Intelligence', sub:'Artificial Analysis Intelligence Index · Higher is better', key:'ii', vlabel:'Intelligence Index', max:25, step:5, wide:true},
       {title:'Output speed', sub:'Output tokens per second on API providers · Higher is better', key:'sp', vlabel:'Tokens per second', max:400, step:100},
@@ -2466,12 +2468,12 @@ const BENCH = {
   image:{label:'Image', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis Image Arena, text to image','https://artificialanalysis.ai/image/leaderboard/text-to-image']],
     method:TOP_NOTE + ' Elo ratings come from blind pairwise votes by people. # is the rank among open-weights models.',
-    take:'H3-Image leads the open image models at 1,066 Elo, ahead of Qwen-Image-2.1 (1,047), FLUX 3 Image Klein (1,041) and Fibo 2.0 (1,037), all four now in your library. Ideogram 4.0 (1,026) rounds out the five.',
+    take:'H3-Image leads the open image models at 1,066 Elo, ahead of Qwen-Image-2.1 (1,048), FLUX 3 Image Klein (1,041) and Fibo 2.0 (1,037), all four now in your library. Ideogram 4.0 (1,027) rounds out the five.',
     cards:[{title:'Text to image', sub:'AA-Image-T2I v2.1 · Elo · Higher is better · Axis starts at 900', key:'e', vlabel:'Elo', base:900, max:1100, step:50, wide:true, rows:IMG, cols:ELO_RANK_COLS}]},
   video:{label:'Video', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis Video Arena, text to video','https://artificialanalysis.ai/video/leaderboard/text-to-video'],['image to video','https://artificialanalysis.ai/video/leaderboard/image-to-video']],
     method:TOP_NOTE + ' Elo ratings come from blind pairwise votes on videos with audio. # is the rank among open-weights models.',
-    take:'MiniMax H3 leads both boards, at 1,159 Elo for text to video and 1,134 for image to video. Hyperflow H3 (1,154) and Pika H3 Flex (1,124), both built on MiniMax H3, come next. LTX-2.5 trails at 939.',
+    take:'MiniMax H3 leads both boards, at 1,161 Elo for text to video and 1,134 for image to video. Hyperflow H3 (1,155) and Pika H3 Flex (1,125), both built on MiniMax H3, come next. LTX-2.5 trails at 938.',
     cards:[
       {title:'Text to video', sub:'AA-Video-T2V v2.1, with audio · Elo · Higher is better · Axis starts at 800', key:'e', vlabel:'Elo', base:800, max:1200, step:100, rows:T2V, cols:ELO_RANK_COLS},
       {title:'Image to video', sub:'AA-Video-I2V v2.1, with audio · Elo · Higher is better · Axis starts at 800', key:'e', vlabel:'Elo', base:800, max:1200, step:100, rows:I2V, cols:ELO_RANK_COLS},
