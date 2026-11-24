@@ -56,6 +56,11 @@ CATALOG = {
     "hunyuan3d-21": {"name": "Hunyuan3D 2.1", "files": [
         ("checkpoints", "hunyuan_3d_v2.1.safetensors", "Comfy-Org/Hunyuan-3D-2.1/resolve/main/hunyuan_3d_v2.1.safetensors"),
     ]},
+    "trellis2": {"name": "TRELLIS.2", "files": [
+        ("diffusion_models", "trellis_2_bf16.safetensors", "Comfy-Org/TRELLIS.2/resolve/main/diffusion_models/trellis_2_bf16.safetensors"),
+        ("vae", "trellis_2_shape_vae_bf16.safetensors", "Comfy-Org/TRELLIS.2/resolve/main/vae/trellis_2_shape_vae_bf16.safetensors"),
+        ("clip_vision", "dino_v3_vit_l.safetensors", "Comfy-Org/TRELLIS.2/resolve/main/clip_vision/dino_v3_vit_l.safetensors"),
+    ]},
     "ace-step-15": {"name": "ACE-Step 1.5", "files": [
         ("checkpoints", "ace_step_1.5_turbo_aio.safetensors", "Comfy-Org/ACE-Step-1.5/resolve/main/checkpoints/ace_step_1.5_turbo_aio.safetensors"),
     ]},

@@ -1219,7 +1219,7 @@ function meterHTML(m, v){
   const note = over
     ? `This version needs about ${v.gb - S.gpu} GB more than your card has. It can still run with CPU offload, but much slower.`
     : `${esc(m.name)} ${esc(v.p)} fits your ${S.gpu} GB ${esc(gpuInfo().card)} with about ${S.gpu - v.gb} GB to spare.${m.licNote ? ' ' + esc(m.licNote) : ''}`;
-  const rk = runFor(m), lm = gpuConn() ? localModel(m.cat) : null;
+  const rk = runFor(m), lm = gpuConn() ? localFor(m) : null;
   const runNote = lm ? (lm === m.id ? ' It runs on your GPU.' : ` ${GPU_INFO[lm].name} runs in its place on your GPU.`) : !rk ? '' : SAME[m.id] ? ` No GPU is connected yet, so it runs free on ${RUN_HOST(rk)}.` : ` No GPU is connected yet, so ${RUN_NAME[rk]} runs in its place, free on ${RUN_HOST(rk)}.`;
   return `<span class="mono">VRAM</span><div class="meter-track" role="img" aria-label="${v.gb} of ${S.gpu} GB"><i class="${over ? 'over' : ''}" style="width:${pct}%"></i></div><span class="mono">≈${v.gb} / ${S.gpu} GB</span><p class="note${over ? ' warn' : ''}">${note}${runNote}</p>`;
 }
@@ -1284,7 +1284,7 @@ function generate(){
   if (!prompt && !S.ref) { toast('Write a prompt first.'); ta.focus(); return; }
   const steps = free ? 1 : (m.steps || 30);
   const g = {id:'g' + Date.now().toString(36), cat:mcat, model:m.id, p: free ? 'Free API' : v.p, prompt:prompt || 'From reference image', opts:readOpts(), seed:hash(prompt + Date.now()), status:'running', t0:Date.now(), dur: free ? 4500 : Math.min(7500, 3200 + steps * 90), steps, gb: free ? 0 : v.gb, prov: free ? m.prov : null, ref: ['video','image','3d'].includes(mcat) && S.ref ? S.ref.thumb : null};
-  const local = !free && gpuConn() ? localModel(mcat) : null;
+  const local = !free && gpuConn() ? localFor(m) : null;
   const runKey = local ? null : runFor(m);
   if (local) {
     g.real = true; g.status = 'working'; g.run = 'gpu'; g.local = local; g._file = S.refFile || null;
@@ -1530,12 +1530,15 @@ function realCard(g){
 const GPU_MODELS = {video:'minimax-h3-singularity', image:'z-image-turbo', '3d':'hunyuan3d-21', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
 /* Per studio, the models your GPU can run, best first; the first one installed is used. */
 const GPU_PREF = {video:['minimax-h3-singularity', 'wan22-5b']};
+/* A library model that the GPU can run runs there itself (installed or not); other models use the studio's pick. */
+const localFor = m => (m && GPU_WF[m.id]) ? m.id : localModel(m ? m.cat : null);
 const localModel = cat => { const prefs = GPU_PREF[cat] || [GPU_MODELS[cat]]; return prefs.find(id => gpuStat && gpuStat.models && gpuStat.models[id] && gpuStat.models[id].ready) || prefs[0]; };
 const GPU_INFO = {
   'minimax-h3-singularity':{name:'MiniMax H3 Singularity V2', size:'34 GB', what:'Video with sound · 8-step turbo, fast attention, 768p upscaling · needs 32 GB+ RAM'},
   'z-image-turbo':{name:'Z-Image Turbo', size:'21 GB', what:'Images'},
   'wan22-5b':{name:'Wan 2.2 5B', size:'18 GB', what:'Video, lighter, no sound'},
   'hunyuan3d-21':{name:'Hunyuan3D 2.1', size:'7.4 GB', what:'3D'},
+  'trellis2':{name:'TRELLIS.2', size:'12.6 GB', what:'3D · shape only, no paint yet'},
   'chatterbox-ml':{name:'Chatterbox Multilingual', size:'3.2 GB', what:'Speech'},
   'ace-step-15':{name:'ACE-Step 1.5', size:'10 GB', what:'Music'},
   'gpt-oss-20b':{name:'gpt-oss-20b', size:'13 GB', what:'Chat'},
@@ -1677,6 +1680,35 @@ const GPU_WF = {
       '27':{class_type:'VAEDecodeHunyuan3D', inputs:{samples:['26', 0], vae:['21', 2], num_chunks:8000, octree_resolution:256}},
       '28':{class_type:'VoxelToMesh', inputs:{voxel:['27', 0], algorithm:'surface net', threshold:0.6}},
       '29':{class_type:'SaveGLB', inputs:{mesh:['28', 0], filename_prefix:'weightroom/3d'}},
+    });
+    return n;
+  },
+  'trellis2'(g, img){
+    /* TRELLIS.2 geometry: the shape stages of the official ComfyUI template, untextured. The photo is scaled to 1024 and not cut out. */
+    const n = img ? {'t0':{class_type:'LoadImage', inputs:{image:img}}} : zimageNodes(refPrompt(g.prompt), 1024, 1024, g.seed, false);
+    const src = img ? ['t0', 0] : ['9', 0];
+    Object.assign(n, {
+      't1':{class_type:'ImageScale', inputs:{image:src, upscale_method:'lanczos', width:1024, height:1024, crop:'disabled'}},
+      't2':{class_type:'SolidMask', inputs:{value:1, width:1024, height:1024}},
+      't3':{class_type:'ImageCropToMask', inputs:{images:['t1', 0], masks:['t2', 0], width:1024, height:1024, pad_factor:1, grow_mask:0, background:'#000000'}},
+      't4':{class_type:'CLIPVisionLoader', inputs:{clip_name:'dino_v3_vit_l.safetensors'}},
+      't5':{class_type:'Trellis2Conditioning', inputs:{clip_vision_model:['t4', 0], image:['t3', 0]}},
+      't6':{class_type:'UNETLoader', inputs:{unet_name:'trellis_2_bf16.safetensors', weight_dtype:'default'}},
+      't7':{class_type:'VAELoader', inputs:{vae_name:'trellis_2_shape_vae_bf16.safetensors'}},
+      't8':{class_type:'CFGOverride', inputs:{model:['t6', 0], cfg:1, start_percent:0.667, end_percent:1}},
+      't9':{class_type:'RescaleCFG', inputs:{model:['t8', 0], multiplier:0.7}},
+      't10':{class_type:'ModelSamplingSD3', inputs:{model:['t9', 0], shift:5}},
+      't11':{class_type:'EmptyTrellis2LatentStructure', inputs:{batch_size:1}},
+      't12':{class_type:'KSampler', inputs:{model:['t10', 0], seed:g.seed, steps:12, cfg:7.5, sampler_name:'euler', scheduler:'normal', positive:['t5', 0], negative:['t5', 1], latent_image:['t11', 0], denoise:1}},
+      't13':{class_type:'VaeDecodeStructureTrellis2', inputs:{samples:['t12', 0], vae:['t7', 0], resolution:'32'}},
+      't14':{class_type:'Trellis2ShapeStage', inputs:{positive:['t5', 0], negative:['t5', 1], voxel:['t13', 0]}},
+      't15':{class_type:'CFGOverride', inputs:{model:['t6', 0], cfg:1, start_percent:0.769, end_percent:1}},
+      't16':{class_type:'RescaleCFG', inputs:{model:['t15', 0], multiplier:0.5}},
+      't17':{class_type:'KSampler', inputs:{model:['t16', 0], seed:g.seed, steps:12, cfg:7.5, sampler_name:'euler', scheduler:'normal', positive:['t14', 0], negative:['t14', 1], latent_image:['t14', 2], denoise:1}},
+      't18':{class_type:'Trellis2UpsampleStage', inputs:{positive:['t14', 0], negative:['t14', 1], shape_latent:['t17', 0], vae:['t7', 0], target_resolution:1536}},
+      't19':{class_type:'KSampler', inputs:{model:['t16', 0], seed:g.seed, steps:12, cfg:7.5, sampler_name:'euler', scheduler:'simple', positive:['t18', 0], negative:['t18', 1], latent_image:['t18', 2], denoise:1}},
+      't20':{class_type:'VaeDecodeShapeTrellis', inputs:{samples:['t19', 0], vae:['t7', 0]}},
+      't21':{class_type:'SaveGLB', inputs:{mesh:['t20', 0], filename_prefix:'weightroom/3d'}},
     });
     return n;
   },
@@ -1886,7 +1918,7 @@ async function gpuPoll(g){
 RUNNERS.gpu = async function(g){
   const st = await gpuCheck(); if (!st) throw new Error(gpuErr || GPU_AWAY);
   /* Pick again with the GPU's current list: the best installed model for this studio. */
-  const best = localModel(g.cat);
+  const best = localFor(anyById(g.model));
   if (best !== g.local && (st.models[best] || {}).ready) { g.local = best; const m = anyById(g.model); g.sub = !!(m && best !== m.id); g.ranOn = g.sub ? GPU_INFO[best].name : null; }
   const id = g.local;
   const x = st.models[id] || {};
