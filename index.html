@@ -10,7 +10,45 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}/* ---------- 3D workspace (Tripo-style layout in Weightroom colours) ---------- */
+.tw{display:grid;gap:18px;padding-top:28px}
+.tw-head{display:flex;justify-content:space-between;align-items:end;gap:18px;flex-wrap:wrap}
+.tw-head .lede{max-width:52ch;margin:0}
+.tw-stage{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:14px;align-items:stretch}
+.tw-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:16px;display:grid;gap:14px;align-content:start;min-width:0}
+.tw-title{display:flex;align-items:center;gap:8px;font:800 15px/1 var(--f-display);font-stretch:112%;text-transform:uppercase;letter-spacing:.04em}
+.tw-title svg{color:var(--accent);flex:none}
+.tw-seg{display:flex;gap:4px;background:var(--surface-2);border-radius:12px;padding:4px}
+.tw-seg button{flex:1;border:0;background:none;padding:9px 10px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer}
+.tw-seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.tw-seg button:disabled{opacity:.45;cursor:not-allowed}
+.tw-drop{position:relative;display:grid;place-items:center;align-content:center;gap:8px;min-height:230px;border:1px dashed var(--line-2);border-radius:var(--r-m);cursor:pointer;text-align:center;padding:16px;overflow:hidden;background-color:var(--surface-2);background-image:linear-gradient(45deg,var(--surface-3) 25%,transparent 25%),linear-gradient(-45deg,var(--surface-3) 25%,transparent 25%),linear-gradient(45deg,transparent 75%,var(--surface-3) 75%),linear-gradient(-45deg,transparent 75%,var(--surface-3) 75%);background-size:22px 22px;background-position:0 0,0 11px,11px -11px,-11px 0}
+.tw-drop:hover{border-color:var(--accent)}
+.tw-drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--surface-2)}
+.tw-drop .tw-cap{position:relative;z-index:1;background:color-mix(in oklab,var(--bg) 82%,transparent);padding:8px 12px;border-radius:10px;font-weight:600;font-size:14px;color:var(--fg)}
+.tw-drop .tw-cap2{position:relative;z-index:1;background:color-mix(in oklab,var(--bg) 82%,transparent);padding:4px 8px;border-radius:8px;font-size:12px;color:var(--muted)}
+.tw .dock{width:100%;max-width:none;grid-template-columns:minmax(0,1fr);gap:10px;padding:0;background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.tw .dock .segs{grid-column:1}
+.tw .dock .add,.tw .dock .ref{display:none}
+.tw .dock-main,.tw .dock-opts{grid-column:1}
+.tw .dock textarea{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:76px}
+.tw .dock .go{grid-column:1;grid-row:auto;width:100%;min-height:52px;font-size:16px;border-radius:13px}
+.tw .dock .meter{grid-column:1}
+.tw-view{position:relative;background:radial-gradient(ellipse at 50% 40%,color-mix(in oklab,var(--surface-3) 85%,transparent) 0%,var(--surface) 55%,var(--bg) 100%);border:1px solid var(--line);border-radius:var(--r-l);overflow:hidden;min-height:560px;min-width:0}
+.tw-axes{position:absolute;top:16px;right:16px;width:64px;height:64px;z-index:2;pointer-events:none}
+.tw-inner{position:absolute;inset:0}
+.tw-empty{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:14px;text-align:center;padding:24px}
+.tw-empty h2{margin:0;font:800 clamp(30px,4vw,52px)/.95 var(--f-display);font-stretch:115%;text-transform:uppercase}
+.tw-empty h2 .hl{color:var(--accent)}
+.tw-empty p{margin:0;color:var(--muted)}
+.tw-viewer{position:absolute;inset:0}
+.tw-viewer model-viewer{position:absolute;inset:0;width:100%;height:100%;background:transparent;--poster-color:transparent}
+.tw-note{position:absolute;left:16px;right:16px;bottom:14px;margin:0;font:500 12px var(--f-mono);color:var(--muted);text-align:left;z-index:2;pointer-events:none}
+@media (max-width:900px){
+  .tw-stage{grid-template-columns:minmax(0,1fr)}
+  .tw-view{min-height:440px}
+}
+</style>
 <title>Weightroom Studio</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1131,7 +1169,53 @@ const PLACEHOLDER = {
   music:'Describe the track: genre, instruments, tempo, mood. Put lyrics on new lines.',
 };
 const mcatOf = view => view === 'audio' ? S.audioMode : view;
+const TW_AXES = '<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><g stroke-width="2.4" stroke-linecap="round"><line x1="32" y1="32" x2="32" y2="10" stroke="#cdfb3a"/><circle cx="32" cy="8" r="6" fill="#cdfb3a"/><line x1="32" y1="32" x2="52" y2="41" stroke="#ff7a6b"/><circle cx="52" cy="42" r="6" fill="#ff7a6b"/><line x1="32" y1="32" x2="12" y2="41" stroke="#3987e5"/><circle cx="12" cy="42" r="6" fill="#3987e5"/></g></svg>';
+const TW_LOGO = '<svg width="56" height="56" viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="8" fill="var(--accent)"/><rect x="5" y="9" width="4" height="12" rx="1.5" fill="var(--accent-ink)"/><rect x="21" y="9" width="4" height="12" rx="1.5" fill="var(--accent-ink)"/><rect x="9" y="13.5" width="12" height="3" rx="1.2" fill="var(--accent-ink)"/></svg>';
+function twLatest(){ return userGens.find(x => x.cat === '3d' && x.status === 'done' && x.result && x.result.type === 'model') || null; }
+function twViewerHTML(){
+  const g = twLatest();
+  if (!g) return `<div class="tw-empty">${TW_LOGO}<h2>Ready for a new <span class="hl">3D model?</span></h2><p>Upload a photo or describe one object, then press Generate.</p></div>`;
+  return `<div class="tw-viewer"><model-viewer src="${esc(g.result.url)}" camera-controls auto-rotate shadow-intensity="1" environment-image="neutral" exposure="1.05" alt="${esc(g.prompt)}"></model-viewer></div><p class="tw-note">${esc(g.prompt)}</p>`;
+}
+function twRefresh(){ const el = document.getElementById('tw-inner'); if (!el) return; el.innerHTML = twViewerHTML(); if (twLatest()) loadModelViewer(); }
+function viewWorkspace3d(){
+  const n = M.filter(m => m.cat === '3d').length;
+  if (twLatest()) loadModelViewer();
+  return `
+  <div class="wrap tw">
+    <div class="tw-head">
+      <div><p class="eyebrow">3D studio · ${n} models</p><h1 class="display d-md">Make a <span class="hl">3D model</span></h1></div>
+      <p class="lede">One photo in, a textured GLB out. It runs on your GPU when connected, otherwise on Hugging Face.</p>
+    </div>
+    <div class="tw-stage">
+      <aside class="tw-panel" aria-label="Generate model">
+        <div class="tw-title">${I.spark}<span>Generate model</span></div>
+        <div class="tw-seg" role="group" aria-label="Model type">
+          <button type="button" aria-pressed="true">HD model</button>
+          <button type="button" disabled title="Coming soon">Smart mesh</button>
+        </div>
+        <label class="tw-drop" for="ref-input">
+          ${S.ref ? `<img src="${S.ref.thumb}" alt="Reference ${esc(S.ref.name)}">` : ''}
+          <span class="tw-cap">${S.ref ? 'Photo ready · click to change' : 'Upload a photo'}</span>
+          <span class="tw-cap2">JPG, PNG or WEBP. One object on a plain background works best.</span>
+        </label>
+        <div id="dock-slot" style="display:grid">${dockHTML('3d')}</div>
+      </aside>
+      <section class="tw-view" aria-label="3D viewer">
+        <div class="tw-axes">${TW_AXES}</div>
+        <div id="tw-inner" class="tw-inner">${twViewerHTML()}</div>
+      </section>
+    </div>
+    <section class="feed" aria-labelledby="h-feed">
+      <div class="feed-head"><h2 id="h-feed" class="h-sec">Your generations</h2><p>Newest first. The latest finished model shows in the viewer.</p></div>
+      <div class="grid" id="feed">${feedFor(['3d']).map(genCard).join('')}</div>
+    </section>
+    ${footHTML()}
+  </div>`;
+}
+
 function viewStudio(view){
+  if (view === '3d') return viewWorkspace3d();
   const s = STUDIO[view];
   const cats = view === 'audio' ? ['speech','music'] : [view];
   const n = M.filter(m => cats.includes(m.cat)).length;
@@ -1527,7 +1611,7 @@ function realCard(g){
 
 /* ---------- your own GPU: ComfyUI with the Weightroom bridge, on a PC or on Kaggle ---------- */
 /* What runs on a connected 16 GB GPU, per studio. Other models in the library run as these, with a note on the card. */
-const GPU_MODELS = {video:'minimax-h3-singularity', image:'z-image-turbo', '3d':'hunyuan3d-21', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
+const GPU_MODELS = {video:'minimax-h3-singularity', image:'z-image-turbo', '3d':'trellis2', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
 /* Per studio, the models your GPU can run, best first; the first one installed is used. */
 const GPU_PREF = {video:['minimax-h3-singularity', 'wan22-5b']};
 /* A library model that the GPU can run runs there itself (installed or not); other models use the studio's pick. */
@@ -1543,7 +1627,7 @@ const GPU_INFO = {
   'ace-step-15':{name:'ACE-Step 1.5', size:'10 GB', what:'Music'},
   'gpt-oss-20b':{name:'gpt-oss-20b', size:'13 GB', what:'Chat'},
 };
-const GPU_PICK = {video:'minimax-h3-singularity', image:'z-image-turbo', '3d':'hunyuan3d-21', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
+const GPU_PICK = {video:'minimax-h3-singularity', image:'z-image-turbo', '3d':'trellis2', speech:'chatterbox-ml', music:'ace-step-15', chat:'gpt-oss-20b'};
 const KAGGLE_LINE = '!curl -fsSL https://danielzar2013-code.github.io/Weightroom/gpu/linux.sh -o /tmp/wr.sh && bash /tmp/wr.sh';
 const WAN_NEG = "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走";
 let gpuStat = null, gpuErr = null, gpuPollT = null;
@@ -1623,7 +1707,7 @@ function gpuRow(id){
   else if (x.state === 'downloading') { const pct = x.total ? Math.floor(x.done / x.total * 100) : 0; right = `<span class="mono">Downloading ${pct}%${x.total ? ' of ' + (x.total / 1e9).toFixed(1) + ' GB' : ''}</span>`; }
   else if (x.missing === 'addon') right = '<span class="hint">Add-on missing. Run Weightroom GPU again.</span>';
   else if (x.missing === 'ollama') right = '<span class="hint">Chat needs Ollama. Run Weightroom GPU again.</span>';
-  else right = `${x.state === 'error' ? `<span class="hint">Stopped: ${esc(x.error || 'download failed')}. </span>` : ''}<button class="btn" type="button" data-gpu-install="${id}">${x.state === 'error' ? 'Resume' : 'Install'} · ${info.size}</button>`;
+  else right = `${x.state === 'error' ? `<span class="hint" title="${esc(x.error || 'download failed')}">Download stopped. </span>` : ''}<button class="btn" type="button" data-gpu-install="${id}">${x.state === 'error' ? 'Resume' : 'Install'} · ${info.size}</button>`;
   return `<li class="gpu-row"><span><b>${esc(info.name)}</b><small>${esc(info.what)}</small></span>${right}</li>`;
 }
 function fillGpuPanel(){
@@ -1684,31 +1768,23 @@ const GPU_WF = {
     return n;
   },
   'trellis2'(g, img){
-    /* TRELLIS.2 geometry: the shape stages of the official ComfyUI template, untextured. The photo is scaled to 1024 and not cut out. */
+    /* TRELLIS.2 as in the official video setup: background removed, low-VRAM model, sparse 64, shape cascade 512 > 1024, 500k faces,
+       textured GLB with a 2048 texture resolution and 4096 texture size. */
     const n = img ? {'t0':{class_type:'LoadImage', inputs:{image:img}}} : zimageNodes(refPrompt(g.prompt), 1024, 1024, g.seed, false);
     const src = img ? ['t0', 0] : ['9', 0];
+    const seed = g.seed;
     Object.assign(n, {
-      't1':{class_type:'ImageScale', inputs:{image:src, upscale_method:'lanczos', width:1024, height:1024, crop:'disabled'}},
-      't2':{class_type:'SolidMask', inputs:{value:1, width:1024, height:1024}},
-      't3':{class_type:'ImageCropToMask', inputs:{images:['t1', 0], masks:['t2', 0], width:1024, height:1024, pad_factor:1, grow_mask:0, background:'#000000'}},
-      't4':{class_type:'CLIPVisionLoader', inputs:{clip_name:'dino_v3_vit_l.safetensors'}},
-      't5':{class_type:'Trellis2Conditioning', inputs:{clip_vision_model:['t4', 0], image:['t3', 0]}},
-      't6':{class_type:'UNETLoader', inputs:{unet_name:'trellis_2_bf16.safetensors', weight_dtype:'default'}},
-      't7':{class_type:'VAELoader', inputs:{vae_name:'trellis_2_shape_vae_bf16.safetensors'}},
-      't8':{class_type:'CFGOverride', inputs:{model:['t6', 0], cfg:1, start_percent:0.667, end_percent:1}},
-      't9':{class_type:'RescaleCFG', inputs:{model:['t8', 0], multiplier:0.7}},
-      't10':{class_type:'ModelSamplingSD3', inputs:{model:['t9', 0], shift:5}},
-      't11':{class_type:'EmptyTrellis2LatentStructure', inputs:{batch_size:1}},
-      't12':{class_type:'KSampler', inputs:{model:['t10', 0], seed:g.seed, steps:12, cfg:7.5, sampler_name:'euler', scheduler:'normal', positive:['t5', 0], negative:['t5', 1], latent_image:['t11', 0], denoise:1}},
-      't13':{class_type:'VaeDecodeStructureTrellis2', inputs:{samples:['t12', 0], vae:['t7', 0], resolution:'32'}},
-      't14':{class_type:'Trellis2ShapeStage', inputs:{positive:['t5', 0], negative:['t5', 1], voxel:['t13', 0]}},
-      't15':{class_type:'CFGOverride', inputs:{model:['t6', 0], cfg:1, start_percent:0.769, end_percent:1}},
-      't16':{class_type:'RescaleCFG', inputs:{model:['t15', 0], multiplier:0.5}},
-      't17':{class_type:'KSampler', inputs:{model:['t16', 0], seed:g.seed, steps:12, cfg:7.5, sampler_name:'euler', scheduler:'normal', positive:['t14', 0], negative:['t14', 1], latent_image:['t14', 2], denoise:1}},
-      't18':{class_type:'Trellis2UpsampleStage', inputs:{positive:['t14', 0], negative:['t14', 1], shape_latent:['t17', 0], vae:['t7', 0], target_resolution:1536}},
-      't19':{class_type:'KSampler', inputs:{model:['t16', 0], seed:g.seed, steps:12, cfg:7.5, sampler_name:'euler', scheduler:'simple', positive:['t18', 0], negative:['t18', 1], latent_image:['t18', 2], denoise:1}},
-      't20':{class_type:'VaeDecodeShapeTrellis', inputs:{samples:['t19', 0], vae:['t7', 0]}},
-      't21':{class_type:'SaveGLB', inputs:{mesh:['t20', 0], filename_prefix:'weightroom/3d'}},
+      't1':{class_type:'Trellis2PreProcessImage', inputs:{image:src, padding:10, remove_background:true, max_size:1024}},
+      't2':{class_type:'Trellis2LoadModel', inputs:{modelname:'visualbruno/TRELLIS.2-4B-FP8', backend:'sdpa', device:'cuda', low_vram:true, keep_models_loaded:true, conv_backend:'flex_gemm', sparse_backend:'xformers', use_reconviagen:false, pixal3d_multiview:false}},
+      't3':{class_type:'Trellis2ImageCondGenerator', inputs:{pipeline:['t2', 0], image:['t1', 0], max_views:1}},
+      't4':{class_type:'Trellis2SparseGenerator', inputs:{pipeline:['t3', 2], image_cond:['t3', 0], seed, sparse_structure_steps:12, sparse_structure_guidance_strength:7.5, sparse_structure_guidance_rescale:0.01, sparse_structure_rescale_t:5, sparse_structure_sampler:'heun', sparse_structure_resolution:32, sparse_structure_guidance_interval_start:0.1, sparse_structure_guidance_interval_end:1, fill_holes:true, hole_iterations:1, verbose:false, dino_lock:1, dino_substeps:8, hole_fill_algorithm:'flood_fill', dino_foundation_cap:1, keep_only_shell:true}},
+      't5':{class_type:'Trellis2ShapeGenerator', inputs:{pipeline:['t4', 2], image_cond:['t3', 0], coords:['t4', 0], resolution:512, shape_steps:12, shape_guidance_strength:7.5, shape_guidance_rescale:0.01, shape_rescale_t:3, shape_sampler:'heun', shape_guidance_interval_start:0.1, shape_guidance_interval_end:1, verbose:false, dino_lock:0, dino_substeps:9, dino_foundation_cap:1}},
+      't6':{class_type:'Trellis2ShapeCascadeGenerator', inputs:{pipeline:['t5', 2], image_cond:['t3', 1], shape_slat:['t5', 0], from_resolution:512, to_resolution:1024, sparse_structure_resolution:32, max_num_tokens:49152, shape_steps:12, shape_guidance_strength:7.5, shape_guidance_rescale:0.01, shape_rescale_t:3, shape_sampler:'heun', shape_guidance_interval_start:0.1, shape_guidance_interval_end:1, verbose:false, dino_lock:0, dino_substeps:1, dino_foundation_cap:1}},
+      't7':{class_type:'Trellis2DecodeLatents', inputs:{pipeline:['t6', 2], shape_slat:['t6', 0], resolution:['t6', 1], use_tiled_decoder:true}},
+      't8':{class_type:'Trellis2SimplifyMesh', inputs:{mesh:['t7', 0], target_face_num:500000, method:'Cumesh'}},
+      't9':{class_type:'Trellis2MeshWithVoxelToTrimesh', inputs:{mesh:['t8', 0], reorient_vertices:'90 degrees'}},
+      't10':{class_type:'Trellis2MeshTexturing', inputs:{pipeline:['t7', 2], image:['t1', 0], trimesh:['t9', 0], seed, texture_steps:12, texture_guidance_strength:5, texture_guidance_rescale:0.05, texture_rescale_t:3, resolution:1024, texture_size:2048, texture_alpha_mode:'OPAQUE', double_side_material:false, texture_guidance_interval_start:0, texture_guidance_interval_end:0.99, max_views:4, bake_on_vertices:false, use_custom_normals:false, mesh_cluster_threshold_cone_half_angle_rad:60, sampler:'heun', inpainting:'telea', verbose:false, dino_lock:0, dino_substeps:4, dino_foundation_cap:1}},
+      't11':{class_type:'Trellis2ExportMesh', inputs:{trimesh:['t10', 0], filename_prefix:'weightroom/3d', file_format:'glb'}},
     });
     return n;
   },
@@ -1850,7 +1926,7 @@ function gpuWsOpen(){
   };
   ws.onclose = () => { if (gpuWs === ws) gpuWs = null; };
 }
-const gpuStage = cls => /^(KSampler|KSamplerAdvanced|SamplerCustom|SamplerCustomAdvanced)$|TTS$/.test(cls) ? 'sample' : /Loader|Checkpoint|AttentionBackend|SparseAttention|ModelSampling/.test(cls) ? 'load'
+const gpuStage = cls => /^(KSampler|KSamplerAdvanced|SamplerCustom|SamplerCustomAdvanced|Trellis2SparseGenerator|Trellis2ShapeGenerator|Trellis2ShapeCascadeGenerator|Trellis2MeshTexturing)$|TTS$/.test(cls) ? 'sample' : /Loader|Checkpoint|AttentionBackend|SparseAttention|ModelSampling/.test(cls) ? 'load'
   : /Upscale/.test(cls) ? 'upscale' : /Decode|VoxelToMesh/.test(cls) ? 'decode' : /^(Save|Create|Preview)/.test(cls) ? 'save' : /TextEncode|ToVideo$|Conditioning$|VisionEncode/.test(cls) ? 'encode' : 'other';
 const GPU_STAGE_W = {sample:60, encode:8, decode:10, upscale:4, load:1, save:1, other:.5};
 const GPU_STAGE_ORDER = {load:0, encode:1, other:1, sample:2, upscale:3, decode:4, save:5};
@@ -1971,7 +2047,7 @@ async function gpuChatSend(standIn){
 }
 let mvLoaded = false;
 function loadModelViewer(){ if (mvLoaded) return; mvLoaded = true; const sc = document.createElement('script'); sc.type = 'module'; sc.src = 'https://cdn.jsdelivr.net/npm/@google/model-viewer@4.3.1/dist/model-viewer.min.js'; document.head.appendChild(sc); }
-function swapCard(g){ const el = document.getElementById(g.id); if (el) { el.outerHTML = genCard(g); if (g.result && g.result.type === 'model') loadModelViewer(); } }
+function swapCard(g){ const el = document.getElementById(g.id); if (el) { el.outerHTML = genCard(g); if (g.result && g.result.type === 'model') loadModelViewer(); }  if (g.cat === '3d') twRefresh(); }
 async function runReal(g){
   g.status = 'working'; swapCard(g);
   try { g.result = await RUNNERS[g.run](g); g.status = 'done'; if (g.result.type === 'model') loadModelViewer(); }
