@@ -651,7 +651,7 @@ const M = [
   {id:'step-audio-editx',cat:'speech',name:'Step-Audio-EditX',maker:'StepFun',params:'3B',date:'Nov 2025',variants:[{p:'BF16',gb:12}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Speech you can edit after it is generated: change the emotion or speaking style, or add breaths and laughter.',steps:1,q:'Step-Audio-EditX',langs:['English','Chinese']},
   {id:'kokoro',cat:'speech',name:'Kokoro 82M',maker:'hexgrad',params:'82M',date:'Jan 2025',variants:[{p:'FP32',gb:1}],lic:'open',license:'Apache 2.0',tags:[],blurb:'Tiny and very fast. Clean narration voices that run even without a GPU.',steps:1,q:'Kokoro-82M',langs:['English','Chinese','French','Hindi','Italian','Japanese','Portuguese','Spanish']},
   {id:'fish-drama-3',cat:'speech',name:'Fish Audio Drama 3',maker:'Fish Audio',params:'35B MoE · 3B active',date:'Oct 2026',variants:[{p:'FP8',gb:44},{p:'INT4',gb:20}],lic:'limited',license:'Fish Audio Community License',licNote:'Free commercial use while yearly revenue is under $500K.',tags:['new','top'],blurb:'The top-rated open voice model, with expressive acting, voice cloning and edits to single words in a take.',steps:1,q:'drama-3',langs:['English','Chinese','Japanese','Korean','Spanish','Portuguese','French','German','Italian','Russian','Arabic','Hebrew','Turkish','Hindi']},
-  {id:'ming3-tts',cat:'speech',name:'Ming-3.0-tts',maker:'inclusionAI',params:'7.9B MoE · 1.3B active',date:'Sep 2026',variants:[{p:'BF16',gb:20}],lic:'open',license:'MIT',tags:['new'],blurb:'Voice cloning and voice design from a written description, in seven languages and Chinese dialects.',steps:1,q:'Ming-3.0-tts',langs:['Chinese','English','German','Spanish','French','Korean','Japanese']},
+  {id:'ming3-tts',cat:'speech',name:'Ming-3.0-tts',maker:'inclusionAI',params:'7.9B MoE · 1.3B active',date:'Sep 2026',variants:[{p:'BF16',gb:20}],lic:'open',license:'MIT',tags:[],blurb:'Voice cloning and voice design from a written description, in seven languages and Chinese dialects.',steps:1,q:'Ming-3.0-tts',langs:['Chinese','English','German','Spanish','French','Korean','Japanese']},
   {id:'zonos3-mini',cat:'speech',name:'ZONOS3-Mini',maker:'Zyphra',params:'800M MoE · 100M active',date:'Nov 2026',variants:[{p:'FP16',gb:3}],lic:'open',license:'Apache 2.0',tags:['new','he'],blurb:'43 languages including Hebrew, with voice cloning, small enough to run in real time on a laptop or in the browser.',steps:1,q:'ZONOS3-Mini',langs:['English','Hebrew','Arabic','Chinese','Danish','Dutch','Finnish','French','German','Greek','Hindi','Italian','Japanese','Korean','Malay','Norwegian','Polish','Portuguese','Russian','Spanish','Swedish','Turkish']},
   {id:'audio8-air',cat:'speech',name:'Audio8-TTS-Realistic-Air',maker:'Edge0',params:'0.6B + codec',date:'Oct 2026',variants:[{p:'FP32',gb:4}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'Realistic voice cloning from a short clip in 23 languages, in a 0.6B model.',steps:1,q:'Audio8-TTS-Realistic-Air',langs:['English','Chinese','Japanese','Korean','German','French','Spanish','Italian','Russian','Arabic','Finnish','Hindi','Malay','Dutch','Norwegian','Polish','Portuguese','Swedish','Turkish']},
   {id:'phonon-31m',cat:'speech',name:'Phonon 31M',maker:'Gradium',params:'31M',date:'Oct 2026',variants:[{p:'BF16',gb:1}],lic:'open',license:'Apache 2.0',tags:['new'],blurb:'A tiny English voice model that ranks above many models a hundred times its size.',steps:1,q:'phonon-31m-en',langs:['English']},
@@ -2474,10 +2474,10 @@ function modelCards(){
 
 /* ---------- BENCHMARKS ---------- */
 /* Numbers copied from public leaderboards on the read date below. Nothing here is estimated except the "fits in 100 GB" grouping for language models. */
-const BENCH_DATE = 'Nov 24, 2026';
+const BENCH_DATE = 'Nov 25, 2026';
 /* Where each library model stands on a public leaderboard, copied from the boards on RANK_DATE. Higher is better.
    Models missing from RANK are not on the board yet. One board per category, so scores compare within a category only. */
-const RANK_DATE = 'Nov 24, 2026';
+const RANK_DATE = 'Nov 25, 2026';
 const RANK_BOARD = {
   video:{name:'Artificial Analysis Video Arena', what:'text to video, Elo', url:'https://artificialanalysis.ai/video/leaderboard/text-to-video?open-weights=true'},
   image:{name:'Artificial Analysis Image Arena', what:'text to image, Elo', url:'https://artificialanalysis.ai/image/leaderboard/text-to-image?open-weights=true'},
@@ -2487,10 +2487,10 @@ const RANK_BOARD = {
 };
 const RANK_UNIT = {video:'Elo', image:'Elo', '3d':'3D Arena score', speech:'Elo', chat:'Intelligence Index'};
 const RANK = {
-  'minimax-h3':1163, 'ltx-25':935,
-  'h3-image':1066, 'qwen-image-21':1048, 'flux3-klein':1040, 'fibo-20':1037, 'flux2-dev':1000, 'z-image-turbo':937, 'qwen-image':911, 'flux2-klein':840,
+  'minimax-h3':1163, 'ltx-25':937,
+  'h3-image':1065, 'qwen-image-21':1048, 'flux3-klein':1040, 'fibo-20':1037, 'flux2-dev':1000, 'z-image-turbo':937, 'qwen-image':911, 'flux2-klein':840,
   'hunyuan3d-21':1271, 'trellis2':1129, 'triposr':1081,
-  'fish-drama-3':1277, 'ming3-tts':1179, 'phonon-31m':1108, 'step-audio-editx':1100, 'kokoro':1060,
+  'fish-drama-3':1277, 'ming3-tts':1180, 'phonon-31m':1109, 'step-audio-editx':1101, 'kokoro':1061,
   'ling32-air':23, 'nanbeige43-33b':20, 'inkling2-mini':20, 'qwen38-27b':20, 'k2-horizon-32b':14, 'k2-horizon-mova':14, 'nemotron35-super-vl':14, 'lfm3-17b':6, 'gpt-oss-120b':4,
 };
 function rankOf(m){
@@ -2523,45 +2523,45 @@ const ELO_RANK_COLS = [['r','#','num'], ...ELO_COLS];
 const T_ROWS = [
   {n:'Ling-3.2-air', by:'InclusionAI', p:'124B · 5.5B active', ii:23, sp:null, tm:null, g:'lib', lib:'ling32-air'},
   {n:'Nanbeige4.3-33B', by:'Nanbeige', p:'33B', ii:20, sp:null, tm:null, g:'lib', lib:'nanbeige43-33b'},
-  {n:'Inkling 2 Mini', by:'Thinking Machines', p:'26B · 5.4B active', ii:20, sp:194, tm:13.0, g:'lib', lib:'inkling2-mini'},
-  {n:'Qwen3.8 27B (Xhigh)', s:'Qwen3.8 27B', by:'Alibaba', p:'27B', ii:20, sp:67, tm:27.4, g:'lib', lib:'qwen38-27b'},
+  {n:'Inkling 2 Mini', by:'Thinking Machines', p:'26B · 5.4B active', ii:20, sp:187, tm:13.5, g:'lib', lib:'inkling2-mini'},
+  {n:'Qwen3.8 27B (Xhigh)', s:'Qwen3.8 27B', by:'Alibaba', p:'27B', ii:20, sp:64, tm:28.4, g:'lib', lib:'qwen38-27b'},
   {n:'K2 Horizon 32B', by:'Institute of Foundation Models', p:'32B', ii:14, sp:null, tm:null, g:'lib', lib:'k2-horizon-32b'},
   {n:'K2 Horizon MoVA 36B A4B', s:'K2 Horizon MoVA', by:'Institute of Foundation Models', p:'36B · 4B active', ii:14, sp:null, tm:null, g:'lib', lib:'k2-horizon-mova'},
   {n:'Nemotron 3.5 Super VL', by:'NVIDIA', p:'120B · 12B active', ii:14, sp:347, tm:3.9, g:'lib', lib:'nemotron35-super-vl'},
 ];
 const IMG = [
-  {r:1, n:'H3-Image', by:'MiniMax', e:1066, ci:'±14', v:3391, d:'Nov 2026', g:'lib', lib:'h3-image'},
-  {r:2, n:'Qwen-Image-2.1', by:'Alibaba Qwen', e:1048, ci:'±11', v:6441, d:'Sep 2026', g:'lib', lib:'qwen-image-21'},
-  {r:3, n:'FLUX 3 Image Klein', by:'Black Forest Labs', e:1040, ci:'±11', v:5910, d:'Oct 2026', g:'lib', lib:'flux3-klein'},
+  {r:1, n:'H3-Image', by:'MiniMax', e:1065, ci:'±14', v:3390, d:'Nov 2026', g:'lib', lib:'h3-image'},
+  {r:2, n:'Qwen-Image-2.1', by:'Alibaba Qwen', e:1048, ci:'±11', v:6440, d:'Sep 2026', g:'lib', lib:'qwen-image-21'},
+  {r:3, n:'FLUX 3 Image Klein', by:'Black Forest Labs', e:1040, ci:'±11', v:5909, d:'Oct 2026', g:'lib', lib:'flux3-klein'},
   {r:4, n:'Fibo 2.0', by:'Bria', e:1037, ci:'±11', v:5871, d:'Oct 2026', g:'lib', lib:'fibo-20'},
   {r:5, n:'Ideogram 4.0 (Quality)', s:'Ideogram 4.0', by:'Ideogram', e:1026, ci:'±10', v:11402, d:'Jun 2026', g:'open', run:'9.3B · the nf4 build fits a 24 GB card', lic:'Non-commercial weights'},
 ];
 const T2V = [
-  {r:1, n:'MiniMax H3 (768p)', by:'MiniMax', e:1163, ci:'±12', v:8948, d:'Jul 2026', g:'lib', lib:'minimax-h3'},
-  {r:2, n:'Hyperflow H3', by:'Community', e:1156, ci:'±14', v:5588, d:'Sep 2026', g:'open', run:'A compressed few-step version of MiniMax H3. Not an official MiniMax release'},
-  {r:3, n:'Pika H3 Flex', by:'Pika', e:1124, ci:'±13', v:5811, d:'Oct 2026', g:'open', run:'LoRA adapters on top of MiniMax H3, so it needs the H3 base weights and the same VRAM', lic:'MiniMax H3 Community License'},
-  {r:4, n:'LTX-2.5 Fast', s:'LTX-2.5', by:'Lightricks', e:935, ci:'±14', v:5877, d:'Aug 2026', g:'lib', lib:'ltx-25', note:'Fast and Pro modes score 935 and 932'},
-  {r:6, n:'LTX-2.3 Pro', s:'LTX-2.3', by:'Lightricks', e:885, ci:'±14', v:6354, d:'Mar 2026', g:'open', run:'The previous LTX release'},
+  {r:1, n:'MiniMax H3 (768p)', by:'MiniMax', e:1163, ci:'±12', v:9250, d:'Jul 2026', g:'lib', lib:'minimax-h3'},
+  {r:2, n:'Hyperflow H3', by:'Community', e:1154, ci:'±14', v:5903, d:'Sep 2026', g:'open', run:'A compressed few-step version of MiniMax H3. Not an official MiniMax release'},
+  {r:3, n:'Pika H3 Flex', by:'Pika', e:1123, ci:'±13', v:6106, d:'Oct 2026', g:'open', run:'LoRA adapters on top of MiniMax H3, so it needs the H3 base weights and the same VRAM', lic:'MiniMax H3 Community License'},
+  {r:4, n:'LTX-2.5 Fast', s:'LTX-2.5', by:'Lightricks', e:937, ci:'±13', v:6197, d:'Aug 2026', g:'lib', lib:'ltx-25', note:'Fast and Pro modes score 937 and 933'},
+  {r:6, n:'LTX-2.3 Pro', s:'LTX-2.3', by:'Lightricks', e:884, ci:'±14', v:6648, d:'Mar 2026', g:'open', run:'The previous LTX release'},
 ];
 const I2V = [
-  {r:1, n:'MiniMax H3 (768p)', by:'MiniMax', e:1138, ci:'±14', v:6834, d:'Jul 2026', g:'lib', lib:'minimax-h3'},
-  {r:2, n:'Hyperflow H3', by:'Community', e:1124, ci:'±14', v:7108, d:'Sep 2026', g:'open', run:'A compressed few-step version of MiniMax H3. Not an official MiniMax release'},
-  {r:3, n:'Pika H3 Flex', by:'Pika', e:1118, ci:'±15', v:4826, d:'Oct 2026', g:'open', run:'LoRA adapters on top of MiniMax H3'},
-  {r:4, n:'LTX-2.5 Fast', s:'LTX-2.5', by:'Lightricks', e:915, ci:'±15', v:5086, d:'Aug 2026', g:'lib', lib:'ltx-25', note:'Fast and Pro modes score 915 and 914'},
-  {r:6, n:'LTX-2.3 Pro', s:'LTX-2.3', by:'Lightricks', e:843, ci:'±16', v:5188, d:'Mar 2026', g:'open', run:'The previous LTX release'},
+  {r:1, n:'MiniMax H3 (768p)', by:'MiniMax', e:1137, ci:'±14', v:7148, d:'Jul 2026', g:'lib', lib:'minimax-h3'},
+  {r:2, n:'Hyperflow H3', by:'Community', e:1122, ci:'±14', v:7401, d:'Sep 2026', g:'open', run:'A compressed few-step version of MiniMax H3. Not an official MiniMax release'},
+  {r:3, n:'Pika H3 Flex', by:'Pika', e:1116, ci:'±14', v:5130, d:'Oct 2026', g:'open', run:'LoRA adapters on top of MiniMax H3'},
+  {r:4, n:'LTX-2.5 Fast', s:'LTX-2.5', by:'Lightricks', e:916, ci:'±15', v:5371, d:'Aug 2026', g:'lib', lib:'ltx-25', note:'Fast and Pro modes score 916 and 914'},
+  {r:6, n:'LTX-2.3 Pro', s:'LTX-2.3', by:'Lightricks', e:841, ci:'±16', v:5507, d:'Mar 2026', g:'open', run:'The previous LTX release'},
 ];
 const TTS = [
-  {r:1, n:'Fish Audio Drama 3', s:'Fish Drama 3', by:'Fish Audio', e:1277, ci:'±16', v:1996, d:'Oct 2026', g:'lib', lib:'fish-drama-3'},
-  {r:3, n:'Breeze TTS 2', by:'BreezeBlue', e:1228, ci:'±12', v:3145, d:'Aug 2026', g:'open', run:'3B', lic:'Non-commercial weights'},
-  {r:4, n:'Ming-3.0-tts', by:'inclusionAI', e:1179, ci:'±12', v:2802, d:'Oct 2026', g:'lib', lib:'ming3-tts'},
-  {r:5, n:'Phonon 31M (English)', s:'Phonon 31M', by:'Phonon', e:1108, ci:'±13', v:2055, d:'Oct 2026', g:'lib', lib:'phonon-31m'},
-  {r:6, n:'Fish Audio S2 Pro', s:'Fish S2 Pro', by:'Fish Audio', e:1101, ci:'±11', v:3091, d:'Mar 2026', g:'open', run:'4.6B', lic:'Fish Audio Research License, non-commercial', note:'Step-Audio-EditX, in your library, is one point behind at 1,100'},
+  {r:1, n:'Fish Audio Drama 3', s:'Fish Drama 3', by:'Fish Audio', e:1277, ci:'±16', v:2024, d:'Oct 2026', g:'lib', lib:'fish-drama-3'},
+  {r:3, n:'Breeze TTS 2', by:'BreezeBlue', e:1229, ci:'±12', v:3172, d:'Aug 2026', g:'open', run:'3B', lic:'Non-commercial weights'},
+  {r:4, n:'Ming-3.0-tts', by:'inclusionAI', e:1180, ci:'±12', v:2830, d:'Oct 2026', g:'lib', lib:'ming3-tts'},
+  {r:5, n:'Phonon 31M (English)', s:'Phonon 31M', by:'Phonon', e:1109, ci:'±13', v:2087, d:'Oct 2026', g:'lib', lib:'phonon-31m'},
+  {r:6, n:'Fish Audio S2 Pro', s:'Fish S2 Pro', by:'Fish Audio', e:1103, ci:'±11', v:3115, d:'Mar 2026', g:'open', run:'4.6B', lic:'Fish Audio Research License, non-commercial', note:'Step-Audio-EditX, in your library, is two points behind at 1,101'},
 ];
 const R3D = [
   {r:2, n:'TRELLIS-3DGS', s:'TRELLIS', by:'Microsoft', e:1398, v:4844, g:'open', run:'Gaussian-splat output. The same model with mesh output scores 1,303', lic:'MIT'},
   {r:8, n:'Hunyuan3D-2', by:'Tencent', e:1283, v:5251, g:'open', lic:'Tencent Hunyuan Community License'},
-  {r:9, n:'Hunyuan3D-2.1', by:'Tencent', e:1271, v:2236, g:'lib', lib:'hunyuan3d-21'},
-  {r:10, n:'SAM-3D-Objects-3DGS', s:'SAM 3D Objects', by:'Meta', e:1269, v:1431, g:'open', lic:'SAM License'},
+  {r:9, n:'Hunyuan3D-2.1', by:'Tencent', e:1271, v:2237, g:'lib', lib:'hunyuan3d-21'},
+  {r:10, n:'SAM-3D-Objects-3DGS', s:'SAM 3D Objects', by:'Meta', e:1269, v:1433, g:'open', lic:'SAM License'},
   {r:11, n:'InstantMesh', by:'TencentARC', e:1269, v:11617, g:'open'},
 ];
 const TOP_NOTE = 'Only models you can download and run in up to 100 GB of VRAM are shown. Commercial and closed models are left out. Modes or previews of the same model count once, at their best score.';
@@ -2569,7 +2569,7 @@ const BENCH = {
   text:{label:'Language', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis, open source models','https://artificialanalysis.ai/models/open-source']],
     method:TOP_NOTE + ' The Intelligence Index v5.0.1 combines 9 evaluations. Speed and time per task are measured on API providers, not on your GPU. Fit is estimated from parameter count.',
-    take:'The new Ling-3.2-air leads at 23; it fits only at 4-bit, at about 68 GB. Nanbeige4.3-33B, Inkling 2 Mini and Qwen3.8 27B tie at 20, and Inkling finishes a task in 13 minutes against 27.4 for Qwen. K2 Horizon 32B, K2 Horizon MoVA 36B A4B and Nemotron 3.5 Super VL tie for fifth at 14, so all seven are shown; Nemotron is the fastest at 347 tokens per second. All seven are in your library.',
+    take:'The new Ling-3.2-air leads at 23; it fits only at 4-bit, at about 68 GB. Nanbeige4.3-33B, Inkling 2 Mini and Qwen3.8 27B tie at 20, and Inkling finishes a task in 13.5 minutes against 28.4 for Qwen. K2 Horizon 32B, K2 Horizon MoVA 36B A4B and Nemotron 3.5 Super VL tie for fifth at 14, so all seven are shown; Nemotron is the fastest at 347 tokens per second. All seven are in your library.',
     cards:[
       {title:'Intelligence', sub:'Artificial Analysis Intelligence Index · Higher is better', key:'ii', vlabel:'Intelligence Index', max:25, step:5, wide:true},
       {title:'Output speed', sub:'Output tokens per second on API providers · Higher is better', key:'sp', vlabel:'Tokens per second', max:400, step:100},
@@ -2579,12 +2579,12 @@ const BENCH = {
   image:{label:'Image', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis Image Arena, text to image','https://artificialanalysis.ai/image/leaderboard/text-to-image']],
     method:TOP_NOTE + ' Elo ratings come from blind pairwise votes by people. # is the rank among open-weights models.',
-    take:'H3-Image leads the open image models at 1,066 Elo, ahead of Qwen-Image-2.1 (1,048), FLUX 3 Image Klein (1,040) and Fibo 2.0 (1,037), all four now in your library. Ideogram 4.0 (1,026) rounds out the five.',
+    take:'H3-Image leads the open image models at 1,065 Elo, ahead of Qwen-Image-2.1 (1,048), FLUX 3 Image Klein (1,040) and Fibo 2.0 (1,037), all four now in your library. Ideogram 4.0 (1,026) rounds out the five.',
     cards:[{title:'Text to image', sub:'AA-Image-T2I v2.1 · Elo · Higher is better · Axis starts at 900', key:'e', vlabel:'Elo', base:900, max:1100, step:50, wide:true, rows:IMG, cols:ELO_RANK_COLS}]},
   video:{label:'Video', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis Video Arena, text to video','https://artificialanalysis.ai/video/leaderboard/text-to-video'],['image to video','https://artificialanalysis.ai/video/leaderboard/image-to-video']],
     method:TOP_NOTE + ' Elo ratings come from blind pairwise votes on videos with audio. # is the rank among open-weights models.',
-    take:'MiniMax H3 leads both boards, at 1,163 Elo for text to video and 1,138 for image to video. Hyperflow H3 (1,156) and Pika H3 Flex (1,124), both built on MiniMax H3, come next. LTX-2.5 trails at 935.',
+    take:'MiniMax H3 leads both boards, at 1,163 Elo for text to video and 1,137 for image to video. Hyperflow H3 (1,154) and Pika H3 Flex (1,123), both built on MiniMax H3, come next. LTX-2.5 trails at 937.',
     cards:[
       {title:'Text to video', sub:'AA-Video-T2V v2.1, with audio · Elo · Higher is better · Axis starts at 800', key:'e', vlabel:'Elo', base:800, max:1200, step:100, rows:T2V, cols:ELO_RANK_COLS},
       {title:'Image to video', sub:'AA-Video-I2V v2.1, with audio · Elo · Higher is better · Axis starts at 800', key:'e', vlabel:'Elo', base:800, max:1200, step:100, rows:I2V, cols:ELO_RANK_COLS},
@@ -2592,7 +2592,7 @@ const BENCH = {
   speech:{label:'Speech', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['Artificial Analysis Speech Arena, provider voices','https://artificialanalysis.ai/text-to-speech/leaderboard']],
     method:TOP_NOTE + ' Elo ratings come from blind pairwise votes on each provider’s own voices. # is the rank among open-weights models.',
-    take:'Fish Audio Drama 3 leads at 1,277 Elo. Three of the five are in your library: Drama 3, Ming-3.0-tts (1,179) and Phonon 31M (1,108). Breeze TTS 2 (1,228) and Fish Audio S2 Pro (1,101) have non-commercial weights. Fish S2 Pro edges Step-Audio-EditX (1,100) out of the top five by one point.',
+    take:'Fish Audio Drama 3 leads at 1,277 Elo. Three of the five are in your library: Drama 3, Ming-3.0-tts (1,180) and Phonon 31M (1,109). Breeze TTS 2 (1,229) and Fish Audio S2 Pro (1,103) have non-commercial weights. Step-Audio-EditX, in your library, is two points behind S2 Pro at 1,101.',
     cards:[{title:'Text to speech', sub:'AA Speech Arena · Elo · Higher is better · Axis starts at 1,000', key:'e', vlabel:'Elo', base:1000, max:1300, step:100, wide:true, rows:TTS, cols:ELO_RANK_COLS}]},
   '3d':{label:'3D', groups:{lib:'In your library', open:'Not in your library yet'},
     src:[['3D Arena on Hugging Face','https://huggingface.co/spaces/3d-arena/3d-arena']],
